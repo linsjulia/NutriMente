@@ -1,10 +1,12 @@
-import Hero from "./components/Hero";
-import Card from "./components/Card";
-import Card_Profi from "./components/Card_Profi";
-import FadeInProps from "./components/FadeScroll";
-import FadeScrollProps from "./components/FadeScroll";
-import Card_Avaliacoes from "./components/Card_Avaliacoes";
-import Footer from "./components/Footer";
+import Hero from "../components/Hero";
+import Card from "../components/Card";
+import Card_Profi from "../components/Card_Profi";
+import FadeInProps from "../components/FadeScroll";
+import FadeScrollProps from "../components/FadeScroll";
+import Card_Avaliacoes from "../components/Card_Avaliacoes";
+import Footer from "../components/Footer";
+
+
 
 export default function Landing() {
   return (
@@ -227,6 +229,7 @@ export default function Landing() {
       <section>
         <Footer />
       </section>
+      
     </main>
   );
 }

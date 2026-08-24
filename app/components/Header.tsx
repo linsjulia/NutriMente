@@ -1,6 +1,11 @@
+"use client"
+
 import Logo from "./Logo"
+import { useRouter } from "next/navigation";
+
 
 export default function Header(){
+    const router = useRouter();
     return(
         <div>
            <header className="bg-blue1 text-white h-20 flex items-center justify-between top-0 px-8 sticky z-20">
@@ -10,7 +15,7 @@ export default function Header(){
                 <a href="#">Profissionais</a>
                 <a href="#">Sobre nós</a>
             </nav>
-            <button className="bg-green1 p-3 px-10 rounded-4xl font-bold cursor-pointer">Cadastre-se</button>
+            <button onClick={() => router.push("/cadastro")} className="bg-green1 p-3 px-10 rounded-4xl font-bold cursor-pointer">Cadastre-se</button>
             </header> 
 
         </div>

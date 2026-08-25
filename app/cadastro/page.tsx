@@ -1,76 +1,125 @@
 "use client"; 
- 
+
+import { useState } from 'react'
 import { Navigation, Pagination, Autoplay } from 'swiper/modules'; 
 import { Swiper, SwiperSlide } from 'swiper/react';
 import "swiper/css";
 import "swiper/css/pagination";
+import Button from "../components/Button"
+import Logo from "../components/Logo"
 
 export default function Cadastro(){ 
+    const [selected, setSelected] = useState("women");
+
+    const options = [
+        { id: "women", label: "Feminino" },
+        { id: "men", label: "Masculino" },
+    ];
+
     return( 
         <section>
-            <h1 className='text-5xl text-center m-10'>Cadastro</h1> 
-            <div className='flex flex-row'>
-                <div className='w-full text-center bg-blue-300'>
-                    <form action="">
-                        <div>
-                            <label htmlFor="name">Nome completo:</label>
+     
+            <div className='flex flex-row'> {/* FLEX PAI 1 */} 
+                <div className='w-full text-center flex flex-col items-center p-28 gap-10 overflow-y-auto h-[950px] bg-blue-200 '> {/* FLEX PAI 2 */} 
+
+                    <h1 className='text-5xl leading-1 font-medium font-fraunces'>Bem vindo!</h1>
+                    <p>Para se cadastrar, preencha as informações abaixo</p> 
+
+                    <form action="" className='flex flex-col justify-center gap-5 '> {/* FLEX PAI 3 */} 
+
+                        <div className='flex flex-col gap-10 w-[600px] my-10'> {/* FLEX PAI 4 */}
+
+                            <div className='flex flex-row justify-center gap-10'>
+                                <div className='flex flex-col w-full gap-5'>
+                                    <div className='input-register'>
+                                        <label htmlFor="name">Nome completo:</label>
+                                        <input type="text" />
+                                    </div>
+                                
+
+                                    <div className='input-register'>
+                                        <label htmlFor="birthdate">Data de nascimento:</label>
+                                        <input type="date" />
+                                    </div>
+                                </div>
+
+                                <div className='flex flex-col w-full gap-5'>
+                                    <div className='input-register'>
+                                        <label htmlFor="cpf">CPF:</label>
+                                        <input type="text" />
+                                    </div>
+
+                                    <div className='input-register'>
+                                        <label htmlFor="numberphone">Número de celular:</label>
+                                        <input type="text" />
+                                    </div>
+
+                                </div>
+
+                                
+                            </div>
+
+                            {/* </div> */}
+
+
+                            {/* <div> */}
+                                <label htmlFor="gender" className='text-start font-bold'>Selecione seu gênero</label>
+                                <div className='input-gender'>
+
+                                    {options.map((opt)=> (
+                                        <div key={opt.id}>
+                                            <input
+                                                type="radio"
+                                                name="gender"
+                                                id={opt.id}
+                                                checked={selected == opt.id}
+                                                onChange={() => setSelected(opt.id)}
+                                            />
+                                            <label htmlFor={opt.id}>{opt.label}</label>
+                                        </div>
+                                    ))}
+                                        {/* <input type="radio" name='gender' id='woman' onClick={() => {event. }}/>
+                                        <label htmlFor="gender">Mulher</label>
+                                        
+                                        <input type="radio" name='gender' id='man'/>
+                                        <label htmlFor="gender">Homem</label> */}
+                                </div>
+                                    
+                                <div className='input-register'>
+                                    <label htmlFor="email">E-mail:</label>
+                                    <input type="text" />
+                                </div>
+
+                                <div className='input-register'>
+                                    <label htmlFor="password">Senha</label>
+                                    <input type="text" />
+                                </div>
+                            {/* </div> */}
                         </div>
 
-                        <div>
-                            <label htmlFor="birthdate">Data de nascimento:</label>
+                        <Button
+                            titulo='Cadastrar'
+                        />
+                        <div className="divider">
+                            <span></span>
+                            <p>Ou cadastre-se com</p>
+                            <span></span>
                         </div>
 
-                        <div>
-                            <label htmlFor="gender">Selecione seu gênero: </label>
+                        <div className='flex justify-center'>
+                            <button className='flex items-center w-40 rounded-2xl p-2 font-bold bg-white cursor-pointer'>
+                                <img src="/google.png" className="w-10 mx-2"/>
+                                Google
+                            </button>
                         </div>
 
-                            
-                        <div>
-                            <label htmlFor="cpf">CPF:</label>
-                        </div>
-
-                        <div>
-                            <label htmlFor="numberphone">Número de celular:</label>
-                        </div>
-
-                        <div>
-                            <label htmlFor="email">E-mail:</label>
-                        </div>
-
-                        <div>
-                            <label htmlFor="password">Senha</label>
-                        </div>
+                        <p>Já possui uma conta? <span className='font-bold'>Logar-se</span></p>
                     </form>
                 </div>
-
-
-                <Swiper 
-                    className='w-full h-[900px] bg-green-300'
-                    modules={[Autoplay, Pagination]} 
-                    slidesPerView={1} 
-                    autoplay={{ 
-                        delay: 3000, 
-                        disableOnInteraction: false 
-                    }} 
-                    pagination
-                    loop={true}
-                > 
-                    <SwiperSlide> 
-                        <img 
-                            src="/psicologo.jpeg" 
-                            alt="" 
-                            className="w-full h-full object-contain" 
-                        /> 
-                    </SwiperSlide> 
-    
-                    <SwiperSlide> 
-                        <img 
-                            src="/psicologo2.jpg" 
-                            alt="" 
-                            className="w-full h-full object-contain "  
-                        /> 
-                    </SwiperSlide>
-                </Swiper> 
+                
+                <div className='bg-white w-[1600px] flex justify-center items-center flex-col'>
+                    <img src="/nutrimenteLogo.png" className='shadow-lg' />
+                </div>
             </div>
         </section> 
     )

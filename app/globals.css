@@ -90,3 +90,76 @@ body {
   font-size: 24px;
 }
 
+.input-register{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.input-register label{
+  text-align: start;
+  font-weight: 500;
+}
+
+input, select{
+  font-size:14.5px;
+  padding:11px 15px;
+  border:1px solid gray;
+  border-radius:9px;
+  background-color: white;
+  width: 100%;
+}
+
+.divider{
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+}
+
+.divider span {
+  flex: 1;
+  height: 1px;
+  background-color: #4f60ff;
+}
+
+.divider p {
+  margin: 0;
+  color: #4f60ff;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.input-gender{
+  display: inline-flex;
+  border-radius: 10px;
+  padding: 10px;
+  gap: 7px;
+}
+
+.input-gender input {
+  display: none; 
+
+}
+
+.input-gender label {
+  padding: 8px 16px;
+  border-radius: 7px;
+  font-size: 14px;  
+  cursor: pointer;
+  border: 1px solid transparent;
+  background-color: white;
+  transition: all 0.15s ease;
+
+}
+
+.input-gender label:hover {
+  color: #60a5fa;
+}
+
+
+.input-gender input:checked + label {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: #3b82f6;
+  color: #60a5fa;
+}

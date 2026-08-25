@@ -1,0 +1,118 @@
+"use client"; 
+ 
+import { Navigation, Pagination, Autoplay } from 'swiper/modules'; 
+import { Swiper, SwiperSlide } from 'swiper/react';
+import "swiper/css";
+import "swiper/css/pagination";
+import Button from "../components/Button"
+
+export default function Cadastro(){ 
+    return( 
+        <section>
+     
+            <div className='flex flex-row'> {/* FLEX PAI 1 */} 
+                <div className='w-full text-center flex flex-col items-center p-28 gap-10 overflow-y-auto h-[950px] bg-linear-to-t from-blue-200 to-white'> {/* FLEX PAI 2 */} 
+
+                    <h1 className='text-5xl leading-1 font-medium font-fraunces'>Bem vindo!</h1>
+                    <p>Para se cadastrar, preencha as informações abaixo</p> 
+
+                    <form action="" className='flex flex-col justify-center gap-5 '> {/* FLEX PAI 3 */} 
+
+                        <div className='flex flex-col gap-10 w-[600px] my-10'> {/* FLEX PAI 4 */}
+
+                            {/* <div> */}
+                                <div className='input-register'>
+                                    <label htmlFor="name">Nome completo:</label>
+                                    <input type="text" />
+                                </div>
+                            
+
+                                <div className='input-register'>
+                                    <label htmlFor="birthdate">Data de nascimento:</label>
+                                    <input type="date" />
+                                </div>
+
+                                <div className='input-register'>
+                                    <label htmlFor="gender">Selecione seu gênero: </label>
+                                    <input type="radio" />
+                                    <input type="radio" />
+                                </div>
+
+                                    
+                                <div className='input-register'>
+                                    <label htmlFor="cpf">CPF:</label>
+                                    <input type="text" />
+                                </div>
+                            {/* </div> */}
+
+
+                            {/* <div> */}
+                                <div className='input-register'>
+                                    <label htmlFor="numberphone">Número de celular:</label>
+                                    <input type="text" />
+                                </div>
+
+                                <div className='input-register'>
+                                    <label htmlFor="email">E-mail:</label>
+                                    <input type="text" />
+                                </div>
+
+                                <div className='input-register'>
+                                    <label htmlFor="password">Senha</label>
+                                    <input type="text" />
+                                </div>
+                            {/* </div> */}
+                        </div>
+
+                        <Button
+                            titulo='Cadastrar'
+                        />
+                        <div className="divider">
+                            <span></span>
+                            <p>Ou logue-se com</p>
+                            <span></span>
+                        </div>
+
+                        <div className='flex justify-center'>
+                            <button className='flex items-center w-40 rounded-2xl p-2 font-bold bg-white border-2 border-gray-200 cursor-pointer'>
+                                <img src="/google.png" className="w-10 mx-2"/>
+                                Google
+                            </button>
+                        </div>
+
+                        <p>Já possui uma conta? <span className='font-bold'>Logar-se</span></p>
+                    </form>
+                </div>
+
+
+                <Swiper 
+                    className='w-full h-full'
+                    modules={[Autoplay, Pagination]} 
+                    slidesPerView={1} 
+                    autoplay={{ 
+                        delay: 3000, 
+                        disableOnInteraction: false 
+                    }} 
+                    pagination
+                    loop={true}
+                > 
+                    <SwiperSlide> 
+                        <img 
+                            src="/psicologo.jpeg" 
+                            alt="" 
+                            className="w-full h-[950px] object-cover rounded-4xl" 
+                        /> 
+                    </SwiperSlide> 
+    
+                    <SwiperSlide> 
+                        <img 
+                            src="/psicologo2.jpg" 
+                            alt="" 
+                            className="w-full h-[950px] object-cover rounded-4xl"  
+                        /> 
+                    </SwiperSlide>
+                </Swiper> 
+            </div>
+        </section> 
+    )
+}

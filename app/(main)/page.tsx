@@ -218,7 +218,7 @@ export default function Landing() {
               </h1>
               <button className="flex items-center  bg-green1 rounded-4xl mb-10 p-2 w-65 text-white font-bold">
                 <img src="/cronograma.png" alt="" className="w-10 mx-2" />
-                Agendar uma consulta
+                  Agendar uma consulta
               </button>
             </div>
           </div>

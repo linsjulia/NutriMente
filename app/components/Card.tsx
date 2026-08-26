@@ -10,9 +10,15 @@ export default function Card({titulo, descricao, image, cor = 'branco'} : CardPr
     return(
         <div>
             <div className={`cards-landing2 ${cor == 'azul' ? 'bg-blue3' : 'bg-white'}`}>
-                <img src={image} alt="" className="numbers-icon"/>
-                <h1>{titulo}</h1>
-                <h2>{descricao}</h2>
+                <div className="flex flex-row gap-5 items-center text-[18px]">
+                    <img src={image} alt="" className="numbers-icon"/>
+                    <h1>{titulo}</h1>
+                </div>
+                
+                <div>
+                    <h2>{descricao}</h2>
+                </div>
+
             </div>
         </div>
 

@@ -1,6 +1,6 @@
 "use client"
 
-import SliderHero from "./SliderHero"
+import SliderHero from "./CarouselHero"
 
 
  export default function Hero(){
@@ -13,7 +13,7 @@ import SliderHero from "./SliderHero"
 
                 {/* Text */}
                 
-                    <div className="inset-0 w-full relative z-10 flex flex-col justify-center bg-linear-65 from-blue-200 to-green-200 md:px-12 lg:px-20 overflow-hidden border-1 border-green-700">
+                    <div className="inset-0 w-full relative z-10 flex flex-col justify-center bg-linear-30 from-indigo-300 to-green-200 md:px-12 lg:px-20 overflow-hidden border-1 border-green-700">
                         <div className="max-w-3xl">
                             <h1 className="md:text-4xl xl:text-6xl font-fraunces leading-tight">Consultas de psicólogos e nutricionistas 
                             <span className="text-blue-600"> em um só lugar</span></h1>  

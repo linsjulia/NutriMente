@@ -5,8 +5,8 @@ export default function Footer(){
     return(
     
    <div>   
-        <div className="p-10 border-t-1 border-b-1 border-gray-300">
-            <div className="flex flex-row gap-96 p-20 mb-50 ">
+        <div className="p-0 border-t-1 border-b-1 border-gray-300">
+            <div className="flex flex-row gap-96 p-20 mb-50 justify-center ">
                 {/* Contato */}
                 <div className="flex flex-col gap-10"> 
                     <h1 className="font-bold titulo-footer">Contato</h1>
@@ -20,21 +20,21 @@ export default function Footer(){
                 {/* Navegue */}
                 <div className="flex flex-col gap-5">
                     <h1 className="font-bold titulo-footer">Navegue</h1>
-                    <p>Home</p>
-                    <p>Profissionais</p>
-                    <p>Serviços</p>
+                    <a className="a-footer">Home</a>
+                    <a className="a-footer">Profissionais</a>
+                    <a className="a-footer">Serviços</a>
                 </div>
 
                 {/* Institucional */}
                 <div className="flex flex-col gap-5">
                     <h1 className="font-bold titulo-footer">Institucional</h1>
-                    <p>Privacidade & Política</p>
-                    <p>Termos & Condições</p>
-                    <p>Sobre nós</p>
+                    <a className="a-footer">Privacidade & Política</a>
+                    <a className="a-footer">Termos & Condições</a>
+                    <a className="a-footer">Sobre nós</a>
                 </div>
             </div>
         </div>
-        <div className="border-t-1 border-gray-400 p-15">
+        <div className="p-10 text-[14px]">
             <p>@Copyrights NutriMente todos os direitos reservados 2026</p>
         </div>
     </div>  

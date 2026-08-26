@@ -5,6 +5,7 @@ import FadeInProps from "../components/FadeScroll";
 import FadeScrollProps from "../components/FadeScroll";
 import Card_Avaliacoes from "../components/Card_Avaliacoes";
 import Footer from "../components/Footer";
+import CTA from "../components/CTA";
 
 
 
@@ -20,14 +21,14 @@ export default function Landing() {
       <FadeScrollProps>
         <section className="mb-50 p-20">
           <div className="flex justify-center items-center gap-40 flex-col flex-1">
-            <h1 className="font-fraunces text-5xl font-medium">
+            <h1 className="font-fraunces text-4xl font-medium">
               Como Funciona?
             </h1>
             {/* <img src="/Como funciona.svg" alt="" className="w-1/2" /> */}
             <div className="flex gap-14 text-center">
               <div className="cards-landing1 font-fraunces">
                 <img className="icon-landingPage" src="/number-1.png" alt="" />
-                <h2>Faça seu cadastro e preencha seu perfil de saúde</h2>
+                <p>Faça seu cadastro e preencha seu perfil de saúde</p>
                 <img className="icon-landingPage" src="/cadastro.png" alt="" />
               </div>
 
@@ -56,17 +57,20 @@ export default function Landing() {
       {/* Ap. Funcionalidades Clientes */}
 
       <FadeScrollProps>
-        <section className="p-10 bg-blue3 min-h-screen">
-          <h1 className="font-fraunces font-medium text-5xl text-center m-10 mb-30">
+        <section className="p-10 bg-blue-100 min-h-screen">
+          <h1 className="font-fraunces font-medium text-4xl text-center mb-20">
             Para <span className="text-[#0069F6]">Pacientes</span>
           </h1>
           <div className=" flex justify-center flex-row items-center gap-20">
-            <img
-              src="/pacientes.jfif"
-              alt=""
-              className="object-contain w-[600px] h-[500px]"
-            />
-            <div className="flex flex-col">
+            <div>
+              <img
+                src="/pacientes.jfif"
+                alt="" 
+                className="object-cover w-[500px] rounded-2xl border-1 border-blue-900"
+              />
+            </div>
+
+            <div className="flex flex-col gap-10">
               <Card
                 image="/1.png"
                 titulo="Avaliação Inicial Inteligente"
@@ -92,13 +96,13 @@ export default function Landing() {
       {/* Ap. Funcionalidades Profissionais */}
 
       <FadeScrollProps>
-        <section className="m-30">
-          <h1 className="font-fraunces font-medium text-5xl text-center m-30">
+        <section className="min-h-screen">
+          <h1 className="font-fraunces font-medium text-4xl text-center m-30">
             Para <span className="text-[#00D9FF]">Nutricionistas</span> e{" "}
             <span className="text-[#00DDB1]">Psicólogos</span>{" "}
           </h1>
           <div className="flex justify-center flex-row items-center gap-20">
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-10">
               <Card
                 image="/1.png"
                 titulo="Validação e Credibilidade"
@@ -116,14 +120,14 @@ export default function Landing() {
               <Card
                 image="/3.png"
                 titulo="Gestão de Agenda Prática"
-                descricao="Comprove sua atuação profissional e conquiste mais confiança dentro da plataforma."
+                descricao="Organize horários, consultas e disponibilidade de forma simples e prática."
                 cor="azul"
               />
             </div>
             <img
               src="/profissionais.jpg"
               alt=""
-              className="object-contain w-[600px] h-[500px]"
+              className="object-contain w-[500px] rounded-2xl border-1 border-blue-900"
             />
           </div>
         </section>
@@ -132,7 +136,7 @@ export default function Landing() {
       <FadeScrollProps>
         <section>
           <img src="/rectangle.svg" alt="" className="w-full" />
-          <h1 className="font-fraunces font-medium text-5xl text-center">
+          <h1 className="font-fraunces font-medium text-4xl text-center">
             Conheça alguns de nossos especialistas
           </h1>
           <h2 className="text-center text-base m-5">
@@ -176,15 +180,16 @@ export default function Landing() {
 
       {/* Secao cards de avaliacoes */}
       <FadeScrollProps>
-        <section>
-          <h1 className="font-fraunces font-medium text-5xl text-center">
-            Conheça alguns de nossos especialistas
+        <section className="bg-blue-100 p-10">
+          <h1 className="font-fraunces font-medium text-4xl text-center">
+            O que dizem sobre nossa plataforma
           </h1>
-          <div className="flex md:flex-row flex-col gap-40 justify-center bg-blue3 my-20 p-20">
+          <h2 className="text-center text-base m-5">Uma plataforma criada para tornar o acompanhamento nutricional e psicológico mais acessível, organizado e personalizado.</h2>
+          <div className="flex md:flex-row flex-col gap-30 justify-center my-20 p-20">
             <Card_Avaliacoes
               titulo="Mariana S., Paciente"
               avaliacao="O NutriMente facilitou muito minha rotina. Antes eu perdia os papéis da dieta, agora recebo as metas direto no celular e os lembretes de consulta me ajudam a não esquecer de nada. Muito prático!"
-              img="/no-pfp.png"
+              img="/paciente2.png"
             />
 
             <Card_Avaliacoes
@@ -198,31 +203,7 @@ export default function Landing() {
 
       {/* Secao CTA Final */}
       <FadeScrollProps>
-        <section className="flex justify-center m-30">
-          <div className="flex flex-row justify-between items-center relative w-[1420px] h-[483px] m-20 rounded-4xl bg-linear-to-t from-green2 to-blue4">
-            <img
-              src="/fundo-cta.png"
-              className="w-full h-full object-cover opacity-15 absolute"
-            />
-
-            <div className="flex justify-center items-end">
-              <img
-                src="/nutricionista.png"
-                className="w-[1910px] h-full mb-10"
-              />
-            </div>
-
-            <div className="flex flex-col gap-10 p-20 w-[1800px]">
-              <h1 className="text-white font-fraunces text-5xl font-medium">
-                Pronto para transformar sua saúde mental e alimentar?
-              </h1>
-              <button className="flex items-center  bg-green1 rounded-4xl mb-10 p-2 w-65 text-white font-bold">
-                <img src="/cronograma.png" alt="" className="w-10 mx-2" />
-                  Agendar uma consulta
-              </button>
-            </div>
-          </div>
-        </section>
+        <CTA/>
       </FadeScrollProps>
 
       {/* Footer  */}

@@ -1,6 +1,6 @@
 "use client"
 
-import SliderHero from "../../components/SliderHero"
+import SliderHero from "../../components/CarouselHero"
 
 export default function AboutPage(){
     return(

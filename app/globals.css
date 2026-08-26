@@ -38,22 +38,25 @@ body {
   background: var(--background);
   color: var(--color-blue2);
   font-family: 'Open Sans';
+  font-size: 14px;
 }
+
 
 /* LANDING PAGE PAGETSX */
 .cards-landing1{
-  width: 380px;
-  height: 230px;
+  width: 340px;
+
   background-color: #EDF9FF;
-  padding: 10px;
+  padding: 15px;
   font-weight: 600;
-  font-size: var(--titulo-cards);
   display: flex;
+  font-size: 17px;
   justify-content: center;
   flex-direction: column;
   align-items: center;
   border: 2px solid #00FFE1;
   border-radius: 1rem;
+  gap: 20px;
 }
 
 .icon-landingPage{
@@ -67,48 +70,61 @@ body {
 }
 
 .cards-landing2{
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
   border: 2px solid;
-  border-image: linear-gradient(90deg, #00DD5C, #7188FF) 1;
-  border-radius: 20px;
-  width: 500px; 
-  height: 175px;
+  /* border-image: linear-gradient(90deg, #00DD5C, #7188FF) 1; */
+  border-color: #3bf65a;
+  border-radius: 20px; 
   margin: 10px;
+  gap: 5px;
+  width: 500px;
 }
 
 .cards-landing2 h1{
   font-weight: 700;
-  font-size: 18px;
 }
 
 
 .cards-landing2 h2{
-  font-size: 16px;
 }
 
 .titulo-footer{
-  font-size: 24px;
+  font-size: 20px;
+}
+
+.a-footer{
+  font-size: 14px;
 }
 
 .input-register{
   display:flex;
   flex-direction:column;
-  gap:6px;
+  gap: 2px;
 }
+
+.input-register input, select{
+  font-size:14px;
+  padding:11px 15px;
+  border:1px solid rgb(201, 201, 201);
+  border-radius:9px;
+  background-color: white;
+  width: 100%;
+  transition:border-color .18s ease, box-shadow .18s ease;
+}
+
+.input-register input:focus, select:focus{
+    box-shadow:0 0 0 3px rgba(62, 232, 255, 0.37);
+    
+  }
 
 .input-register label{
   text-align: start;
   font-weight: 500;
+  font-size: 13px;
 }
 
-input, select{
-  font-size:14.5px;
-  padding:11px 15px;
-  border:1px solid gray;
-  border-radius:9px;
-  background-color: white;
-  width: 100%;
-}
 
 .divider{
   display: flex;
@@ -133,7 +149,7 @@ input, select{
 .input-gender{
   display: inline-flex;
   border-radius: 10px;
-  padding: 10px;
+  padding: 0px;
   gap: 7px;
 }
 
@@ -154,12 +170,13 @@ input, select{
 }
 
 .input-gender label:hover {
-  color: #60a5fa;
+  color: #60fa86;
 }
 
 
 .input-gender input:checked + label {
-  background: rgba(59, 130, 246, 0.12);
-  border-color: #3b82f6;
-  color: #60a5fa;
+  background: rgba(59, 246, 75, 0.452);
+  border-color: #3bf65a;
+  color: #008d18;
 }
+

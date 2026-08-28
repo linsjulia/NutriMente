@@ -1,9 +1,9 @@
 import Hero from "../components/Hero";
-import Card from "../components/Card";
-import Card_Profi from "../components/Card_Profi";
+import Card from "../components/CardFuncionalidades";
+import Card_Profi from "../components/CardProfi";
 import FadeInProps from "../components/FadeScroll";
 import FadeScrollProps from "../components/FadeScroll";
-import Card_Avaliacoes from "../components/Card_Avaliacoes";
+import Card_Avaliacoes from "../components/CardAvaliacoes";
 import Footer from "../components/Footer";
 import CTA from "../components/CTA";
 
@@ -32,14 +32,14 @@ export default function Landing() {
                 <img className="icon-landingPage" src="/cadastro.png" alt="" />
               </div>
 
-              <img src="/line.svg" alt="" className="w-[5%] object-contain" />
+              {/* <img src="/line.svg" alt="" className="w-[5%] object-contain" /> */}
               <div className="cards-landing1 gap-3 font-fraunces">
                 <img className="icon-landingPage" src="/number-2.png" alt="" />
                 <h2>Escolha o profissional ideal</h2>
                 <img className="icon-landingPage" src="/medico.png" alt="" />
               </div>
 
-              <img src="/line.svg" alt="" className="w-[5%] object-contain" />
+              {/* <img src="/line.svg" alt="" className="w-[5%] object-contain" /> */}
               <div className="cards-landing1 font-fraunces">
                 <img className="icon-landingPage" src="/number-3.png" alt="" />
                 <h2>Agende sua consulta e comece seu acompanhamento</h2>
@@ -97,10 +97,11 @@ export default function Landing() {
 
       <FadeScrollProps>
         <section className="min-h-screen">
-          <h1 className="font-fraunces font-medium text-4xl text-center m-30">
-            Para <span className="text-[#00D9FF]">Nutricionistas</span> e{" "}
-            <span className="text-[#00DDB1]">Psicólogos</span>{" "}
+          <h1 className="font-fraunces font-medium text-4xl text-center mt-15 leading-15">
+            Para <span className="text-[#00D9FF]">Nutricionistas</span> e 
+            <span className="text-[#00DDB1]"> Psicólogos</span>
           </h1>
+          <h2 className="text-base text-center mb-20 ">Uma plataforma pensada para simplificar sua rotina profissional.</h2>
           <div className="flex justify-center flex-row items-center gap-20">
             <div className="flex flex-col gap-10">
               <Card
@@ -139,6 +140,7 @@ export default function Landing() {
           <h1 className="font-fraunces font-medium text-4xl text-center">
             Conheça alguns de nossos especialistas
           </h1>
+          
           <h2 className="text-center text-base m-5">
             Junte-se a centenas de pacientes que já encontram psicólogos e
             nutricionistas qualificados no NutriMente. Escolha seu especialista

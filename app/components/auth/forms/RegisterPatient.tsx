@@ -1,8 +1,8 @@
 
 "use client";
 import { useState } from "react"
-import Button from "../components/Button"
-import ButtonGender from "../components/ButtonGender"
+import Button from "../../buttons/Button"
+import GenderButton from "../../buttons/GenderButton";
 
 
 export default function RegisterPatient() {
@@ -60,7 +60,7 @@ export default function RegisterPatient() {
           <label htmlFor="gender" className="text-start font-bold">
             Selecione seu gênero
           </label>
-            <ButtonGender/>
+            <GenderButton/>
 
           <div className="flex flex-col gap-3">
             <div className="input-register">

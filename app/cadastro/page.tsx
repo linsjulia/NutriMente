@@ -5,10 +5,10 @@ import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import "swiper/css";
 import "swiper/css/pagination";
-import Button from "../components/Button"
+import Button from "../components/buttons/Button"
 import Logo from "../components/Logo"
-import RegisterPatient from '../components/RegisterPatient';
-import RegisterProfessional from '../components/RegisterProfessional';
+import RegisterPatient from '../components/auth/forms/RegisterPatient';
+import RegisterProfessional from '../components/auth/forms/RegisterProfessional';
 
 export default function Cadastro(){ 
     const [selected, setSelected] = useState("women");

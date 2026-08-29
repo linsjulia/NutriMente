@@ -1,6 +1,6 @@
 import { useState } from "react"
 
-export default function ButtonGender(){
+export default function GenderButton(){
     const [selected, setSelected] = useState("women");
 
     const options = [

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-import ButtonGender from "./ButtonGender";
-import Button from "./Button";
+import GenderButton from "../../buttons/GenderButton";
+import Button from "../../buttons/Button";
 
 export default function RegisterProfessional() {
 
@@ -49,7 +49,7 @@ export default function RegisterProfessional() {
             Selecione seu gênero
           </label>
 
-          <ButtonGender />
+          <GenderButton/>
 
             <label htmlFor="type-professional" className="text-start font-bold">Você é: </label>
             <div className="input-type-professional">

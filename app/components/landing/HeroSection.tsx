@@ -3,6 +3,7 @@
 import { Highlighter } from "@/components/ui/highlighter";
 import FadeInProps from "../fade-effect/FadeScroll";
 import CarouselHeroSection from "../CarouselHeroSection";
+import TestButton from "../buttons/LandingButton";
 
 export default function Hero() {
   return (
@@ -22,10 +23,12 @@ export default function Hero() {
               </h2>
             </div>
 
-            <button className="flex items-center bg-green1 rounded-4xl mb-10 w-65 p-2 text-white font-bold">
+            {/* <button className="flex items-center bg-green1 rounded-4xl mb-10 w-65 p-2 text-white font-bold">
               <img src="/icons/cronograma.png" alt="" className="w-10 mx-2" />
               Agendar uma consulta
-            </button>
+            </button> */}
+
+            <TestButton></TestButton>
 
             <div className="flex flex-row gap-10 font-bold">
               <div className="flex flex-row items-center gap-2">

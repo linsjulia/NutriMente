@@ -7,6 +7,7 @@ import PatientFeaturesSection from "../components/landing/PatientFeaturesSection
 import ProfessionalFeaturesSection from "../components/landing/ProfessionalFeaturesSection";
 import SpecialistsSection from "../components/landing/SpecialistsSection";
 import ReviewsSection from "../components/landing/ReviewsSection";
+import TestButton from "../components/buttons/LandingButton";
 
 
 export default function Landing() {

@@ -28,7 +28,7 @@ export default function RegisterPatient() {
           Para se cadastrar, preencha as informações abaixo
         </p>
         <div className="border-t-2 border-blue1"></div>
-        <div className="flex flex-col gap-7 w-[486px] my-6">
+        <div className="flex flex-col gap-7 w-121.5 my-6">
           {" "}
           {/* FLEX PAI 4 */}
           <div className="flex flex-row justify-center gap-8">

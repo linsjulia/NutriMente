@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 export default function Header() {
   const router = useRouter();
   return (
-    <header className="bg-blue1 text-white h-20 flex items-center justify-between top-0 px-8 sticky z-1000">
+    <header className="header bg-blue1 text-white h-20 flex items-center justify-between top-0 px-8 sticky z-1000">
       <Logo />
       <nav className="flex items-center gap-14 text-white">
         <a href="#">Home</a>
@@ -15,7 +15,7 @@ export default function Header() {
       </nav>
       <button
         onClick={() => router.push("/cadastro")}
-        className="bg-green1 p-3 px-10 rounded-4xl font-bold cursor-pointer"
+        className="bg-green1 p-3 px-10 rounded-4xl font-bold cursor-pointer hover:bg-green3 transition ease-in-out duration-200"
       >
         Cadastre-se
       </button>

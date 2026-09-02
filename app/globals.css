@@ -363,7 +363,7 @@ body {
 }
 
 
-
+/*? Botão Hero Section */
 .button-test {
   line-height: 1;
   background-color: transparent;
@@ -397,4 +397,27 @@ body {
     transform: scale(0.98);
   box-shadow: 0 0.5em 1.5em -0.5em #04e66a;;
   transform: translateY(-3px);
+}
+
+
+
+/* Cadastro Profissional*/
+
+.form-register input{
+  background-color: white;
+  border-radius: 10px;
+  border: 1px rgb(198, 198, 198) solid;
+  padding: 10px;
+
+}
+
+.form-register{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-register div{
+  display: flex;
+  flex-direction: column;
 }

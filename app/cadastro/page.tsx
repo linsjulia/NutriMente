@@ -11,12 +11,6 @@ import RegisterPatient from '../components/auth/forms/RegisterPatient';
 import RegisterProfessional from '../components/auth/forms/RegisterProfessional';
 
 export default function Cadastro(){ 
-    const [selected, setSelected] = useState("women");
-
-    const options = [
-        { id: "women", label: "Feminino" },
-        { id: "men", label: "Masculino" },
-    ];
 
     return( 
         <section>
@@ -48,9 +42,9 @@ export default function Cadastro(){
 
                 <RegisterProfessional/>  
                
-                <div className='bg-blue-100 w-1/2 flex justify-center items-center h-screen'>
+                {/* <div className='bg-blue-100 w-1/2 flex justify-center items-center h-screen'>
                     <img src="/nutrimenteLogo.png" className='w-[397px] h-[397px] shadow-lg' />
-                </div>
+                </div> */}
             </div>
         </section> 
     )

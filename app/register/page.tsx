@@ -10,7 +10,7 @@ import Logo from "../components/Logo"
 import RegisterPatient from '../components/auth/forms/RegisterPatient';
 import RegisterProfessional from '../components/auth/forms/RegisterProfessional';
 
-export default function Cadastro(){ 
+export default function Register(){ 
 
     return( 
         <section>

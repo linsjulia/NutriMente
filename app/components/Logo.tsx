@@ -1,9 +1,10 @@
 import Image from "next/image";
 
+
 export default function Logo(){
     return(
         <Image
-        src="/nutrimenteLogo.png"
+        src="/logo/nutrimente-v1.png"
         width={200}
         height={80}
         draggable={false}

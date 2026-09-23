@@ -3,7 +3,7 @@
 import { Highlighter } from "@/components/ui/highlighter";
 import FadeInProps from "../fade-effect/FadeScroll";
 import CarouselHeroSection from "../CarouselHeroSection";
-import TestButton from "../buttons/LandingButton";
+import Button from "../buttons/LandingButton";
 
 export default function Hero() {
   return (
@@ -28,7 +28,9 @@ export default function Hero() {
               Agendar uma consulta
             </button> */}
 
-            <TestButton></TestButton>
+            <Button
+            router_string="/login"
+            />
 
             <div className="flex flex-row gap-10 font-bold">
               <div className="flex flex-row items-center gap-2">

@@ -1,11 +1,9 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import GenderButton from "../../buttons/GenderButton";
-import Button from "../../buttons/Button";
 import RegisterIconNumbers from "../../icons/RegisterIconNumbers";
-import { ArrowRight, User } from "lucide-react";
-import Logo from "../../Logo";
-
+import { ArrowRight, User, BadgeCheck, ArrowLeft, Mail, Lock, Smartphone, UserSearch, Cake, SquarePen } from "lucide-react";
+import { Highlighter } from "@/components/ui/highlighter"
 
   type RegisterData = {
     name: string;
@@ -53,6 +51,9 @@ export default function RegisterProfessional() {
   const [data, setData] = useState<RegisterData>(initialData);
   const [done, setDone] = useState(false);
 
+    useEffect(() => {
+    setData((prev) => ({ ...prev, document_professional: "" }));
+  }, [data.professional_type]);
 
   const stepValid = useMemo(() => {
     if (step === 1)
@@ -77,20 +78,20 @@ export default function RegisterProfessional() {
   const next = () => step < 3 && setStep(step + 1);
   const back = () => step > 1 && setStep(step - 1);
   const submit = () => stepValid && setDone(true);
-  console.log("state atual:", data);
+  console.log("state atual:", data.professional_type, data.document_professional);
   
   return (
     <section className="min-h-screen flex flex-row min-w-screen">
-      <div className="bg-blue1 flex flex-col gap-10 p-20 text-white w-230 relative min-h-screen">
-        <h1 className="text-white font-fraunces text-3xl">
-          Cadastro de Profissionais
+      <div className="bg-blue-200 flex flex-col gap-10 p-20 text-blue2 w-230 relative min-h-screen">
+        <h1 className="text-blue1 font-fraunces text-4xl">
+          Cadastro para Profissionais
         </h1>
         <p className="text-[18px]">Sua jornada profissional começa aqui</p>
 
         <div className="flex flex-col gap-10">
-          <RegisterIconNumbers number="1" title="Acesso" />
-          <RegisterIconNumbers number="2" title="Identificação" />
-          <RegisterIconNumbers number="3" title="Atuação" />
+          <RegisterIconNumbers number="1" title="Acesso" active={step >= 1} />
+          <RegisterIconNumbers number="2" title="Identificação" active={step >= 2} />
+          <RegisterIconNumbers number="3" title="Atuação" active={step >=3}/>
         </div>
         <img
           src="/icons/line.svg"
@@ -104,16 +105,19 @@ export default function RegisterProfessional() {
         {/* <img src="/logo/nutrimente-v1.png" cl/> */}
       </div>
 
-      <div className="bg-blue-100 p-20 px-60 w-full">
-        {/* {step === 1 && (
+      <div className="flex flex-col p-15 px-60 gap-10 w-full">
+        {step === 1 && (
           <>
-            <div className="flex flex-col p-10 gap-5">
-              <p className="tracking-widest text-green-600 font-bold">ETAPA 1 de 3</p>
+            <div className="flex flex-col gap-5">
+              <p className="info-steps">ETAPA 1 de 3</p>
               <h2 className="font-bold text-2xl">Dados de Acesso</h2>
               <form action="" className="form-register">
                 <div className="flex flex-col gap-5">
-                  <label htmlFor="name">Nome Completo</label>
-                  <User size={16} />
+                  <div className="flex flex-row gap-5 items-center">
+                    <User size={30} />
+                    <label htmlFor="name">Nome Completo</label>
+                  </div>
+
                   <input
                     value={data.name}
                     onChange={(e) => setData({ ...data, name: e.target.value })}
@@ -125,7 +129,10 @@ export default function RegisterProfessional() {
                 </div>
 
                 <div className="flex flex-col gap-5">
-                  <label htmlFor="email">E-mail</label>
+                  <div className="flex flex-row gap-5 items-center">
+                    <Mail size={25}/>
+                    <label htmlFor="email">E-mail</label>
+                  </div>
                   <input
                     value={data.email}
                     onChange={(e) =>
@@ -140,7 +147,10 @@ export default function RegisterProfessional() {
                 </div>
 
                 <div className="flex flex-col gap-5">
-                  <label htmlFor="password">Senha</label>
+                  <div className="flex flex-row gap-5 items-center">
+                    <Lock size={25}/>
+                    <label htmlFor="password">Senha</label>
+                  </div>
                   <input
                     value={data.password}
                     onChange={(e) =>
@@ -159,15 +169,19 @@ export default function RegisterProfessional() {
 
         {step === 2 && (
           <>
-              <div className="flex flex-col p-10 gap-5">
-                <p className="tracking-widest text-green-600 font-bold">ETAPA 2 de 3</p>
+              <div className="flex flex-col gap-5">
+                <p className="info-steps">ETAPA 2 de 3</p>
 
                 <h2 className="font-bold text-2xl">Identificação</h2>
 
-                <form action="" className="form-register ">
-                  <div className="flex flex-row w-full gap-5">
+                <form action="" className="form-register">
+                  <div className="flex flex-row w-full gap-10">
                     <div className="flex-1 flex flex-col gap-3">
-                      <label htmlFor="name">Telefone</label>
+                      <div className="flex flex-row gap-5 items-center">
+                        <Smartphone size={30}/>
+                        <label htmlFor="name">Telefone</label>
+                      </div>
+
                       <input
                         value={data.telephone}
                         onChange={(e) => setData({...data, telephone: maskPhone(e.target.value)})}
@@ -179,7 +193,10 @@ export default function RegisterProfessional() {
                     </div>
 
                     <div className="flex-1 flex flex-col gap-3">
-                      <label htmlFor="email">CPF</label>
+                      <div className="flex flex-row gap-5 items-center">
+                        <UserSearch size={30}/>
+                        <label htmlFor="email">CPF</label>
+                      </div>
                       <input
                         value={data.cpf}
                         onChange={(e) =>
@@ -195,7 +212,10 @@ export default function RegisterProfessional() {
                   </div>
 
                   <div className="flex flex-col gap-5">
-                    <label htmlFor="password">Data de Nascimento</label>
+                    <div className="flex flex-row gap-5 items-center"> 
+                      <Cake size={30}/>
+                      <label htmlFor="password">Data de Nascimento</label>
+                    </div>
                     <input 
                       onChange={(e) => setData({...data, birth_date: e.target.value})}
                       type="date" 
@@ -203,8 +223,16 @@ export default function RegisterProfessional() {
                       id="birthdate" />
                   </div>
 
+                   <div className="flex flex-col gap-5">
+                    <label htmlFor="">Gênero</label>
+                    <GenderButton/>
+                  </div>     
+
                   <div className="flex flex-col gap-5">
-                    <label htmlFor="password">Bio</label>
+                    <div className="flex flex-row gap-5 items-center">
+                      <SquarePen/>
+                      <label htmlFor="bio">Bio</label>
+                    </div>
                     <textarea
                       value={data.bio}
                       onChange={(e) =>
@@ -221,11 +249,11 @@ export default function RegisterProfessional() {
                 </form>
               </div>
           </>
-        )} */}
+        )} 
 
-
+          {step === 3 && (
               <div className="flex flex-col gap-5 m-0 p-0">
-                <p className="tracking-widest text-green-600 font-bold">ETAPA 3 de 3</p>
+                <p className="info-steps">ETAPA 3 de 3</p>
                 <h2 className="font-bold text-2xl">Atuação Profissional</h2>
 
                 <div className="flex flex-row gap-10 m-0 p-0">
@@ -254,44 +282,65 @@ export default function RegisterProfessional() {
                   </div>
                 </div>
 
+                {data.professional_type === 'Nutricionista' && (
+                  <>
+                  <div className="form-register">
+                    <label>N° do CRN</label>
+                    <input type="text" placeholder="Exemplo: 0-00000" value={data.document_professional} onChange={(e) => setData({...data, document_professional: e.target.value})}/>
+                  </div>
+                   
+                  </>
+                )}
+       
+                {data.professional_type === 'Psicologo' && 
+                  <>
+                  <div className="form-register">
+                    <label>N° do CRP</label>
+                    <input type="text" placeholder="Exemplo: 00/000000" value={data.document_professional} onChange={(e) => setData({...data, document_professional: e.target.value})}/>
+                  </div>
+                  </>
+                }
+
               </div>
-    
+          )}
 
 
-        {step > 1 && (
-          <div className="flex justify-end">
-            <button 
-            className="flex flex-row bg-green1 p-5 rounded-2xl text-white font-bold items-center gap-3 w-35 cursor-pointer"
-            onClick={back}
-            >
-              Voltar <ArrowRight size={20}/>
-            </button>
-          </div>
-        )} 
+        <div className="flex flex-row justify-between gap-10">
+          {step > 1 ? (
+            <div className="flex">
+              <button 
+              className="flex flex-row justify-center rounded-2xl text-blue1 text-[18px] font-bold items-center gap-3 cursor-pointer"
+              onClick={back}
+              >
+                <ArrowLeft size={20}/>Voltar 
+              </button>
+            </div>
+   
+          ) : <span/> } 
 
-        {step < 3 ? (
-          <div className="flex justify-end">
-            <button
-            className="flex flex-row bg-blue-500 p-5 rounded-2xl text-white font-bold items-center gap-3 w-35 cursor-pointer"
-            onClick={next}
-            disabled={!stepValid}
-            >
-              Continuar <ArrowRight size={20}/>
-            </button>
-          </div>
+          {step < 3 ? (
+            <div className="flex">
+              <button
+              className="flex flex-row justify-end text-end bg-green1 p-5 rounded-2xl text-[18px] text-white font-bold items-center gap-3  cursor-pointer"
+              onClick={next}
+              disabled={!stepValid}
+              >
+                Continuar <ArrowRight size={20}/>
+              </button>
+            </div>
 
-        ) : (
-          <div className="flex justify-end">
-            <button 
-            className="flex flex-row bg-green1 p-5 rounded-2xl text-white font-bold items-center gap-3 w-35 cursor-pointer"
-            onClick={submit}
-            disabled={!stepValid}
-            >
-              Concluir cadastro <ArrowRight size={20}/>
-            </button>
-          </div>
-        )}
-        
+          ) : (
+            <div className="flex justify-end">
+              <button 
+              className="flex flex-row bg-green1 p-5 rounded-2xl text-[18px] text-white font-bold items-center gap-3 cursor-pointer"
+              onClick={submit}
+              disabled={!stepValid}
+              >
+                Concluir cadastro <BadgeCheck size={30}/>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

@@ -3,7 +3,7 @@ export default function Footer() {
     <section className="border-t border-gray-300">
       <div className="min-h-screen gap-50 flex flex-col">
         <div className="p-20">
-          <div className="flex flex-row gap-96 p-20 justify-center ">
+          <div className="flex flex-row gap-60 p-20 justify-center ">
             {/* Contato */}
             <div className="flex flex-col gap-10">
               <h1 className="font-bold titulo-footer">Contato</h1>
@@ -17,17 +17,17 @@ export default function Footer() {
             {/* Navegue */}
             <div className="flex flex-col gap-5">
               <h1 className="font-bold titulo-footer">Navegue</h1>
-              <a className="a-footer">Home</a>
-              <a className="a-footer">Profissionais</a>
-              <a className="a-footer">Serviços</a>
+              <a className="a-footer" href="#">Home</a>
+              <a className="a-footer" href="#">Profissionais</a>
+              <a className="a-footer" href="#">Serviços</a>
             </div>
 
             {/* Institucional */}
             <div className="flex flex-col gap-5">
               <h1 className="font-bold titulo-footer">Institucional</h1>
-              <a className="a-footer">Privacidade & Política</a>
-              <a className="a-footer">Termos & Condições</a>
-              <a className="a-footer">Sobre nós</a>
+              <a className="a-footer" href="#">Privacidade & Política</a>
+              <a className="a-footer" href="#">Termos & Condições</a>
+              <a className="a-footer" href="#">Sobre nós</a>
             </div>
           </div>
         </div>

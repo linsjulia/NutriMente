@@ -15,32 +15,39 @@ export default function SpecialistsSection() {
                     
                     <h2 className="text-center text-base m-5">
                       Junte-se a centenas de pacientes que já encontram psicólogos e
-                      nutricionistas qualificados no NutriMente. Escolha seu especialista
+                      nutricionistas qualificados no NutriMente.
+                      <br/>Escolha seu especialista
                       e dê o primeiro passo hoje.
                     </h2>
           
                     <div className="flex flex-row gap-20 m-30 items-center justify-center">
                       <ProfessionalCards
                         titulo="Dr. Lucas Fernandes"
+                        tipoProfissional="Nutricionista"
+                        documento="CRN-3 00000"
                         descricao="Nutricionista com enfoque em nutrição comportamental, adesão terapêutica e organização da rotina alimentar. Atua no desenvolvimento de estratégias sustentáveis para melhorar a relação com a comida sem prescrições rígidas ou extremismos."
                         categoria="Nutrição Comportamental"
-                        categoria2="Nutrição comportamental e alimentação consciente"
+                        segundaCategoria="Nutrição comportamental e alimentação consciente"
                         img="/doctor/pfp.png"
                       />
           
                       <ProfessionalCards
                         titulo="Dra. Fernanda Lima"
+                        tipoProfissional="Psicóloga"
+                        documento="CRP - 06/00000"
                         descricao="Psicóloga clínica com ênfase em Terapia Cognitivo-Comportamental para manejo de estresse, sobrecarga emocional, padrões cognitivos disfuncionais e fortalecimento de recursos internos."
                         categoria="Terapia Cognitivo-Comportamental"
-                        categoria2="Regulação emocional e manejo de sintomas ansiosos"
+                        segundaCategoria="Regulação emocional e manejo de sintomas ansiosos"
                         img="/doctor/pfp2.png"
                       />
           
                       <ProfessionalCards
                         titulo="Dra. Mariana Souza"
+                        tipoProfissional="Psicóloga"
+                        documento="CRP - 06/00000"
                         descricao="Psicóloga com atuação clínica em sofrimento psíquico relacionado à alimentação, ansiedade, imagem corporal e processos de autocuidado. Realiza acompanhamento individual com foco em avaliação, formulação clínica e plano terapêutico personalizado."
                         categoria="Psicologia Clínica e Nutricional"
-                        categoria2="Ansiedade associada ao comportamento alimentar"
+                        segundaCategoria="Ansiedade associada ao comportamento alimentar"
                         img="/doctor/pfp3.png"
                       />
                     </div>

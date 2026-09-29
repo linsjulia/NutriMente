@@ -168,15 +168,17 @@ body {
 
 .cards-landing2{
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
   padding: 20px;
-  border: 2px solid;
   /* border-image: linear-gradient(90deg, #00DD5C, #7188FF) 1; */
-  border-color: #00ff6a;
   border-radius: 20px; 
   margin: 10px;
-  gap: 5px;
-  width: 500px;
+  gap: 7%;
+  width: 600px;
+  font-size: 16px;
+
 }
 
 

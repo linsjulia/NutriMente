@@ -15,14 +15,14 @@ export default function Header() {
 
       {/* Navegação Desktop */}
       <nav className="hidden md:flex items-center gap-8 lg:gap-14 text-white">
-        <a href="#" className="hover:opacity-80 transition-opacity">Home</a>
-        <a href="#" className="hover:opacity-80 transition-opacity">Profissionais</a>
-        <a href="#" className="hover:opacity-80 transition-opacity">Sobre nós</a>
+        <a href="#" className="transition-opacity">Home</a>
+        <a href="#" className="transition-opacity">Profissionais</a>
+        <a href="#" className="transition-opacity">Sobre nós</a>
       </nav>
 
       {/* Botão Desktop */}
       <button
-        onClick={() => router.push("/cadastro")}
+        onClick={() => router.push("/register")}
         className="hidden md:block bg-green1 p-3 px-8 lg:px-10 rounded-full font-bold cursor-pointer hover:bg-green3 transition ease-in-out duration-200"
       >
         Cadastre-se

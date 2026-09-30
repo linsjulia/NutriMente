@@ -12,6 +12,13 @@
 
 import { defineConfig, devices } from "@playwright/test";
 
+// Lê o .env da raiz (ADMIN_EMAIL, API_URL...) para os testes de ponta a ponta
+try {
+  process.loadEnvFile(".env");
+} catch {
+  // sem .env: os testes que precisam do back-end são pulados
+}
+
 const PORT = 3100;
 
 export default defineConfig({
@@ -19,6 +26,8 @@ export default defineConfig({
   // Se um teste falhar no CI, tenta de novo uma vez (evita falso negativo)
   retries: process.env.CI ? 1 : 0,
   reporter: "list",
+  // Os fluxos de ponta a ponta mexem no mesmo banco: um de cada vez é mais previsível
+  workers: 1,
   use: {
     baseURL: `http://localhost:${PORT}`,
     // Grava um "filme" do teste quando ele falha, para investigar

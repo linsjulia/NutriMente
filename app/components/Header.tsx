@@ -1,105 +1,103 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logo from "./Logo";
-import { useRouter } from "next/navigation";
 
-export default function Header() {
-  const router = useRouter();
+const NAV = [
+  { href: "/", label: "Home" },
+  { href: "/professionals", label: "Profissionais" },
+  { href: "/about", label: "Sobre nós" },
+];
+
+type HeaderProps = {
+  /** null = visitante; senão, nome e página inicial de quem está logado */
+  user: { name: string; home: string } | null;
+};
+
+/**
+ * Cabeçalho público. Antes: links "#", botão "Cadastre-se" usando
+ * router.push (não abria em nova aba e não funcionava sem JS) e o menu do
+ * celular levava para /cadastro, uma página que não existe.
+ */
+export default function Header({ user }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Fecha o menu do celular ao trocar de página. Ajustar o estado durante a
+  // renderização quando algo muda é o jeito recomendado pelo React (um
+  // useEffect aqui causaria uma renderização extra).
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    setIsMenuOpen(false);
+  }
+
+  const isCurrent = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+
+  const actions = user ? (
+    <Link href={user.home} className="rounded-full bg-green1 px-8 py-3 font-bold text-blue2 transition hover:bg-green3">
+      Minha área
+    </Link>
+  ) : (
+    <>
+      <Link href="/login" className="rounded-full border-2 border-white px-6 py-2.5 font-bold transition hover:bg-white/10">
+        Entrar
+      </Link>
+      <Link href="/register" className="rounded-full bg-green1 px-6 py-3 font-bold text-blue2 transition hover:bg-green3">
+        Cadastre-se
+      </Link>
+    </>
+  );
 
   return (
-    <header className="header bg-blue1 text-white h-16 lg:h-18 flex items-center justify-between top-0 px-4 md:px-8 sticky z-50">
-      {/* Logo */}
-      <Logo />
+    <header className="header sticky top-0 z-50 bg-blue1 text-white">
+      <div className="flex h-16 items-center justify-between px-4 md:px-8 lg:h-18">
+        <Link href="/" className="h-full py-1" aria-label="NutriMente: página inicial">
+          <Logo />
+        </Link>
 
-      {/* Navegação Desktop */}
-      <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-8 lg:gap-14 text-white">
-        <a href="#" className="transition-opacity">Home</a>
-        <a href="#" className="transition-opacity">Profissionais</a>
-        <a href="#" className="transition-opacity">Sobre nós</a>
-      </nav>
+        {/* Desktop */}
+        <nav aria-label="Navegação principal" className="hidden items-center gap-8 md:flex lg:gap-14">
+          {NAV.map((item) => (
+            <Link key={item.href} href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined} className="underline-offset-8 hover:underline aria-[current=page]:underline">
+              {item.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="hidden items-center gap-3 md:flex">{actions}</div>
 
-      {/* Botão Desktop */}
-      <button
-        onClick={() => router.push("/register")}
-        className="hidden md:block bg-green1 p-3 px-8 lg:px-10 rounded-full font-bold cursor-pointer hover:bg-green3 transition ease-in-out duration-200"
-      >
-        Cadastre-se
-      </button>
-
-      {/* Botão do Menu Hambúrguer (Mobile) */}
-      <button
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="md:hidden p-2 text-white"
-        // aria-expanded diz ao leitor de tela se o menu está aberto;
-        // aria-controls liga o botão ao menu que ele abre.
-        // (removido "focus:outline-none": ele escondia o contorno de foco,
-        // e quem usa teclado ficava sem saber onde estava)
-        aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
-        aria-expanded={isMenuOpen}
-        aria-controls="menu-mobile"
-      >
-        <svg
-          aria-hidden="true"
-          className="w-8 h-8"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+        {/* Celular: botão do menu */}
+        <button
+          type="button"
+          onClick={() => setIsMenuOpen((open) => !open)}
+          className="p-2 md:hidden"
+          aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={isMenuOpen}
+          aria-controls="menu-mobile"
         >
-          {isMenuOpen ? (
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          ) : (
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          )}
-        </svg>
-      </button>
+          <svg aria-hidden="true" className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {isMenuOpen ? (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+      </div>
 
-      {/* Dropdown / Menu Mobile */}
+      {/* Celular: menu aberto (logo abaixo do cabeçalho) */}
       {isMenuOpen && (
-        <div id="menu-mobile" className="md:hidden absolute top-20 left-0 w-full bg-blue1 flex flex-col items-center gap-6 py-6 shadow-lg border-t border-white/10">
-          <nav aria-label="Navegação principal" className="flex flex-col items-center gap-4 text-white w-full">
-            <a
-              href="#"
-              onClick={() => setIsMenuOpen(false)}
-              className="hover:opacity-80 transition-opacity"
-            >
-              Home
-            </a>
-            <a
-              href="#"
-              onClick={() => setIsMenuOpen(false)}
-              className="hover:opacity-80 transition-opacity"
-            >
-              Profissionais
-            </a>
-            <a
-              href="#"
-              onClick={() => setIsMenuOpen(false)}
-              className="hover:opacity-80 transition-opacity"
-            >
-              Sobre nós
-            </a>
+        <div id="menu-mobile" className="flex flex-col items-center gap-6 border-t border-white/10 bg-blue1 py-6 shadow-lg md:hidden">
+          <nav aria-label="Navegação principal" className="flex flex-col items-center gap-4">
+            {NAV.map((item) => (
+              <Link key={item.href} href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>
+                {item.label}
+              </Link>
+            ))}
           </nav>
-          <button
-            onClick={() => {
-              setIsMenuOpen(false);
-              router.push("/register");
-            }}
-            className="bg-green1 p-3 px-8 rounded-full font-bold cursor-pointer hover:bg-green3 transition ease-in-out duration-200"
-          >
-            Cadastre-se
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-3">{actions}</div>
         </div>
       )}
     </header>

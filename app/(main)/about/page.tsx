@@ -4,6 +4,6 @@
 
 export default function AboutPage(){
     return(
-        <div></div>
+        <main id="conteudo"></main>
     )
 }

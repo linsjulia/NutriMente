@@ -12,7 +12,8 @@ import TestButton from "../components/buttons/LandingButton";
 
 export default function Landing() {
   return (
-    <main>
+    // id="conteudo": destino do link "Pular para o conteúdo" (SkipLink)
+    <main id="conteudo">
       <Hero/>
 
       {/* Primeiros passos do site */}

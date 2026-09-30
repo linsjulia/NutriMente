@@ -257,9 +257,21 @@ body {
   gap: 7px;
 }
 
+/* O radio fica invisível, mas NÃO com display:none: display:none tira o
+   campo do teclado e do leitor de tela. Esta técnica ("visually hidden")
+   esconde só visualmente e o label estilizado aparece no lugar. */
 .input-gender input {
-  display: none; 
-  
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+/* Mostra o contorno de foco no label quando o radio é focado pelo teclado */
+.input-gender input:focus-visible + label {
+  outline: 3px solid var(--color-blue1);
+  outline-offset: 2px;
 }
 
 .input-gender label {
@@ -536,4 +548,173 @@ body {
 /* Mostra o ícone quando marcado */
 .custom-checkbox input:checked ~ .checkmark:after {
   display: block;
+}
+
+
+/* =============================================================
+   ACESSIBILIDADE
+   Cada bloco abaixo corresponde a um botão do menu de acessibilidade
+   (app/components/accessibility/AccessibilityMenu.tsx). O menu coloca um
+   atributo data-a11y-* na tag <html> e estas regras mudam o visual.
+   "!important" aqui é proposital: a preferência da pessoa precisa vencer
+   o estilo de qualquer componente.
+   ============================================================= */
+
+/* ---------- Foco visível (sempre ativo) ----------
+   Quem navega pelo teclado (Tab) precisa enxergar onde está. Nunca use
+   "outline: none" sem colocar outro indicador no lugar. */
+:focus-visible {
+  outline: 3px solid var(--color-blue1);
+  outline-offset: 3px;
+}
+
+/* Cards de profissão viraram <button>: mostra o texto também no foco do teclado */
+.professional_type {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+}
+.professional_type:focus-visible .overlay-text {
+  opacity: 1;
+}
+
+/* Botões de opção do menu de acessibilidade */
+.a11y-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 2px solid #d1d5db;
+  border-radius: 0.75rem;
+  background: #fff;
+  cursor: pointer;
+}
+.a11y-option:hover {
+  border-color: var(--color-blue1);
+}
+/* aria-pressed="true" = opção ligada. O CSS usa o mesmo atributo que o
+   leitor de tela lê, então visual e acessibilidade nunca ficam diferentes. */
+.a11y-option[aria-pressed="true"] {
+  border-color: var(--color-blue1);
+  background: var(--color-blue3);
+  color: var(--color-blue1);
+}
+.a11y-option:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- 1. Tamanho do texto ----------
+   O Tailwind usa "rem" (relativo à fonte do <html>). Aumentando a fonte
+   do <html>, tudo que usa rem cresce junto. Valores em px fixos (ex.:
+   text-[18px]) NÃO crescem: prefira as classes padrão (text-lg, text-xl). */
+html[data-a11y-font="1"] { font-size: 115%; }
+html[data-a11y-font="2"] { font-size: 130%; }
+html[data-a11y-font="3"] { font-size: 150%; }
+
+/* ---------- 2. Alto contraste ----------
+   Fundo preto, texto branco e links amarelos: contraste máximo (21:1)
+   para baixa visão. Os elementos do VLibras ([vw]) ficam de fora para
+   não quebrar o avatar. */
+html[data-a11y-contrast="high"] body,
+html[data-a11y-contrast="high"] body *:not([vw]):not([vw] *) {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #fff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+html[data-a11y-contrast="high"] a,
+html[data-a11y-contrast="high"] a * {
+  color: #ff0 !important;
+  text-decoration: underline !important;
+}
+html[data-a11y-contrast="high"] button:not([vw] *),
+html[data-a11y-contrast="high"] input,
+html[data-a11y-contrast="high"] textarea,
+html[data-a11y-contrast="high"] select {
+  border: 2px solid #fff !important;
+}
+html[data-a11y-contrast="high"] .a11y-option[aria-pressed="true"],
+html[data-a11y-contrast="high"] .a11y-option[aria-pressed="true"] * {
+  background-color: #ff0 !important;
+  color: #000 !important;
+}
+html[data-a11y-contrast="high"] ::placeholder {
+  color: #ccc !important;
+}
+html[data-a11y-contrast="high"] :focus-visible {
+  outline-color: #ff0;
+}
+/* Fotos continuam visíveis, mas sem o fundo preto por trás "vazando" */
+html[data-a11y-contrast="high"] img {
+  background-color: transparent !important;
+}
+
+/* ---------- 3. Texto legível ----------
+   Fonte Atkinson Hyperlegible + espaçamentos recomendados pela WCAG 1.4.12
+   (letras 0,12em, palavras 0,16em, linhas 1,5x). Ajuda dislexia e baixa visão. */
+html[data-a11y-readable="true"] body * {
+  font-family: var(--font-atkinson), Verdana, Arial, sans-serif !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+html[data-a11y-readable="true"] p,
+html[data-a11y-readable="true"] li,
+html[data-a11y-readable="true"] label,
+html[data-a11y-readable="true"] h1,
+html[data-a11y-readable="true"] h2,
+html[data-a11y-readable="true"] h3 {
+  line-height: 1.6 !important;
+}
+
+/* ---------- 4. Destacar links ----------
+   Sublinha links e contorna botões: não depende só da cor para perceber
+   o que é clicável (importante para daltonismo). */
+html[data-a11y-links="true"] a {
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 4px !important;
+  outline: 2px dashed currentColor;
+  outline-offset: 2px;
+}
+html[data-a11y-links="true"] button {
+  outline: 2px dashed currentColor;
+  outline-offset: 2px;
+}
+
+/* ---------- 5. Pausar animações ----------
+   Zera animações e transições CSS. As animações do framer-motion são
+   paradas pelo MotionConfig (AccessibilityProvider.tsx) e o carrossel
+   pelo próprio componente. */
+html[data-a11y-motion="reduce"] *,
+html[data-a11y-motion="reduce"] *::before,
+html[data-a11y-motion="reduce"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* O sistema operacional também pode pedir menos movimento
+   (Windows: Configurações > Acessibilidade > Efeitos visuais).
+   Respeitamos isso mesmo sem a pessoa abrir o nosso menu. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- 6. Cursor grande ----------
+   Cursor desenhado em SVG (seta de 48px, preta com borda branca, visível
+   em qualquer fundo). "4 4" = ponto exato do clique; "auto" = reserva. */
+html[data-a11y-cursor="big"],
+html[data-a11y-cursor="big"] * {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24'%3E%3Cpath d='M4 2l16 11-7 1.5 4 7.5-3 1.5-4-7.5L4 20z' fill='%23000' stroke='%23fff' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 4 4, auto !important;
 }

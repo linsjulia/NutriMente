@@ -92,7 +92,7 @@ export default function RegisterPatient() {
         </div>
         <div className="flex justify-center">
           <button className="flex items-center w-40 rounded-2xl p-2 font-bold bg-white cursor-pointer">
-            <img src="/google.png" className="w-10 mx-2" />
+            <img src="/logo/google.png" alt="" className="w-10 mx-2" />
             Google
           </button>
         </div>

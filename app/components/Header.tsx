@@ -14,7 +14,7 @@ export default function Header() {
       <Logo />
 
       {/* Navegação Desktop */}
-      <nav className="hidden md:flex items-center gap-8 lg:gap-14 text-white">
+      <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-8 lg:gap-14 text-white">
         <a href="#" className="transition-opacity">Home</a>
         <a href="#" className="transition-opacity">Profissionais</a>
         <a href="#" className="transition-opacity">Sobre nós</a>
@@ -31,10 +31,17 @@ export default function Header() {
       {/* Botão do Menu Hambúrguer (Mobile) */}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="md:hidden p-2 text-white focus:outline-none"
-        aria-label="Abrir menu"
+        className="md:hidden p-2 text-white"
+        // aria-expanded diz ao leitor de tela se o menu está aberto;
+        // aria-controls liga o botão ao menu que ele abre.
+        // (removido "focus:outline-none": ele escondia o contorno de foco,
+        // e quem usa teclado ficava sem saber onde estava)
+        aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
+        aria-expanded={isMenuOpen}
+        aria-controls="menu-mobile"
       >
         <svg
+          aria-hidden="true"
           className="w-8 h-8"
           fill="none"
           stroke="currentColor"
@@ -60,8 +67,8 @@ export default function Header() {
 
       {/* Dropdown / Menu Mobile */}
       {isMenuOpen && (
-        <div className="md:hidden absolute top-20 left-0 w-full bg-blue1 flex flex-col items-center gap-6 py-6 shadow-lg border-t border-white/10">
-          <nav className="flex flex-col items-center gap-4 text-white w-full">
+        <div id="menu-mobile" className="md:hidden absolute top-20 left-0 w-full bg-blue1 flex flex-col items-center gap-6 py-6 shadow-lg border-t border-white/10">
+          <nav aria-label="Navegação principal" className="flex flex-col items-center gap-4 text-white w-full">
             <a
               href="#"
               onClick={() => setIsMenuOpen(false)}
@@ -87,7 +94,7 @@ export default function Header() {
           <button
             onClick={() => {
               setIsMenuOpen(false);
-              router.push("/cadastro");
+              router.push("/register");
             }}
             className="bg-green1 p-3 px-8 rounded-full font-bold cursor-pointer hover:bg-green3 transition ease-in-out duration-200"
           >

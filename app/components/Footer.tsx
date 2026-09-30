@@ -8,10 +8,10 @@ export default function Footer() {
             <div className="flex flex-col gap-10">
               <h1 className="font-bold titulo-footer">Contato</h1>
               <div className="flex flex-row gap-5 items-center">
-                <img src="/icons/email.png" className="w-10" />
+                <img src="/icons/email.png" alt="" className="w-10" />
                 <p>nutrimente@gmail.com</p>
               </div>
-              <img src="/logo/nutrimente-v1.png" className="w-40" />
+              <img src="/logo/nutrimente-v1.png" alt="NutriMente" className="w-40" />
             </div>
 
             {/* Navegue */}

@@ -15,7 +15,7 @@ export default function CardProfi({titulo, tipoProfissional, documento, descrica
         <div>
             <div className="flex flex-col w-105 h-150.5 border border-gray-400 rounded-2xl gap-4 p-8 shadow-xl ">
                 <div className="flex items-center justify-center my-4 gap-10">
-                    <img src={img} className="rounded-full bg-green-700 w-20 justify-center"/>
+                    <img src={img} alt={`Foto de ${titulo}`} className="rounded-full bg-green-700 w-20 justify-center"/>
                     <div>
                         <h1 className="font-semibold font-fraunces text-[18px] text-center">{titulo}</h1>
                         <p>{tipoProfissional}</p>

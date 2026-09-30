@@ -7,7 +7,7 @@ export default function SpecialistsSection() {
       <FadeScroll>
               <section className="min-h-screen">
                 
-                  <img src="/background/rectangle.svg" className="w-full" />
+                  <img src="/background/rectangle.svg" alt="" className="w-full" />
                   <div className="p-30 min-h-screen">
                     <h1 className="font-fraunces font-medium text-4xl text-center">
                       Conheça alguns de nossos especialistas
@@ -52,8 +52,8 @@ export default function SpecialistsSection() {
                       />
                     </div>
                                     <div className="flex flex-row justify-center gap-5">
-                  <img src="/icons/apple.png" className="w-15 h-fit" />
-                  <img src="/icons/caring-mental.png" className="w-17 object-contain h-fit" />
+                  <img src="/icons/apple.png" alt="" className="w-15 h-fit" />
+                  <img src="/icons/caring-mental.png" alt="" className="w-17 object-contain h-fit" />
                 </div>
                   </div>
                   

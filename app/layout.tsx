@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Open_Sans, Fraunces, Atkinson_Hyperlegible } from "next/font/google";
+import { Geist, Geist_Mono, Open_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 import SkipLink from "./components/accessibility/SkipLink";
 import AccessibilityMenu from "./components/accessibility/AccessibilityMenu";
 import { AccessibilityProvider } from "./components/accessibility/AccessibilityProvider";
-import VLibras from "./components/accessibility/VLibras";
 import { INLINE_APPLY_SCRIPT } from "./components/accessibility/preferences";
 
 const geistSans = Geist({
@@ -27,16 +26,6 @@ const fraunces = Fraunces({
   subsets: ["latin"],
 });
 
-// Fonte criada pelo Braille Institute para pessoas com baixa visão: letras
-// parecidas (I, l, 1 / O, 0) têm formatos bem diferentes. Usada pela opção
-// "Texto legível". preload: false = só baixa quando alguém ativa a opção.
-const atkinson = Atkinson_Hyperlegible({
-  variable: "--font-atkinson",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  preload: false,
-});
-
 export const metadata: Metadata = {
   title: "NutriMente",
   description: "Plataforma que conecta pacientes a profissionais da área da nutrição e psicologia",
@@ -56,7 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="pt-BR"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${openSans.variable} ${fraunces.variable} ${atkinson.variable} text-blue2 font-open-sans h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${openSans.variable} ${fraunces.variable} text-blue2 font-open-sans h-full antialiased`}
     >
       <head>
         {/*
@@ -73,7 +62,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <AccessibilityMenu />
           {children}
         </AccessibilityProvider>
-        <VLibras />
       </body>
     </html>
   );

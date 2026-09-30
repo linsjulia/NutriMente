@@ -12,12 +12,6 @@
 
 import { test, expect, Page } from "@playwright/test";
 
-// O VLibras é um serviço externo do governo; bloqueamos para o teste não
-// depender da internet nem da disponibilidade dele.
-test.beforeEach(async ({ page }) => {
-  await page.route("https://vlibras.gov.br/**", (route) => route.abort());
-});
-
 async function openMenu(page: Page) {
   await page.getByRole("button", { name: "Menu de acessibilidade", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Acessibilidade" })).toBeVisible();
@@ -69,31 +63,30 @@ test("aumentar e diminuir o tamanho do texto", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Diminuir" })).toBeDisabled();
 });
 
-const toggles = [
-  { name: "Alto contraste", attribute: "data-a11y-contrast", value: "high" },
-  { name: "Texto legível", attribute: "data-a11y-readable", value: "true" },
-  { name: "Destacar links", attribute: "data-a11y-links", value: "true" },
-  { name: "Pausar animações", attribute: "data-a11y-motion", value: "reduce" },
-  { name: "Cursor grande", attribute: "data-a11y-cursor", value: "big" },
-];
+test('botão "Alto contraste" liga e desliga', async ({ page }) => {
+  await page.goto("/");
+  await openMenu(page);
+  const button = page.getByRole("button", { name: /Alto contraste/ });
 
-for (const { name, attribute, value } of toggles) {
-  test(`botão "${name}" liga e desliga`, async ({ page }) => {
-    await page.goto("/");
-    await openMenu(page);
-    const button = page.getByRole("button", { name: new RegExp(name) });
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "true");
+  await expect(html(page)).toHaveAttribute("data-a11y-contrast", "high");
+  // O leitor de tela é avisado da mudança
+  await expect(page.getByText("Alto contraste ativado")).toBeAttached();
 
-    await button.click();
-    await expect(button).toHaveAttribute("aria-pressed", "true");
-    await expect(html(page)).toHaveAttribute(attribute, value);
-    // O leitor de tela é avisado da mudança
-    await expect(page.getByText(`${name} ativado`)).toBeAttached();
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "false");
+  await expect(html(page)).not.toHaveAttribute("data-a11y-contrast", "high");
+});
 
-    await button.click();
-    await expect(button).toHaveAttribute("aria-pressed", "false");
-    await expect(html(page)).not.toHaveAttribute(attribute, value);
-  });
-}
+test("o menu tem só as opções usadas agora: tamanho do texto e contraste", async ({ page }) => {
+  await page.goto("/");
+  await openMenu(page);
+  const dialog = page.getByRole("dialog", { name: "Acessibilidade" });
+  await expect(dialog.getByRole("button", { name: "Aumentar" })).toBeVisible();
+  await expect(dialog.getByRole("button", { name: /Alto contraste/ })).toBeVisible();
+  await expect(dialog.getByRole("button", { name: /Texto legível|Destacar links|Pausar animações|Cursor grande/ })).toHaveCount(0);
+});
 
 test("alto contraste deixa o fundo preto", async ({ page }) => {
   await page.goto("/");
@@ -127,17 +120,10 @@ test("preferências continuam depois de recarregar a página, sem erro de hidrat
   expect(errors).toEqual([]);
 });
 
-test("'Pausar animações' para o carrossel e trava o botão de play", async ({ page }) => {
+test("carrossel tem botão para pausar e continuar (WCAG 2.2.2)", async ({ page }) => {
   await page.goto("/");
-  const carouselButton = page.getByRole("button", { name: "Pausar carrossel" });
-  await expect(carouselButton).toBeEnabled();
-
-  // Pausa manual pelo botão do carrossel
-  await carouselButton.click();
+  await page.getByRole("button", { name: "Pausar carrossel" }).click();
   await expect(page.getByRole("button", { name: "Continuar carrossel" })).toBeVisible();
   await page.getByRole("button", { name: "Continuar carrossel" }).click();
-
-  await openMenu(page);
-  await page.getByRole("button", { name: /Pausar animações/ }).click();
-  await expect(page.getByRole("button", { name: "Continuar carrossel" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Pausar carrossel" })).toBeVisible();
 });

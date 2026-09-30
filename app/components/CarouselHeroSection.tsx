@@ -5,7 +5,6 @@ import { Pause, Play } from "lucide-react";
 import { Autoplay, Pagination, A11y, Keyboard } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperInstance } from "swiper";
-import { useAccessibility } from "./accessibility/AccessibilityProvider";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -34,13 +33,10 @@ const slides = [
 ];
 
 export default function CarouselHeroSection() {
-  const { prefs } = useAccessibility();
   const swiperRef = useRef<SwiperInstance | null>(null);
   // Pausa manual pelo botão. Regra WCAG 2.2.2: todo conteúdo que se move
   // sozinho por mais de 5 segundos precisa de um jeito de pausar.
-  const [pausedByUser, setPausedByUser] = useState(false);
-  // Também para quando a pessoa ativa "Pausar animações" no menu de acessibilidade
-  const paused = pausedByUser || prefs.reduceMotion;
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const autoplay = swiperRef.current?.autoplay;
@@ -92,11 +88,9 @@ export default function CarouselHeroSection() {
 
       <button
         type="button"
-        onClick={() => setPausedByUser((current) => !current)}
-        // Com "Pausar animações" ligado o carrossel fica sempre parado
-        disabled={prefs.reduceMotion}
+        onClick={() => setPaused((current) => !current)}
         aria-label={paused ? "Continuar carrossel" : "Pausar carrossel"}
-        className="absolute bottom-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-blue1 shadow-md disabled:opacity-50"
+        className="absolute bottom-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-blue1 shadow-md"
       >
         {paused ? <Play aria-hidden size={20} /> : <Pause aria-hidden size={20} />}
       </button>

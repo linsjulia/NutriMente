@@ -9,7 +9,6 @@
 import { test, expect } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
-  await page.route("https://vlibras.gov.br/**", (route) => route.abort());
   await page.goto("/register");
 });
 

@@ -17,25 +17,14 @@
 // =============================================================
 
 import { useEffect, useId, useRef, useState } from "react";
-import {
-  AArrowDown,
-  AArrowUp,
-  Accessibility,
-  BookOpenText,
-  Contrast,
-  Link,
-  MousePointer2,
-  Pause,
-  RotateCcw,
-  X,
-} from "lucide-react";
+import { AArrowDown, AArrowUp, Accessibility, Contrast, RotateCcw, X } from "lucide-react";
 import { useAccessibility } from "./AccessibilityProvider";
 import { AccessibilityPreferences, FONT_SCALES } from "./preferences";
 
 type ToggleKey = Exclude<keyof AccessibilityPreferences, "fontLevel">;
 
 // Lista das opções liga/desliga. Para criar uma nova opção:
-// 1. adicione o campo em preferences.ts (tipo, padrão e applyPreferences);
+// 1. adicione o campo em preferences.ts (tipo, padrão, applyPreferences e script inline);
 // 2. adicione aqui;
 // 3. escreva o CSS em globals.css.
 const TOGGLES: { key: ToggleKey; label: string; description: string; Icon: typeof Contrast }[] = [
@@ -44,30 +33,6 @@ const TOGGLES: { key: ToggleKey; label: string; description: string; Icon: typeo
     label: "Alto contraste",
     description: "Fundo escuro com texto claro",
     Icon: Contrast,
-  },
-  {
-    key: "readableFont",
-    label: "Texto legível",
-    description: "Fonte simples e mais espaçamento",
-    Icon: BookOpenText,
-  },
-  {
-    key: "highlightLinks",
-    label: "Destacar links",
-    description: "Sublinha links e botões",
-    Icon: Link,
-  },
-  {
-    key: "reduceMotion",
-    label: "Pausar animações",
-    description: "Para movimentos e o carrossel",
-    Icon: Pause,
-  },
-  {
-    key: "bigCursor",
-    label: "Cursor grande",
-    description: "Aumenta a seta do mouse",
-    Icon: MousePointer2,
   },
 ];
 
@@ -126,7 +91,7 @@ export default function AccessibilityMenu() {
 
   return (
     // fixed + z-[1000]: fica sempre visível, por cima de tudo, no canto
-    // inferior esquerdo (o direito é usado pelo botão do VLibras)
+    // inferior esquerdo
     <div className="fixed bottom-5 left-5 z-[1000] flex flex-col items-start gap-3">
       {open && (
         <div

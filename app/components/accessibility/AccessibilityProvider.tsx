@@ -8,13 +8,11 @@
 // props de pai para filho. Qualquer componente pode fazer:
 //
 //   const { prefs } = useAccessibility();
-//   if (prefs.reduceMotion) { ...não anima... }
+//   if (prefs.highContrast) { ... }
 //
-// (o carrossel da home usa isso para parar de passar sozinho).
 // =============================================================
 
 import { createContext, useContext, useLayoutEffect, useSyncExternalStore } from "react";
-import { MotionConfig } from "framer-motion";
 import {
   AccessibilityPreferences,
   DEFAULT_PREFERENCES,
@@ -89,13 +87,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
 
   return (
     <AccessibilityContext.Provider value={{ prefs, update, reset }}>
-      {/*
-        MotionConfig controla TODAS as animações do framer-motion do site
-        (FadeIn, FadeScroll...). "always" = sem animação de movimento;
-        "user" = segue a configuração do sistema operacional da pessoa
-        (Windows/macOS/celular têm a opção "reduzir movimento").
-      */}
-      <MotionConfig reducedMotion={prefs.reduceMotion ? "always" : "user"}>{children}</MotionConfig>
+      {children}
     </AccessibilityContext.Provider>
   );
 }

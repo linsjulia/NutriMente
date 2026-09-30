@@ -2,7 +2,7 @@
 
 Este guia explica o que foi implementado, como funciona por dentro e as regras que todo componente novo deve seguir.
 
-**Por que isso importa?** No Brasil, cerca de 18,6 milhões de pessoas têm alguma deficiência (IBGE, 2022). A **Lei Brasileira de Inclusão (Lei 13.146/2015, art. 63)** torna a acessibilidade obrigatória em sites, e ela conversa direto com a **ODS 3** do projeto. A referência técnica usada é a **WCAG 2.2**, a diretriz internacional de acessibilidade web.
+**Por que isso importa?** No Brasil, cerca de 18,6 milhões de pessoas têm alguma deficiência (IBGE, 2022). A **Lei Brasileira de Inclusão (Lei 13.146/2015, art. 63)** torna a acessibilidade obrigatória em sites, e ela conversa direto com a **ODS 3** do projeto. A referência técnica usada é a **WCAG 2.2**.
 
 ---
 
@@ -10,30 +10,24 @@ Este guia explica o que foi implementado, como funciona por dentro e as regras q
 
 ### Botão de acessibilidade (canto inferior esquerdo)
 
-Abre com clique ou com o atalho **Alt + A** em qualquer página.
+Abre com clique ou com o atalho **Alt + A** em qualquer página. Nesta fase do projeto, o menu tem o básico:
 
 | Botão | O que faz | Quem ajuda |
 |---|---|---|
 | **Aumentar / Diminuir** | Texto em 100%, 115%, 130% ou 150% | Baixa visão, pessoas idosas |
 | **Alto contraste** | Fundo preto, texto branco, links amarelos | Baixa visão, catarata, telas com reflexo |
-| **Texto legível** | Fonte Atkinson Hyperlegible e mais espaço entre letras, palavras e linhas | Dislexia, baixa visão |
-| **Destacar links** | Sublinha links e contorna botões | Daltonismo, deficiência cognitiva |
-| **Pausar animações** | Para transições, efeitos de entrada e o carrossel | Epilepsia fotossensível, TDAH, labirintite |
-| **Cursor grande** | Seta do mouse de 48px | Baixa visão, dificuldade motora |
-| **Restaurar padrão** | Desliga tudo | — |
+| **Restaurar padrão** | Volta tudo ao normal | — |
 
 As escolhas ficam salvas no navegador e valem para todas as páginas e visitas.
 
-### VLibras (canto direito)
-
-Plugin gratuito do Governo Federal que traduz o texto selecionado para **Libras** com um avatar 3D. Para muitas pessoas surdas, Libras é a primeira língua e o português escrito é a segunda.
-
-### Outros recursos
+### Recursos que não dependem de botão
 
 - **"Pular para o conteúdo principal"**: aparece ao apertar **Tab** pela primeira vez. Leva direto ao conteúdo, sem passar pelo menu inteiro.
 - **Foco visível**: contorno azul em tudo que recebe foco pelo teclado.
-- **Carrossel com botão de pausa** e navegação pelas setas do teclado.
-- **Respeita o sistema operacional**: se a pessoa ativou "reduzir movimento" no Windows, macOS ou celular, as animações já vêm reduzidas.
+- **Carrossel com botão de pausa** (exigência da WCAG 2.2.2) e navegação pelas setas do teclado.
+- **Menos movimento automático**: se a pessoa ativou "reduzir movimento" no Windows, macOS ou celular, as animações CSS são desligadas.
+
+> Opções como fonte para dislexia, cursor grande e tradução para Libras (VLibras) ficaram de fora por enquanto. A estrutura permite adicioná-las depois (ver "Criando uma nova opção").
 
 ---
 
@@ -42,10 +36,9 @@ Plugin gratuito do Governo Federal que traduz o texto selecionado para **Libras*
 ```text
 app/components/accessibility/
 ├── preferences.ts             tipos, padrões, salvar/ler e aplicar no <html>
-├── AccessibilityProvider.tsx  estado compartilhado (Context) + animações do framer-motion
+├── AccessibilityProvider.tsx  estado compartilhado entre os componentes
 ├── AccessibilityMenu.tsx      o botão flutuante e o painel com as opções
-├── SkipLink.tsx               link "Pular para o conteúdo"
-└── VLibras.tsx                plugin de Libras
+└── SkipLink.tsx               link "Pular para o conteúdo"
 ```
 
 ### O caminho de um clique
@@ -77,62 +70,33 @@ O script em `app/layout.tsx` (`INLINE_APPLY_SCRIPT`) roda **antes** da página s
 
 ### Por que `useSyncExternalStore` e não `useState`?
 
-O React compara o HTML do servidor com o que o navegador gera. Se o navegador renderizar de cara com as preferências salvas, os dois HTMLs ficam diferentes e dá **erro de hidratação**. O `useSyncExternalStore` usa o valor padrão durante essa comparação e troca para o valor salvo logo em seguida. Os detalhes estão comentados em `AccessibilityProvider.tsx`.
+O React compara o HTML do servidor com o que o navegador gera. Se o navegador renderizar de cara com as preferências salvas, os dois HTMLs ficam diferentes e dá **erro de hidratação**. O `useSyncExternalStore` usa o valor padrão durante essa comparação e troca para o valor salvo logo em seguida.
 
-### Usando as preferências em um componente
+### Por que o tamanho do texto usa `rem`?
 
-```tsx
-"use client";
-import { useAccessibility } from "@/app/components/accessibility/AccessibilityProvider";
-
-export default function MeuComponente() {
-  const { prefs } = useAccessibility();
-
-  if (prefs.reduceMotion) {
-    // não anime, não toque vídeo automaticamente...
-  }
-}
-```
+O Tailwind usa `rem` (relativo à fonte da tag `<html>`). Aumentando a fonte do `<html>`, tudo o que usa `rem` cresce junto. Valores fixos em `px` (ex.: `text-[18px]`, `w-[600px]`) **não** crescem: prefira as classes padrão (`text-lg`, `max-w-xl`).
 
 ### Criando uma nova opção no menu
 
-1. Em `preferences.ts`: adicione o campo no tipo `AccessibilityPreferences`, no `DEFAULT_PREFERENCES`, no `applyPreferences` **e** no `INLINE_APPLY_SCRIPT`.
+1. Em `preferences.ts`: adicione o campo no tipo, no `DEFAULT_PREFERENCES`, no `loadPreferences`, no `applyPreferences` **e** no `INLINE_APPLY_SCRIPT`.
 2. Em `AccessibilityMenu.tsx`: adicione um item na lista `TOGGLES`.
 3. Em `globals.css`: escreva a regra `html[data-a11y-sua-opcao="..."] { ... }`.
-4. Em `tests/e2e/accessibility.spec.ts`: adicione na lista `toggles` (o teste já é gerado).
+4. Em `tests/e2e/accessibility.spec.ts`: adicione um teste.
 
 ---
 
-## 3. Correções feitas no código existente
-
-| Onde | Problema | Correção |
-|---|---|---|
-| Layout raiz | `lang="en"`: leitor de tela lia o português com pronúncia de inglês | `lang="pt-BR"` |
-| Layout raiz | `/login` e `/register` ficavam sem `<html>`, `<body>` e fontes | `<html>` movido para `app/layout.tsx` |
-| Cadastro de profissional | Label "Telefone" apontava para `id="name"`; CPF era `type="email"` | Cada label aponta para o seu campo; tipos corrigidos |
-| Cadastro de profissional | Escolha Nutricionista/Psicólogo era `<div onClick>`: impossível usar pelo teclado | Virou `<button>` com `aria-pressed` |
-| Botões de gênero | Radios com `display: none`: sumiam do teclado e do leitor de tela | Escondidos só visualmente, com foco visível no rótulo |
-| Botões de gênero | `id="women"` fixo: dois grupos na mesma tela conflitariam | Ids únicos com `useId` e grupo rotulado (`radiogroup`) |
-| Cabeçalho | Menu mobile sem `aria-expanded`; `focus:outline-none` escondia o foco | Atributos ARIA adicionados, foco visível |
-| Cabeçalho | Botão mobile "Cadastre-se" ia para `/cadastro` (página inexistente) | Aponta para `/register` |
-| Carrossel | Passava sozinho sem como pausar (WCAG 2.2.2) | Botão pausar/continuar, teclado e rótulos |
-| Imagens | 12 imagens sem `alt` | `alt` descritivo, ou `alt=""` nas decorativas |
-| Cadastro | `useEffect` com `setState` (erro do lint) e `console.log` esquecido | Limpeza feita no clique; log removido |
-
----
-
-## 4. Checklist para qualquer componente novo
+## 3. Checklist para qualquer componente novo
 
 - [ ] **Imagem**: tem `alt`? Se só enfeita, use `alt=""`. Se informa algo, descreva (`alt="Nutricionista em consulta"`).
-- [ ] **Clicável**: é `<button>` (ação) ou `<a href>` (navegação)? **Nunca** `<div onClick>`.
+- [ ] **Clicável**: é `<button>` (ação) ou `<a href>` / `<Link>` (navegação)? **Nunca** `<div onClick>`.
 - [ ] **Botão só com ícone**: tem `aria-label`? O ícone tem `aria-hidden`?
-- [ ] **Campo de formulário**: tem `<label htmlFor="x">` e o input tem `id="x"`?
+- [ ] **Campo de formulário**: tem `<label htmlFor="x">` e o input tem `id="x"`? Erros ligados ao campo com `aria-describedby`?
 - [ ] **Foco**: nada de `outline: none` / `focus:outline-none` sem outro indicador.
 - [ ] **Teclado**: dá para fazer tudo só com Tab, Enter, Espaço e Esc?
 - [ ] **Cor**: a informação não depende **só** da cor (use também texto ou ícone)?
-- [ ] **Tamanho**: use classes do Tailwind (`text-lg`) em vez de `text-[18px]`, que não cresce com "Aumentar texto".
-- [ ] **Animação**: respeita `prefs.reduceMotion`?
-- [ ] **Página nova**: tem `<main id="conteudo">`?
+- [ ] **Tamanho**: `rem` (classes do Tailwind) em vez de `px` fixo.
+- [ ] **Celular**: funciona em 360px de largura sem rolagem horizontal?
+- [ ] **Página nova**: tem `<main id="conteudo">` e um `<h1>`?
 
 ### Como testar na mão
 

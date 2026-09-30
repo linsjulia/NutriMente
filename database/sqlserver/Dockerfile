@@ -41,10 +41,13 @@ ENV ACCEPT_EULA=Y \
 # Porta padrão do SQL Server
 EXPOSE 1433
 
-# O Docker roda esse comando periodicamente para saber se o banco está de pé.
+# O Docker roda esse comando periodicamente para saber se o banco está PRONTO.
 # O status "healthy" aparece no `docker compose ps` e é usado pelo compose
 # para só ligar a API depois que o banco estiver pronto.
-HEALTHCHECK --interval=10s --timeout=5s --start-period=40s --retries=10 \
-    CMD /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" -b -o /dev/null || exit 1
+# Não basta o servidor responder: na primeira vez os scripts ainda estão
+# criando as tabelas. Por isso entramos com o usuário da APLICAÇÃO e lemos
+# a tabela preenchida pelo último script (03-seed.sql).
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=12 \
+    CMD /opt/mssql-tools18/bin/sqlcmd -S localhost -U "$NUTRIMENTE_DB_USER" -P "$NUTRIMENTE_DB_PASSWORD" -C -d NutriMente -Q "SELECT TOP 1 1 FROM specialties" -b -o /dev/null || exit 1
 
 ENTRYPOINT ["/usr/src/nutrimente/entrypoint.sh"]

@@ -1,5 +1,7 @@
 # NutriMente - infraestrutura local
-#   SQL Server  -> dados da aplicação (API Java / Spring Boot)
+#   SQL Server  -> dados da aplicação
+#   api         -> API REST em Java (Spring Boot), porta 8080
+#   mailpit     -> caixa de e-mails de teste, http://localhost:8025
 #   MongoDB     -> logs (aplicação, acesso e auditoria LGPD)
 #   logs-service-> serviço Node.js que grava/consulta os logs no MongoDB
 #
@@ -79,22 +81,44 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Quando a API Java (Spring Boot) existir, descomente e aponte o build:
-  # api:
-  #   build: ./backend
-  #   environment:
-  #     SPRING_DATASOURCE_URL: jdbc:sqlserver://sqlserver:1433;databaseName=NutriMente;encrypt=true;trustServerCertificate=true
-  #     SPRING_DATASOURCE_USERNAME: ${NUTRIMENTE_DB_USER}
-  #     SPRING_DATASOURCE_PASSWORD: ${NUTRIMENTE_DB_PASSWORD}
-  #     LOGS_SERVICE_URL: http://logs-service:4000
-  #     LOGS_API_KEY: ${LOGS_API_KEY}
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     sqlserver:
-  #       condition: service_healthy
-  #     logs-service:
-  #       condition: service_healthy
+  # "Carteiro falso" para desenvolvimento: recebe TODOS os e-mails da API
+  # (confirmação de cadastro, redefinição de senha) e mostra numa página:
+  # http://localhost:8025. Nenhum e-mail sai de verdade.
+  mailpit:
+    image: axllent/mailpit:v1.27
+    container_name: nutrimente-mailpit
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"   # página web
+      - "${MAILPIT_SMTP_PORT:-1025}:1025" # SMTP (por onde a API envia)
+    restart: unless-stopped
+
+  # API REST em Java (Spring Boot): cadastro, login, perfis e permissões
+  api:
+    build: ./backend
+    container_name: nutrimente-api
+    environment:
+      DB_HOST: sqlserver
+      NUTRIMENTE_DB_USER: ${NUTRIMENTE_DB_USER}
+      NUTRIMENTE_DB_PASSWORD: ${NUTRIMENTE_DB_PASSWORD}
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+      LOGS_SERVICE_URL: http://logs-service:4000
+      LOGS_API_KEY: ${LOGS_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    # Só liga depois que o banco (com as tabelas) e o serviço de logs estiverem prontos
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      logs-service:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    restart: unless-stopped
 
 # Declaração dos volumes persistentes usados acima
 volumes:

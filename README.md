@@ -142,12 +142,147 @@ Utilizado como servidor e suporte à arquitetura da aplicação.
 ### Banco de dados
 
 <p>
+  <img src="https://img.shields.io/badge/SQL_Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white"/>
   <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
 </p>
+
+**SQL Server**
+
+Banco relacional com os dados da plataforma: usuários, consultas, planos de ação, chat e financeiro.
 
 **MongoDB**
 
-Banco de dados não relacional utilizado para armazenamento das informações da plataforma.
+Banco não relacional usado para os logs: aplicação, acessos e trilha de auditoria da LGPD.
+
+**Docker**
+
+Sobe os bancos com um único comando, sem instalar nada além do Docker. Detalhes em [database/README.md](database/README.md).
+
+---
+
+# 🚀 Instalação e execução
+
+### 1. Pré-requisitos
+
+Instale uma vez no seu computador:
+
+| Ferramenta | Versão | Para quê | Download |
+|---|---|---|---|
+| Git | qualquer recente | Baixar o código | https://git-scm.com/downloads |
+| Node.js | 20 ou superior (LTS) | Rodar o front-end | https://nodejs.org |
+| Docker Desktop | qualquer recente | Rodar SQL Server e MongoDB | https://www.docker.com/products/docker-desktop/ |
+
+Para conferir se deu certo, abra um terminal e rode:
+
+```bash
+git --version
+node --version
+docker --version
+```
+
+Cada comando deve mostrar um número de versão. No Windows, o Docker Desktop pode pedir para ativar o **WSL 2**: aceite e reinicie o computador.
+
+### 2. Baixar o projeto
+
+```bash
+git clone https://github.com/linsjulia/NutriMentee.git
+cd NutriMentee
+```
+
+### 3. Configurar as variáveis de ambiente
+
+Copie o arquivo de exemplo para criar o seu `.env`:
+
+```bash
+# Linux, macOS ou Git Bash
+cp .env.example .env
+
+# Windows (PowerShell)
+Copy-Item .env.example .env
+```
+
+Abra o `.env` e troque as senhas. A senha do SQL Server precisa ter **8 ou mais caracteres, com maiúscula, minúscula, número e símbolo**; se não tiver, o banco não liga.
+
+> 🔐 O `.env` guarda senhas e **nunca** deve ser enviado ao GitHub. Ele já está no `.gitignore`.
+
+### 4. Subir os bancos de dados
+
+Com o **Docker Desktop aberto**, rode na pasta do projeto:
+
+```bash
+docker compose up -d --build
+```
+
+Na primeira vez ele baixa as imagens (alguns minutos). Depois, confira se está tudo no ar:
+
+```bash
+docker compose ps
+```
+
+Os dois serviços (`nutrimente-sqlserver` e `nutrimente-mongodb`) devem aparecer como **healthy**. O SQL Server leva uns 30 segundos para ficar pronto.
+
+O banco, as tabelas e os dados iniciais são criados automaticamente. Para ver o andamento:
+
+```bash
+docker compose logs -f sqlserver
+```
+
+Quando aparecer `Banco de dados criado com sucesso`, está pronto. Aperte `Ctrl + C` para sair dos logs (os containers continuam rodando).
+
+### 5. Rodar o front-end
+
+```bash
+npm install
+npm run dev
+```
+
+Acesse http://localhost:3000 no navegador.
+
+### 6. Endereços locais
+
+| Serviço | Endereço |
+|---|---|
+| Front-end (Next.js) | http://localhost:3000 |
+| SQL Server | `localhost,1433` |
+| MongoDB | `mongodb://localhost:27017` |
+
+### Comandos do dia a dia
+
+| Comando | O que faz |
+|---|---|
+| `npm run dev` | Roda o front-end em modo de desenvolvimento |
+| `npm run build` e `npm start` | Gera e roda a versão de produção do front |
+| `npm run lint` | Procura problemas no código |
+| `docker compose up -d` | Liga os bancos |
+| `docker compose down` | Desliga os bancos (os dados continuam salvos) |
+| `docker compose down -v` | Desliga e **apaga** os dados; na próxima subida tudo é recriado do zero |
+| `cd database/tests && npm test` | Roda os testes de integração dos bancos (containers ligados; `npm install` na 1ª vez) |
+
+### Problemas comuns
+
+| Sintoma | Solução |
+|---|---|
+| `error during connect` ou `cannot find the file specified` | O Docker Desktop não está aberto. Abra e espere o ícone ficar verde. |
+| `port is already allocated` | A porta já está em uso (ex.: um SQL Server instalado no PC). Mude `MSSQL_PORT` ou `MONGO_PORT` no `.env`. |
+| `nutrimente-sqlserver` reiniciando sem parar | A senha `MSSQL_SA_PASSWORD` é fraca. Troque no `.env` e rode `docker compose down -v` e depois `docker compose up -d --build`. |
+| Alterei um script `.sql` e nada mudou | Os scripts só rodam na criação do banco. Rode `docker compose down -v` e suba de novo (apaga os dados locais). |
+
+### Fluxo de contribuição
+
+Nunca envie alterações direto para a `main`. Crie uma branch para cada mudança:
+
+```bash
+git switch main
+git pull
+git switch -c feature/nome-da-funcionalidade   # ou fix/nome-do-bug
+# ... faça as alterações ...
+git add .
+git commit -m "feat: descreve a mudança"
+git push -u origin feature/nome-da-funcionalidade
+```
+
+Depois abra um **Pull Request** no GitHub para a equipe revisar antes de juntar na `main`.
 
 ---
 

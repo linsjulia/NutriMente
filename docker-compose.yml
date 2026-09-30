@@ -1,0 +1,80 @@
+# NutriMente - infraestrutura local
+#   SQL Server  -> dados da aplicação (API Java / Spring Boot)
+#   MongoDB     -> logs (aplicação, acesso e auditoria LGPD)
+#
+# O docker compose sobe vários containers juntos, já ligados numa rede
+# interna: dentro dela um serviço acessa o outro pelo NOME (ex.: a API
+# conecta em "sqlserver:1433", não em localhost).
+#
+# Comandos úteis:
+#   docker compose up -d --build   liga tudo (recompila imagens se mudaram)
+#   docker compose ps              mostra status (healthy = saudável)
+#   docker compose logs -f sqlserver   acompanha os logs de um serviço
+#   docker compose down            desliga (os DADOS são mantidos)
+#   docker compose down -v         desliga e APAGA os dados (recria do zero)
+#
+# Os valores ${...} vêm do arquivo .env (copie de .env.example).
+# ${VAR:-padrao} usa "padrao" se a variável não existir.
+
+name: nutrimente
+
+services:
+  # Banco principal. build = usa o Dockerfile da pasta indicada
+  sqlserver:
+    build: ./database/sqlserver
+    container_name: nutrimente-sqlserver
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      NUTRIMENTE_DB_USER: ${NUTRIMENTE_DB_USER}
+      NUTRIMENTE_DB_PASSWORD: ${NUTRIMENTE_DB_PASSWORD}
+    # "porta_no_seu_pc:porta_no_container" -> conecte pelo Azure Data Studio,
+    # DBeaver ou SSMS em localhost,1433
+    ports:
+      - "${MSSQL_PORT:-1433}:1433"
+    # Volume = pasta persistente gerenciada pelo Docker. Sem ele, os dados
+    # sumiriam ao recriar o container.
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    restart: unless-stopped
+
+  # Banco de logs. Usa a imagem oficial pronta (não precisa de Dockerfile)
+  mongodb:
+    image: mongo:8.0
+    container_name: nutrimente-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_LOGS_DB: ${MONGO_LOGS_DB:-nutrimente_logs}
+      MONGO_APP_USER: ${MONGO_APP_USER}
+      MONGO_APP_PASSWORD: ${MONGO_APP_PASSWORD}
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongodb-data:/data/db
+      # Monta nossa pasta de scripts dentro do container (ro = somente leitura).
+      # O Mongo executa esses scripts na primeira inicialização.
+      - ./database/mongodb/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # Quando a API Java (Spring Boot) existir, descomente e aponte o build:
+  # api:
+  #   build: ./backend
+  #   environment:
+  #     SPRING_DATASOURCE_URL: jdbc:sqlserver://sqlserver:1433;databaseName=NutriMente;encrypt=true;trustServerCertificate=true
+  #     SPRING_DATASOURCE_USERNAME: ${NUTRIMENTE_DB_USER}
+  #     SPRING_DATASOURCE_PASSWORD: ${NUTRIMENTE_DB_PASSWORD}
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     sqlserver:
+  #       condition: service_healthy
+
+# Declaração dos volumes persistentes usados acima
+volumes:
+  sqlserver-data:
+  mongodb-data:

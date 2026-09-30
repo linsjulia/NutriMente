@@ -261,6 +261,7 @@ Acesse http://localhost:3000 no navegador.
 - **Administrador**: entre com `ADMIN_EMAIL` e `ADMIN_PASSWORD` do `.env`. Ele aprova os profissionais.
 - **Cadastro**: os e-mails de confirmação não vão para a sua caixa de entrada; abra o **Mailpit** (http://localhost:8025) e clique no link.
 - As rotas da API e as regras de cada papel estão em [backend/README.md](backend/README.md).
+- O mapa de papéis e fluxos (paciente, profissional, admin) está em `docs/PAPEIS-E-FLUXOS.md` (branch do front).
 
 ### Comandos do dia a dia
 
@@ -274,6 +275,7 @@ Acesse http://localhost:3000 no navegador.
 | `docker compose down -v` | Desliga e **apaga** os dados; na próxima subida tudo é recriado do zero |
 | `cd database/tests && npm test` | Roda os testes de integração dos bancos (containers ligados; `npm install` na 1ª vez) |
 | `cd services/logs-service && npm test` | Roda os testes de integração do serviço de logs (containers ligados; `npm install` na 1ª vez) |
+| `npm run test:e2e` | Testes do front no navegador: fluxos completos (precisa do `docker compose` no ar) e auditoria de acessibilidade. Na 1ª vez: `npx playwright install chromium` |
 | `docker compose logs -f api` | Acompanha os logs da API Java |
 | `docker compose up -d --build api` | Recompila e reinicia a API depois de mudar o código Java |
 

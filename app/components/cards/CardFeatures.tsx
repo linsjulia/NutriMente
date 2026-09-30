@@ -16,16 +16,16 @@ export default function CardFeatures({titulo, descricao, corFundo, corIcon = 'br
         <div>
             <div className={`cards-landing2 ${corFundo == 'azul' ? 'bg-blue-100' : 'bg-white'} shadow-lg shadow-blue-900/5 flex-1 transition duration-300 hover:-translate-y-1`}>
                 <div className={`${corIcon} rounded-lg p-5`}>
-                    {Icone && <Icone size={60}/>}    
+                    {Icone && <Icone size={60}/>}
                 </div>
 
                 <div>
                     <div className="flex flex-row gap-5 items-center text-[18px]">
 
-                        <h1 className="text-center font-bold">{titulo}</h1>
+                        <h3 className="font-bold">{titulo}</h3>
                     </div>
                     <div>
-                        <h2 className='text-gray-600'>{descricao}</h2>
+                        <p className='text-gray-600'>{descricao}</p>
                     </div>
                 </div>
             </div>

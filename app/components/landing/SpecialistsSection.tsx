@@ -5,22 +5,22 @@ export default function SpecialistsSection() {
   return (
     <div>
       <FadeScroll>
-              <section className="min-h-screen">
-                
+              <section>
+
                   <img src="/background/rectangle.svg" alt="" className="w-full" />
-                  <div className="p-30 min-h-screen">
-                    <h1 className="font-fraunces font-medium text-4xl text-center">
+                  <div className="px-4 py-16 sm:px-8 md:py-24">
+                    <h2 className="font-fraunces font-medium text-3xl sm:text-4xl text-center">
                       Conheça alguns de nossos especialistas
-                    </h1>
-                    
-                    <h2 className="text-center text-base m-5">
+                    </h2>
+
+                    <p className="mx-auto mt-4 max-w-2xl text-center">
                       Junte-se a centenas de pacientes que já encontram psicólogos e
                       nutricionistas qualificados no NutriMente.
                       <br/>Escolha seu especialista
                       e dê o primeiro passo hoje.
-                    </h2>
-          
-                    <div className="flex flex-row gap-20 m-30 items-center justify-center">
+                    </p>
+
+                    <div className="my-12 flex flex-col items-center gap-8 lg:flex-row lg:items-stretch lg:justify-center">
                       <ProfessionalCards
                         titulo="Dr. Lucas Fernandes"
                         tipoProfissional="Nutricionista"
@@ -30,7 +30,7 @@ export default function SpecialistsSection() {
                         segundaCategoria="Nutrição comportamental e alimentação consciente"
                         img="/doctor/pfp.png"
                       />
-          
+
                       <ProfessionalCards
                         titulo="Dra. Fernanda Lima"
                         tipoProfissional="Psicóloga"
@@ -40,7 +40,7 @@ export default function SpecialistsSection() {
                         segundaCategoria="Regulação emocional e manejo de sintomas ansiosos"
                         img="/doctor/pfp2.png"
                       />
-          
+
                       <ProfessionalCards
                         titulo="Dra. Mariana Souza"
                         tipoProfissional="Psicóloga"
@@ -56,7 +56,7 @@ export default function SpecialistsSection() {
                   <img src="/icons/caring-mental.png" alt="" className="w-17 object-contain h-fit" />
                 </div>
                   </div>
-                  
+
 
               </section>
             </FadeScroll>

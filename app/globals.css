@@ -50,7 +50,7 @@
   --color-green3: #00ff6a;
   --font-open-sans: var(--font-open-sans);
   --font-fraunces: var(--font-fraunces);
-  --shadow-3xl: 0 0 100px rgba(0, 0, 0, 0.10); 
+  --shadow-3xl: 0 0 100px rgba(0, 0, 0, 0.10);
 }
 
 @theme inline {
@@ -173,10 +173,11 @@ body {
   align-items: center;
   padding: 20px;
   /* border-image: linear-gradient(90deg, #00DD5C, #7188FF) 1; */
-  border-radius: 20px; 
-  margin: 10px;
-  gap: 7%;
-  width: 600px;
+  border-radius: 20px;
+  gap: 1.25rem;
+  /* era width: 600px -> estourava a tela no celular */
+  width: 100%;
+  max-width: 37.5rem;
   font-size: 16px;
 
 }
@@ -277,7 +278,7 @@ body {
 .input-gender label {
   padding: 8px 16px;
   border-radius: 7px;
-  font-size: 14px;  
+  font-size: 14px;
   cursor: pointer;
   border: 1px solid transparent;
   background-color: rgb(211, 231, 255);
@@ -300,14 +301,14 @@ body {
 }
 
 .input-type-professional input {
-  display: none; 
-  
+  display: none;
+
 }
 
 .input-type-professional label {
   padding: 8px 16px;
   border-radius: 7px;
-  font-size: 14px;  
+  font-size: 14px;
   cursor: pointer;
   border: 1px solid transparent;
   background-color: white;
@@ -478,7 +479,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 0; 
+  padding: 12px 0;
   color: white;
   font-size: 18px;
   opacity: 0;
@@ -550,6 +551,181 @@ body {
   display: block;
 }
 
+
+/* Bolinhas do carrossel: 14px com 6px de cada lado = alvos de toque de pelo
+   menos 24px entre si (WCAG 2.5.8). O padrão do Swiper (8px) era pequeno demais. */
+.swiper {
+  --swiper-pagination-bullet-size: 14px;
+  --swiper-pagination-bullet-horizontal-gap: 6px;
+  --swiper-pagination-color: var(--color-blue1);
+}
+
+/* =============================================================
+   COMPONENTES DAS TELAS DE CONTA (login, cadastro, área logada)
+   Classes reaproveitadas para manter o mesmo visual em todas as telas.
+   Tamanhos em rem: crescem junto com "Aumentar texto".
+   ============================================================= */
+
+/* Campo de texto. min-height 3rem = alvo de toque confortável no celular */
+.form-input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid #9ca3af;
+  border-radius: 0.75rem;
+  background: #fff;
+  font-size: 1rem;
+}
+.form-input:focus-visible {
+  border-color: var(--color-blue1);
+  outline-offset: 1px;
+}
+.form-input[aria-invalid="true"] {
+  border-color: #b91c1c;
+}
+
+/* Botões */
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+.btn-primary {
+  background: var(--color-blue1);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #003a88;
+}
+.btn-secondary {
+  border: 2px solid var(--color-blue1);
+  color: var(--color-blue1);
+  background: #fff;
+}
+.btn-danger {
+  background: #b91c1c;
+  color: #fff;
+}
+.btn-primary:disabled,
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Opções em formato de "pílula" (gênero). O radio fica escondido (sr-only)
+   e o label vira o botão; peer-checked/peer-focus-visible do Tailwind não
+   alcançam labels irmãos com id, então usamos o seletor + do CSS */
+.chip {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 2px solid transparent;
+  border-radius: 0.5rem;
+  background: #d3e7ff;
+  cursor: pointer;
+}
+input:checked + .chip {
+  background: var(--color-blue1);
+  color: #fff;
+}
+input:focus-visible + .chip,
+input:focus-visible + .profession-card {
+  outline: 3px solid var(--color-blue1);
+  outline-offset: 2px;
+}
+
+/* Links de filtro (abas) */
+.chip-link {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--color-blue1);
+  border-radius: 999px;
+  font-weight: 600;
+  color: var(--color-blue1);
+}
+.chip-link-active {
+  background: var(--color-blue1);
+  color: #fff;
+}
+
+/* Cartão de escolha da profissão no cadastro */
+.profession-card {
+  display: block;
+  overflow: hidden;
+  border: 3px solid #d1d5db;
+  border-radius: 1rem;
+  cursor: pointer;
+}
+input:checked + .profession-card {
+  border-color: #16a34a;
+}
+
+/* Caixa branca padrão */
+.card {
+  padding: 1.25rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  background: #fff;
+}
+@media (min-width: 640px) {
+  .card {
+    padding: 1.75rem;
+  }
+}
+
+/* Situação do cadastro do profissional */
+.status-box {
+  padding: 1.25rem;
+  border-left: 6px solid;
+  border-radius: 0.75rem;
+}
+.status-pending {
+  border-color: #d97706;
+  background: #fffbeb;
+}
+.status-approved {
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+.status-rejected {
+  border-color: #b91c1c;
+  background: #fef2f2;
+}
+
+/* Páginas de texto (termos, privacidade, sobre) */
+.prose-page {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 4rem;
+  line-height: 1.7;
+}
+.prose-page h1 {
+  font-family: var(--font-fraunces);
+  font-size: 2.25rem;
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+.prose-page h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 2rem 0 0.5rem;
+}
+.prose-page ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+.prose-page p {
+  margin: 0.75rem 0;
+}
 
 /* =============================================================
    ACESSIBILIDADE
@@ -639,6 +815,17 @@ html[data-a11y-contrast="high"] .a11y-option[aria-pressed="true"],
 html[data-a11y-contrast="high"] .a11y-option[aria-pressed="true"] * {
   background-color: #ff0 !important;
   color: #000 !important;
+}
+/* Opção marcada precisa continuar visível sem as cores do tema */
+html[data-a11y-contrast="high"] input:checked + .chip,
+html[data-a11y-contrast="high"] input:checked + .chip *,
+html[data-a11y-contrast="high"] .chip-link-active,
+html[data-a11y-contrast="high"] [aria-current="page"] {
+  background-color: #ff0 !important;
+  color: #000 !important;
+}
+html[data-a11y-contrast="high"] input:checked + .profession-card {
+  border: 4px solid #ff0 !important;
 }
 html[data-a11y-contrast="high"] ::placeholder {
   color: #ccc !important;

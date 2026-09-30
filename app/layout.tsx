@@ -55,7 +55,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         */}
         <script dangerouslySetInnerHTML={{ __html: INLINE_APPLY_SCRIPT }} />
       </head>
-      <body className="min-h-full flex flex-col text-blue2 font-open-sans">
+      {/* pb-20: espaço para o botão flutuante de acessibilidade não cobrir o fim da página */}
+      <body className="min-h-full flex flex-col pb-20 text-blue2 font-open-sans sm:pb-0">
         <AccessibilityProvider>
           {/* Primeiros itens do Tab: pular conteúdo e menu de acessibilidade */}
           <SkipLink />

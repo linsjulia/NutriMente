@@ -92,7 +92,7 @@ export default function AccessibilityMenu() {
   return (
     // fixed + z-[1000]: fica sempre visível, por cima de tudo, no canto
     // inferior esquerdo
-    <div className="fixed bottom-5 left-5 z-[1000] flex flex-col items-start gap-3">
+    <div className="fixed bottom-3 left-3 z-[1000] sm:bottom-5 sm:left-5 flex flex-col items-start gap-3">
       {open && (
         <div
           ref={panelRef}
@@ -188,9 +188,9 @@ export default function AccessibilityMenu() {
         aria-controls={open ? panelId : undefined}
         aria-label="Menu de acessibilidade"
         title="Acessibilidade (Alt + A)"
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-blue1 text-white shadow-lg transition hover:scale-105"
+        className="flex h-12 w-12 items-center justify-center rounded-full bg-blue1 text-white shadow-lg transition hover:scale-105 sm:h-14 sm:w-14"
       >
-        <Accessibility aria-hidden size={30} />
+        <Accessibility aria-hidden size={28} />
       </button>
 
       {/* Região viva: o leitor de tela lê o texto sempre que ele muda */}

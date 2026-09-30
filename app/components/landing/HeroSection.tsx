@@ -1,4 +1,3 @@
-"use client";
 
 import FadeScroll from "../fade-effect/FadeScroll";
 import CarouselHeroSection from "../CarouselHeroSection";
@@ -29,7 +28,7 @@ export default function Hero() {
               </h2>
             </div>
 
-            <Button href="/login" />
+            <Button href="/register/patient" />
 
             <div className="flex flex-col gap-4 font-bold sm:flex-row sm:flex-wrap sm:gap-8">
               <div className="flex items-center gap-2">

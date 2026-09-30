@@ -26,7 +26,7 @@ export default function GettingStartedSection() {
     <FadeScroll>
       <section className="bg-[#f7fffc] min-h-screen px-6 py-20 sm:px-10 lg:px-20 lg:pt-50">
         <div className="mx-auto flex max-w-7xl flex-col items-center">
-          <span className="mb-3 text-[18px] font-bold uppercase tracking-[0.25em] text-green-500">
+          <span className="mb-3 text-lg font-bold uppercase tracking-[0.25em] text-green-700">
             É simples começar
           </span>
 

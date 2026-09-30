@@ -1,48 +1,48 @@
+import Link from "next/link";
 import CategoryBadge from "../badge/CategoryBagde";
 
-interface Props{
-    titulo: string
-    tipoProfissional: string;
-    documento: string;
-    descricao: string
-    categoria: string
-    segundaCategoria: string
-    img: string
+interface Props {
+  titulo: string;
+  tipoProfissional: string;
+  documento: string;
+  descricao: string;
+  categoria: string;
+  segundaCategoria: string;
+  img: string;
 }
 
-export default function CardProfi({titulo, tipoProfissional, documento, descricao, categoria, segundaCategoria, img} : Props){
-    return(
+// Card de exemplo da landing page.
+// Largura: w-full + max-w-105 (420px) -> no celular ocupa a tela, no
+// desktop para em 420px. Sem altura fixa, para o texto nunca ser cortado
+// quando a pessoa aumenta a fonte no menu de acessibilidade.
+export default function CardProfi({ titulo, tipoProfissional, documento, descricao, categoria, segundaCategoria, img }: Props) {
+  return (
+    <article className="flex w-full max-w-105 flex-col gap-4 rounded-2xl border border-gray-400 p-6 shadow-xl sm:p-8">
+      <div className="my-4 flex items-center justify-center gap-6">
+        <img src={img} alt={`Foto de ${titulo}`} className="w-20 rounded-full bg-green-700" />
         <div>
-            <div className="flex flex-col w-105 h-150.5 border border-gray-400 rounded-2xl gap-4 p-8 shadow-xl ">
-                <div className="flex items-center justify-center my-4 gap-10">
-                    <img src={img} alt={`Foto de ${titulo}`} className="rounded-full bg-green-700 w-20 justify-center"/>
-                    <div>
-                        <h1 className="font-semibold font-fraunces text-[18px] text-center">{titulo}</h1>
-                        <p>{tipoProfissional}</p>
-                        <p>{documento}</p>
-                    </div>
-                </div>
-
-                    <div className="mt-4 h-37.5">
-                        <h2>{descricao}</h2>
-                    </div>
-
-                <div className="flex flex-col gap-5">
-                    <CategoryBadge
-                    categoria={categoria}
-                    />
-
-                    <CategoryBadge
-                    categoria={segundaCategoria}
-                    />
-
-                </div>
-
-                <div className="flex gap-5">
-                    <button className="border border-gray-300 rounded-[8px] p-2 cursor-pointer transition duration-300 hover:-translate-y-0.5">Ver perfil</button>
-                    <button className="border border-gray-300 rounded-[8px] p-2 cursor-pointer transition duration-300 hover:-translate-y-0.5">Agendar</button>
-                </div>
-            </div>
+          <h3 className="font-fraunces text-lg font-semibold">{titulo}</h3>
+          <p>{tipoProfissional}</p>
+          <p>{documento}</p>
         </div>
-    )
+      </div>
+
+      <p className="flex-1">{descricao}</p>
+
+      <div className="flex flex-col gap-3">
+        <CategoryBadge categoria={categoria} />
+        <CategoryBadge categoria={segundaCategoria} />
+      </div>
+
+      {/* Antes eram <button> sem ação; agora levam a páginas reais */}
+      <div className="flex flex-wrap gap-3">
+        <Link href="/professionals" className="rounded-lg border border-gray-300 p-2 transition duration-300 hover:-translate-y-0.5">
+          Ver profissionais
+        </Link>
+        <Link href="/register/patient" className="rounded-lg border border-gray-300 p-2 transition duration-300 hover:-translate-y-0.5">
+          Agendar
+        </Link>
+      </div>
+    </article>
+  );
 }

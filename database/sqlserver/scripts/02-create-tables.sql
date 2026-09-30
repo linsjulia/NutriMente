@@ -68,19 +68,23 @@ CREATE TABLE users (
     telephone       VARCHAR(20)    NULL,
     cpf             CHAR(11)       NULL,          -- somente dígitos
     birth_date      DATE           NULL,
-    gender          VARCHAR(10)    NULL,          -- opções do GenderButton.tsx
+    gender          VARCHAR(12)    NULL,          -- opcional (LGPD: só coletamos se a pessoa quiser)
     photo_url       NVARCHAR(500)  NULL,
     role            VARCHAR(20)    NOT NULL,      -- tipo de conta: define o que a pessoa pode acessar
     is_active       BIT            NOT NULL CONSTRAINT df_users_is_active DEFAULT 1,
     email_verified  BIT            NOT NULL CONSTRAINT df_users_email_verified DEFAULT 0,
     last_login_at   DATETIME2(0)   NULL,
+    -- Proteção contra força bruta: após 5 senhas erradas seguidas a conta
+    -- fica bloqueada por 15 minutos (regra aplicada pela API Java)
+    failed_login_attempts TINYINT  NOT NULL CONSTRAINT df_users_failed_logins DEFAULT 0,
+    locked_until    DATETIME2(0)   NULL,
     created_at      DATETIME2(0)   NOT NULL CONSTRAINT df_users_created_at DEFAULT SYSUTCDATETIME(),
     updated_at      DATETIME2(0)   NOT NULL CONSTRAINT df_users_updated_at DEFAULT SYSUTCDATETIME(),
     deleted_at      DATETIME2(0)   NULL,          -- exclusão lógica (LGPD: anonimização posterior)
 
     CONSTRAINT uq_users_email  UNIQUE (email),
     CONSTRAINT ck_users_role   CHECK (role IN ('PATIENT', 'PROFESSIONAL', 'ADMIN')),
-    CONSTRAINT ck_users_gender CHECK (gender IN ('WOMEN', 'MEN')),
+    CONSTRAINT ck_users_gender CHECK (gender IN ('FEMALE', 'MALE', 'OTHER', 'UNDISCLOSED')),
     CONSTRAINT ck_users_cpf    CHECK (cpf NOT LIKE '%[^0-9]%' AND LEN(cpf) = 11)
 );
 -- Índice único FILTRADO: CPF não pode repetir, mas vários usuários podem
@@ -180,21 +184,27 @@ GO
 -- Autenticação e LGPD
 -- -------------------------------------------------------------
 
--- Fluxo "Esqueceu sua senha?" da tela de login.
--- Guardamos só o HASH do token: se o banco vazar, o link do e-mail não
--- pode ser reaproveitado. O token expira (expires_at) e é de uso único (used_at).
-CREATE TABLE password_reset_tokens (
+-- Tokens enviados por e-mail, usados em dois fluxos:
+--   EMAIL_VERIFICATION -> link "Confirme seu e-mail" após o cadastro (24h)
+--   PASSWORD_RESET     -> link "Esqueceu sua senha?" da tela de login (1h)
+-- Guardamos só o HASH (SHA-256) do token: se o banco vazar, os links dos
+-- e-mails não podem ser reaproveitados. O token expira (expires_at) e é de
+-- uso único (used_at).
+CREATE TABLE user_tokens (
     id          BIGINT IDENTITY(1,1) PRIMARY KEY,
     user_id     BIGINT        NOT NULL,
-    token_hash  CHAR(64)      NOT NULL,          -- SHA-256 do token enviado por e-mail
+    purpose     VARCHAR(20)   NOT NULL,
+    token_hash  CHAR(64)      NOT NULL,
     expires_at  DATETIME2(0)  NOT NULL,
     used_at     DATETIME2(0)  NULL,
-    created_at  DATETIME2(0)  NOT NULL CONSTRAINT df_pwd_reset_created_at DEFAULT SYSUTCDATETIME(),
+    created_at  DATETIME2(0)  NOT NULL CONSTRAINT df_user_tokens_created_at DEFAULT SYSUTCDATETIME(),
 
-    CONSTRAINT fk_pwd_reset_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-    CONSTRAINT uq_pwd_reset_token UNIQUE (token_hash)
+    CONSTRAINT fk_user_tokens_user    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT uq_user_tokens_hash    UNIQUE (token_hash),
+    CONSTRAINT ck_user_tokens_purpose CHECK (purpose IN ('EMAIL_VERIFICATION', 'PASSWORD_RESET'))
 );
-CREATE INDEX ix_pwd_reset_user ON password_reset_tokens (user_id);
+-- Busca dos tokens ainda válidos de um usuário (para invalidar os antigos)
+CREATE INDEX ix_user_tokens_user ON user_tokens (user_id, purpose) WHERE used_at IS NULL;
 GO
 
 -- Registro dos aceites da LGPD (Lei 13.709/2018). Dados de saúde são

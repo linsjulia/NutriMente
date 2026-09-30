@@ -235,3 +235,27 @@ test("ROWVERSION da carteira muda a cada alteração (controle de concorrência)
     await query(`UPDATE wallets SET balance = 20 WHERE user_id = ${patient}`);
     assert.notDeepEqual(await version(), before);
   }));
+
+test("token de e-mail é único e só aceita as finalidades conhecidas", () =>
+  inTransaction(async (query) => {
+    const { patient } = await createPatientAndProfessional(query);
+    const hash = "a".repeat(64);
+    const insert = (purpose) =>
+      query(`INSERT INTO user_tokens (user_id, purpose, token_hash, expires_at)
+             VALUES (${patient}, '${purpose}', '${hash}', DATEADD(HOUR, 24, SYSUTCDATETIME()))`);
+    await assertFails(insert("QUALQUER"), /ck_user_tokens_purpose/);
+    await insert("EMAIL_VERIFICATION");
+    await assertFails(insert("PASSWORD_RESET"), /uq_user_tokens_hash/);
+  }));
+
+test("gênero é opcional e aceita só as opções do formulário", () =>
+  inTransaction(async (query) => {
+    await query(`INSERT INTO users (name, email, role, gender) VALUES
+      (N'A', 'g1@teste.local', 'PATIENT', 'FEMALE'),
+      (N'B', 'g2@teste.local', 'PATIENT', 'UNDISCLOSED'),
+      (N'C', 'g3@teste.local', 'PATIENT', NULL)`);
+    await assertFails(
+      query("INSERT INTO users (name, email, role, gender) VALUES (N'D', 'g4@teste.local', 'PATIENT', 'X')"),
+      /ck_users_gender/
+    );
+  }));

@@ -87,7 +87,7 @@ erDiagram
     users ||--o| patients : "é"
     users ||--o| professionals : "é"
     users ||--o{ lgpd_consents : aceita
-    users ||--o{ password_reset_tokens : solicita
+    users ||--o{ user_tokens : recebe
     users ||--o{ notifications : recebe
     users ||--o| wallets : possui
     professionals ||--o{ professional_documents : envia
@@ -117,7 +117,7 @@ Como ler: `||--o{` significa "um para muitos" (um paciente tem várias consultas
 | Grupo | Tabelas | Funcionalidade do README principal |
 |---|---|---|
 | Usuários | `users`, `patients`, `professionals`, `professional_documents`, `specialties`, `professional_specialties` | Cadastro, perfis, verificação, busca por especialidade/preço |
-| Autenticação/LGPD | `password_reset_tokens`, `lgpd_consents` | Esqueci a senha, consentimentos |
+| Autenticação/LGPD | `user_tokens`, `lgpd_consents` | Confirmação de e-mail, esqueci a senha, consentimentos |
 | Agenda | `professional_availability`, `appointments`, `reviews` | Agendamento, horários, avaliações |
 | Plano de ação | `action_plans`, `plan_goals`, `meal_routines`, `checklist_items`, `checklist_entries`, `progress_records` | Planos, metas, rotinas, checklists, progresso |
 | Comunicação | `conversations`, `messages`, `notifications` | Chat e notificações |

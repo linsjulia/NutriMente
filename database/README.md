@@ -9,14 +9,16 @@ Guia para rodar e entender a infraestrutura de dados do projeto. Não é preciso
       │  HTTP
       ▼
  API Java (Spring Boot) ──────────► SQL Server  (dados: usuários, consultas, planos...)
-      │
-      └───────────────────────────► MongoDB     (logs: aplicação, acesso, auditoria LGPD)
+      │  HTTP (x-api-key)
+      ▼
+ logs-service (Node.js) ──────────► MongoDB     (logs: aplicação, acesso, auditoria LGPD)
 ```
 
 | Peça | Tecnologia | Para quê |
 |---|---|---|
 | `database/sqlserver` | SQL Server 2022 | Dados principais, relacionais, com regras de integridade |
 | `database/mongodb` | MongoDB 8 | Logs: volume alto, formato flexível, apagados sozinhos depois de um prazo |
+| `services/logs-service` | Node.js 22 + Express | Recebe logs por HTTP e grava no MongoDB |
 
 **Por que dois bancos?** Dados de negócio (consultas, pagamentos) precisam de relações e garantias fortes: é o ponto forte do SQL. Logs são muitos, cada um com campos diferentes, e só são escritos e consultados de vez em quando: é onde o MongoDB se encaixa melhor. Assim os logs também não pesam no banco principal.
 
@@ -31,7 +33,7 @@ cp .env.example .env
 # 2. Suba tudo (a 1ª vez demora: baixa as imagens)
 docker compose up -d --build
 
-# 3. Confira: os dois devem aparecer como "healthy"
+# 3. Confira: os três devem aparecer como "healthy"
 docker compose ps
 ```
 
@@ -78,6 +80,11 @@ database/
     └── init/
         └── 01-init-logs.js     # collections de log, validação e TTL
 tests/                          # testes de integração dos dois bancos
+services/
+└── logs-service/               # API Node.js de logs
+    ├── src/app.js              # rotas
+    ├── src/server.js           # conecta no Mongo e liga o servidor
+    └── test/                   # testes de integração da API
 ```
 
 ## Modelo de dados (SQL Server)
@@ -143,6 +150,17 @@ Como ler: `||--o{` significa "um para muitos" (um paciente tem várias consultas
 | `audit_logs` | Quem acessou/alterou dados pessoais e de saúde (LGPD) | 5 anos |
 
 Os documentos antigos são apagados automaticamente (índice **TTL**). Cada collection tem validação: um log fora do formato é recusado.
+
+### Enviando um log (exemplo)
+
+```bash
+curl -X POST http://localhost:4000/logs/audit   -H "x-api-key: <LOGS_API_KEY do .env>"   -H "Content-Type: application/json"   -d '{"actorId": 2, "actorRole": "PROFESSIONAL", "action": "READ",
+       "entity": "progress_records", "entityId": 10, "subjectUserId": 1}'
+```
+
+- `POST /logs/application | /logs/access | /logs/audit`: aceita um objeto ou um array de até 500 (envie em lote sempre que puder).
+- `GET /logs/audit/{userId}`: histórico de quem acessou os dados daquele usuário.
+- `GET /health`: status do serviço (sem chave).
 
 ⚠️ Nunca coloque senha, CPF completo ou conteúdo de consulta dentro de um log. Registre **o que** foi acessado (`entity` + `entityId`), não o dado em si.
 

@@ -137,7 +137,7 @@ Responsável pela API REST e pelas regras de negócio da aplicação.
 
 **Node.js**
 
-Utilizado como servidor e suporte à arquitetura da aplicação.
+Serviço de logs (`services/logs-service`): recebe os logs da aplicação por HTTP e grava no MongoDB.
 
 ### Banco de dados
 
@@ -157,7 +157,13 @@ Banco não relacional usado para os logs: aplicação, acessos e trilha de audit
 
 **Docker**
 
-Sobe os bancos com um único comando, sem instalar nada além do Docker. Detalhes em [database/README.md](database/README.md).
+Sobe os bancos e o serviço de logs com um único comando, sem instalar nada além do Docker. Detalhes em [database/README.md](database/README.md).
+
+```text
+ Next.js (front) ──► API Java (Spring Boot) ──► SQL Server   (dados)
+                              │
+                              └──► logs-service (Node.js) ──► MongoDB   (logs)
+```
 
 ---
 
@@ -171,7 +177,7 @@ Instale uma vez no seu computador:
 |---|---|---|---|
 | Git | qualquer recente | Baixar o código | https://git-scm.com/downloads |
 | Node.js | 20 ou superior (LTS) | Rodar o front-end | https://nodejs.org |
-| Docker Desktop | qualquer recente | Rodar SQL Server e MongoDB | https://www.docker.com/products/docker-desktop/ |
+| Docker Desktop | qualquer recente | Rodar SQL Server, MongoDB e serviço de logs | https://www.docker.com/products/docker-desktop/ |
 
 Para conferir se deu certo, abra um terminal e rode:
 
@@ -220,7 +226,7 @@ Na primeira vez ele baixa as imagens (alguns minutos). Depois, confira se está 
 docker compose ps
 ```
 
-Os dois serviços (`nutrimente-sqlserver` e `nutrimente-mongodb`) devem aparecer como **healthy**. O SQL Server leva uns 30 segundos para ficar pronto.
+Os três serviços (`nutrimente-sqlserver`, `nutrimente-mongodb` e `nutrimente-logs-service`) devem aparecer como **healthy**. O SQL Server leva uns 30 segundos para ficar pronto.
 
 O banco, as tabelas e os dados iniciais são criados automaticamente. Para ver o andamento:
 
@@ -246,6 +252,7 @@ Acesse http://localhost:3000 no navegador.
 | Front-end (Next.js) | http://localhost:3000 |
 | SQL Server | `localhost,1433` |
 | MongoDB | `mongodb://localhost:27017` |
+| Serviço de logs | http://localhost:4000/health |
 
 ### Comandos do dia a dia
 
@@ -258,13 +265,14 @@ Acesse http://localhost:3000 no navegador.
 | `docker compose down` | Desliga os bancos (os dados continuam salvos) |
 | `docker compose down -v` | Desliga e **apaga** os dados; na próxima subida tudo é recriado do zero |
 | `cd database/tests && npm test` | Roda os testes de integração dos bancos (containers ligados; `npm install` na 1ª vez) |
+| `cd services/logs-service && npm test` | Roda os testes de integração do serviço de logs (containers ligados; `npm install` na 1ª vez) |
 
 ### Problemas comuns
 
 | Sintoma | Solução |
 |---|---|
 | `error during connect` ou `cannot find the file specified` | O Docker Desktop não está aberto. Abra e espere o ícone ficar verde. |
-| `port is already allocated` | A porta já está em uso (ex.: um SQL Server instalado no PC). Mude `MSSQL_PORT` ou `MONGO_PORT` no `.env`. |
+| `port is already allocated` | A porta já está em uso (ex.: um SQL Server instalado no PC). Mude `MSSQL_PORT`, `MONGO_PORT` ou `LOGS_SERVICE_PORT` no `.env`. |
 | `nutrimente-sqlserver` reiniciando sem parar | A senha `MSSQL_SA_PASSWORD` é fraca. Troque no `.env` e rode `docker compose down -v` e depois `docker compose up -d --build`. |
 | Alterei um script `.sql` e nada mudou | Os scripts só rodam na criação do banco. Rode `docker compose down -v` e suba de novo (apaga os dados locais). |
 

@@ -97,14 +97,13 @@ public class AuthController {
 	}
 
 	/**
-	 * IP de quem fez a requisição. O front (Next.js) repassa o IP original no
-	 * header X-Forwarded-For, porque para a API quem chama é o servidor do Next.
+	 * IP de quem fez a requisição. Antes lia o X-Forwarded-For na mão, e o
+	 * visitante conseguia forjar o próprio IP (que vai para os logs e para os
+	 * consentimentos da LGPD). Agora o Tomcat só aceita esse cabeçalho vindo da
+	 * rede interna (server.forward-headers-strategy=native) e já entrega o IP
+	 * certo em getRemoteAddr().
 	 */
 	static String clientIp(HttpServletRequest request) {
-		String forwarded = request.getHeader("X-Forwarded-For");
-		if (forwarded != null && !forwarded.isBlank()) {
-			return forwarded.split(",")[0].strip();
-		}
 		return request.getRemoteAddr();
 	}
 }

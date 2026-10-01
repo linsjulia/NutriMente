@@ -3,11 +3,13 @@ package br.com.nutrimente.api.config;
 import java.time.Duration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -22,7 +24,8 @@ public record AppProperties(
 		@Valid @NotNull Jwt jwt,
 		@Valid @NotNull Mail mail,
 		@Valid @NotNull Logs logs,
-		@Valid @NotNull Admin admin) {
+		@Valid @NotNull Admin admin,
+		@Valid @DefaultValue RateLimit rateLimit) {
 
 	public record Jwt(
 			@NotBlank @Size(min = 32, message = "JWT_SECRET precisa ter pelo menos 32 caracteres") String secret,
@@ -34,6 +37,10 @@ public record AppProperties(
 
 	/** apiKey vazio = envio de logs desligado (útil em testes) */
 	public record Logs(@NotBlank String url, String apiKey) {
+	}
+
+	/** Máximo de requisições por minuto, por IP, nas rotas de autenticação */
+	public record RateLimit(@DefaultValue("30") @Positive int authRequestsPerMinute) {
 	}
 
 	/** Se e-mail/senha ficarem vazios, nenhum admin é criado */

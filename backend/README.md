@@ -67,6 +67,8 @@ O `code` é estável e o front decide o que fazer por ele: `EMAIL_NOT_VERIFIED` 
 - **Senhas com BCrypt**: o banco nunca guarda a senha, só o hash.
 - **Token JWT** assinado (HS256), com validade de 8 horas. Contém só o id, o papel e o primeiro nome.
 - **Bloqueio após 5 senhas erradas** seguidas, por 15 minutos.
+- **Limite de requisições por IP** nas rotas `/api/auth/**` (30 por minuto, `AUTH_RATE_LIMIT_PER_MINUTE`). Passou disso, a API responde `429` com o header `Retry-After`. Complementa o bloqueio por conta: impede que um robô teste uma senha em cada uma de milhares de contas.
+- **IP real e não forjável**: a API só aceita o cabeçalho `X-Forwarded-For` vindo da rede interna (`server.forward-headers-strategy=native`).
 - **Não revela contas cadastradas**: login errado, "esqueci a senha" e "reenviar e-mail" respondem igual, exista o e-mail ou não. O login leva o mesmo tempo nos dois casos.
 - **Links de e-mail de uso único**: só o hash vai para o banco, com validade de 24 h (confirmação) ou 1 h (senha).
 - **O id do usuário vem sempre do token**, nunca da URL, então ninguém edita a conta de outra pessoa trocando um número.
@@ -108,3 +110,10 @@ docker run --rm --network nutrimente_default --env-file .env -e DB_HOST=sqlserve
 1. Suba só a infraestrutura: `docker compose up -d sqlserver mongodb logs-service mailpit`
 2. Abra a pasta `backend` no IntelliJ ou no VS Code (Extension Pack for Java).
 3. Configure as variáveis de ambiente do `.env` (no mínimo `NUTRIMENTE_DB_PASSWORD`, `JWT_SECRET` e `LOGS_API_KEY`) e rode `NutrimenteApiApplication`.
+
+## Em produção
+
+- **Coloque um proxy reverso** (nginx, Caddy ou o da hospedagem) na frente do Next.js, acrescentando o IP do visitante no `X-Forwarded-For`. Sem ele, o Next repassa o cabeçalho que o próprio visitante mandou, e o IP dos logs, dos consentimentos e do limite de tentativas pode ser forjado.
+- **Não exponha a porta da API** (8080) na internet: só o servidor do Next deve chamá-la.
+- **Troque o Mailpit por um SMTP real** (`MAIL_HOST`, `MAIL_PORT`) e use HTTPS.
+- O limite de tentativas fica na memória da API. Com várias cópias da API rodando, use um contador compartilhado (ex.: Redis).

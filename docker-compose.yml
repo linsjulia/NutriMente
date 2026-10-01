@@ -108,6 +108,7 @@ services:
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      AUTH_RATE_LIMIT_PER_MINUTE: ${AUTH_RATE_LIMIT_PER_MINUTE:-30}
     ports:
       - "${API_PORT:-8080}:8080"
     # Só liga depois que o banco (com as tabelas) e o serviço de logs estiverem prontos

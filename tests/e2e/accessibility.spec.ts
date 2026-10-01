@@ -127,3 +127,10 @@ test("carrossel tem botão para pausar e continuar (WCAG 2.2.2)", async ({ page 
   await page.getByRole("button", { name: "Continuar carrossel" }).click();
   await expect(page.getByRole("button", { name: "Pausar carrossel" })).toBeVisible();
 });
+
+test("endereço inexistente mostra a página 404 em português", async ({ page }) => {
+  const response = await page.goto("/pagina-que-nao-existe");
+  expect(response?.status()).toBe(404);
+  await expect(page.getByRole("heading", { level: 1, name: "Página não encontrada" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ir para o início" })).toHaveAttribute("href", "/");
+});

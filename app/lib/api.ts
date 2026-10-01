@@ -17,6 +17,9 @@ import { headers } from "next/headers";
 
 const API_URL = process.env.API_URL ?? "http://localhost:8080";
 
+/** Se a API não responder neste tempo, desistimos (senão a página trava para sempre) */
+const TIMEOUT_MS = 10_000;
+
 /** Formato de erro da API (Problem Details, RFC 9457) */
 export type ApiError = {
   status: number;
@@ -35,15 +38,31 @@ type RequestOptions = {
   token?: string;
 };
 
+/**
+ * IP confiável do visitante a partir do X-Forwarded-For.
+ *
+ * O visitante pode mandar esse cabeçalho com qualquer valor ("6.6.6.6, ...").
+ * O proxy da NOSSA infraestrutura (nginx, Caddy, a hospedagem) acrescenta o IP
+ * real no FIM da lista, então só a última entrada é confiável. Repassar a
+ * lista inteira deixava qualquer pessoa forjar o próprio IP.
+ *
+ * Em produção é obrigatório ter esse proxy na frente do Next: sem ele, o Next
+ * mantém o cabeçalho que o visitante mandou (ver docs/REVISAO-QA.md).
+ */
+export function trustedClientIp(forwardedFor: string | null): string | null {
+  const last = forwardedFor?.split(",").pop()?.trim();
+  return last ? last : null;
+}
+
 export async function api<T>(path: string, { method = "GET", body, token }: RequestOptions = {}): Promise<ApiResult<T>> {
   const requestHeaders: Record<string, string> = { Accept: "application/json" };
   if (body !== undefined) requestHeaders["Content-Type"] = "application/json";
   if (token) requestHeaders.Authorization = `Bearer ${token}`;
 
-  // Repassa o IP de quem acessou o site (a API registra nos logs e nos
-  // consentimentos da LGPD; sem isso ela veria sempre o IP do Next)
-  const forwardedFor = (await headers()).get("x-forwarded-for");
-  if (forwardedFor) requestHeaders["X-Forwarded-For"] = forwardedFor;
+  // Repassa o IP de quem acessou o site (a API registra nos logs, nos
+  // consentimentos da LGPD e usa no limite de tentativas).
+  const clientIp = trustedClientIp((await headers()).get("x-forwarded-for"));
+  if (clientIp) requestHeaders["X-Forwarded-For"] = clientIp;
 
   let response: Response;
   try {
@@ -52,14 +71,18 @@ export async function api<T>(path: string, { method = "GET", body, token }: Requ
       headers: requestHeaders,
       body: body === undefined ? undefined : JSON.stringify(body),
       cache: "no-store", // dados de conta nunca podem vir de cache
+      signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-  } catch {
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === "TimeoutError";
     return {
       ok: false,
       error: {
-        status: 503,
-        code: "API_UNAVAILABLE",
-        detail: "Não foi possível falar com o servidor. Verifique se a API está rodando e tente de novo.",
+        status: timedOut ? 504 : 503,
+        code: timedOut ? "API_TIMEOUT" : "API_UNAVAILABLE",
+        detail: timedOut
+          ? "O servidor demorou demais para responder. Tente de novo em instantes."
+          : "Não foi possível falar com o servidor. Verifique se a API está rodando e tente de novo.",
       },
     };
   }

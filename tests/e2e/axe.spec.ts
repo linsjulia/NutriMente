@@ -21,6 +21,7 @@ const PAGES = [
   "/terms",
   "/privacy",
   "/about",
+  "/pagina-que-nao-existe", // 404
 ];
 
 for (const path of PAGES) {

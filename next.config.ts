@@ -18,8 +18,18 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
 ];
 
+/**
+ * Endereços da rede local que podem abrir o site em modo de desenvolvimento
+ * (ex.: testar pelo celular). Cada pessoa tem um IP diferente, então vem do
+ * .env:  ALLOWED_DEV_ORIGINS=192.168.0.98,192.168.3.70
+ */
+const allowedDevOrigins = (process.env.ALLOWED_DEV_ORIGINS ?? "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.0.98"],
+  allowedDevOrigins,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

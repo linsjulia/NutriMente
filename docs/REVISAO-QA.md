@@ -1,4 +1,4 @@
-# 🔎 Revisão de QA e de arquitetura (setembro/2026)
+# 🔎 Revisão de QA e de arquitetura (set./out. 2026)
 
 Varredura do projeto inteiro (front, API, banco e infraestrutura) testando como usuário e revisando o código. Cada item diz **o que estava errado, o impacto e o que foi feito**.
 
@@ -8,11 +8,11 @@ Varredura do projeto inteiro (front, API, banco e infraestrutura) testando como 
 
 | Suíte | Resultado | Como rodar |
 |---|---|---|
-| Front: acessibilidade, fluxos e auditoria WCAG | **35 de 35** | `npm run test:e2e` |
-| API Java: regras e permissões por papel | **16 de 16** | ver `backend/README.md` |
+| Front: acessibilidade, fluxos e auditoria WCAG | **38 de 38** | `npm run test:e2e` |
+| API Java (Java 25): regras, permissões e limite de tentativas | **18 de 18** | ver `backend/README.md` |
 | Banco (SQL Server + MongoDB) | **23 de 23** | `cd database/tests && npm test` |
 | Serviço de logs (Node) | **11 de 11** | `cd services/logs-service && npm test` |
-| Lint do front | **0 erros** (eram 3) | `npm run lint` |
+| Lint do front | **0 erros e 11 avisos** (eram 3 erros e 33 avisos; os 11 são ícones de 1 a 3 KB) | `npm run lint` |
 | Rolagem horizontal em 320/375/768/1366px | **nenhuma página** | — |
 
 ## Encontrado e corrigido
@@ -56,6 +56,22 @@ Varredura do projeto inteiro (front, API, banco e infraestrutura) testando como 
 | 🟠 | Links de e-mail levam um token na URL e poderiam vazar para outros sites pelo cabeçalho `Referer` | `Referrer-Policy` e outros cabeçalhos de segurança em `next.config.ts` |
 | 🟠 | A confirmação de e-mail seria "gasta" por robôs de antivírus que abrem links | Confirmação por botão (POST), não ao abrir a página |
 
+## Segunda rodada (outubro/2026): rodando o projeto do zero
+
+Subi tudo como alguém da equipe faria (`docker compose up -d --build` + `npm run dev`) e rodei todas as suítes.
+
+| | Problema | Correção |
+|---|---|---|
+| 🔴 | **A home baixava 59 MB** (52 MB só de fotos) mesmo no celular: o carrossel usava fotos de até 8000px e 25 MB | `next/image` entrega cada foto no tamanho da tela e em WebP/AVIF. **Home: 59 MB → ~1,5 MB.** Cadastro: 17,7 MB → ~1,2 MB |
+| 🔴 | Depois do upgrade para **Java 25**, a API funcionava mas ficava sempre "unhealthy": a nova imagem base não tem `wget`, usado pelo healthcheck | `curl` instalado na imagem. Upgrade validado: 18 de 18 testes passam em Java 25 |
+| 🔴 | **O visitante conseguia forjar o próprio IP** (testado: `X-Forwarded-For: 6.6.6.6` foi parar no log e nos consentimentos da LGPD) | A API só aceita o cabeçalho vindo da rede interna; o Next repassa só a última entrada (a do proxy). Em produção é preciso um proxy reverso (ver `backend/README.md`) |
+| 🟠 | Sem limite de tentativas por IP: um robô podia testar uma senha em cada uma de milhares de contas sem nunca bloquear nenhuma | Limite por IP em `/api/auth/**` (30/min, configurável), com resposta 429 e `Retry-After` |
+| 🟠 | Se a API travasse, as páginas ficavam carregando para sempre | Tempo-limite de 10s com mensagem clara |
+| 🟠 | Endereço inexistente e erros inesperados mostravam telas padrão do Next, em inglês | `not-found.tsx` e `error.tsx` em português |
+| 🟡 | Favicon era um PNG de 800 KB | `app/icon.png` de 64px (4,7 KB) |
+| 🟡 | `allowedDevOrigins` com um IP fixo de uma máquina | Variável `ALLOWED_DEV_ORIGINS` no `.env` |
+| 🟡 | O lint do front analisava também o Java, o Node e os testes do banco | Lint restrito ao front; imports sem uso removidos |
+
 ## Decisões de arquitetura
 
 - **BFF (Backend for Frontend)**: o navegador só fala com o Next. O token fica num cookie `httpOnly`, fora do alcance de scripts maliciosos (XSS).
@@ -68,10 +84,10 @@ Varredura do projeto inteiro (front, API, banco e infraestrutura) testando como 
 
 | Prioridade | Recomendação | Por quê |
 |---|---|---|
-| Alta | **Limitar tentativas por IP** nas rotas de login e cadastro (ex.: Bucket4j) | Hoje o bloqueio é por conta; um ataque pode testar várias contas a partir do mesmo IP |
 | Alta | **Invalidar sessões antigas** ao trocar a senha (coluna `token_version` no usuário e no JWT) | O token dura 8h; trocar a senha não desconecta outros aparelhos (a exclusão de conta já desconecta) |
 | Alta | **CI no GitHub Actions** rodando os testes em cada Pull Request | Hoje os testes dependem de alguém lembrar de rodar |
 | Média | Trocar os profissionais e depoimentos fixos da landing por dados da API | Hoje são exemplos inventados |
-| Média | Migrar `<img>` para `next/image` (26 avisos do lint) | Imagens menores e carregamento mais rápido |
+| Média | Reduzir as fotos originais em `public/` (63 MB, uma delas com 8000px e 25 MB) | O site já entrega versões leves, mas o repositório fica pesado de clonar e o servidor gasta CPU otimizando na primeira visita |
+| Média | Migrations com Flyway | Hoje, mudar o banco depois da 1ª subida exige `docker compose down -v` (apaga os dados) |
 | Média | Revisão jurídica dos Termos e da Política de Privacidade | Os textos atuais são modelos |
-| Baixa | Em produção: SMTP real, HTTPS, segredos fora do `.env` e a API sem acesso público direto | O `X-Forwarded-For` só é confiável se apenas o Next puder chamar a API |
+| Alta | Em produção: proxy reverso na frente do Next, SMTP real, HTTPS, segredos fora do `.env` e a API sem acesso público direto | Ver "Em produção" em `backend/README.md` |

@@ -7,7 +7,7 @@ API REST responsável por cadastro, login, perfis e permissões. Roda no Docker 
 | Endereço | http://localhost:8080 |
 | Saúde | http://localhost:8080/actuator/health |
 | E-mails enviados (Mailpit) | http://localhost:8025 |
-| Stack | Java 21, Spring Boot 4.1, Spring Security (JWT), JPA/Hibernate, SQL Server |
+| Stack | Java 25, Spring Boot 4.1, Spring Security (JWT), JPA/Hibernate, SQL Server |
 
 ## Papéis (roles)
 
@@ -93,14 +93,14 @@ src/main/java/br/com/nutrimente/api/
 Testes de integração passam pela API inteira (HTTP → segurança → banco real). Precisam dos containers ligados; cada teste apaga os usuários que criou.
 
 ```bash
-# Com Java 21 instalado:
+# Com Java 25 instalado:
 cd backend
 ./mvnw test          # Windows: mvnw.cmd test
 
 # Sem Java instalado (usa o Maven dentro do Docker):
 docker run --rm --network nutrimente_default --env-file .env -e DB_HOST=sqlserver \
   -v nutrimente-m2:/root/.m2 -v "$(pwd)/backend:/app" -w /app \
-  maven:3.9-eclipse-temurin-21 mvn -B test
+  maven:3.9-eclipse-temurin-25 mvn -B test
 ```
 
 ## Rodando fora do Docker (para desenvolver com a IDE)

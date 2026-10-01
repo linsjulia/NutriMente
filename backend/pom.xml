@@ -19,7 +19,7 @@
 	<description>API REST do NutriMente (Spring Boot)</description>
 
 	<properties>
-		<java.version>21</java.version>
+		<java.version>25</java.version>
 	</properties>
 
 	<dependencies>

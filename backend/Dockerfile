@@ -7,7 +7,7 @@
 # A imagem final fica bem menor e sem ferramentas de compilação.
 # =============================================================
 
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM maven:3.9-eclipse-temurin-25 AS build
 WORKDIR /app
 # Baixa as dependências antes de copiar o código: se só o código mudar,
 # o Docker reaproveita esta etapa do cache e o build fica rápido.
@@ -17,7 +17,7 @@ COPY src ./src
 # -DskipTests: os testes de integração precisam do banco, rodam à parte
 RUN mvn -B -q package -DskipTests
 
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 WORKDIR /app
 # Usuário sem privilégios (não roda como root)
 RUN useradd --system --uid 1001 nutrimente

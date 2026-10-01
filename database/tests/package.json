@@ -1,0 +1,17 @@
+{
+  "name": "nutrimente-database-tests",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Testes de integração dos bancos do NutriMente (SQL Server e MongoDB)",
+  "type": "module",
+  "scripts": {
+    "test": "node --env-file=../../.env --test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "mongodb": "^6.18.0",
+    "mssql": "^11.0.1"
+  }
+}

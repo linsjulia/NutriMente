@@ -19,14 +19,16 @@ RUN mvn -B -q package -DskipTests
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
-# Usuário sem privilégios (não roda como root)
-RUN useradd --system --uid 1001 nutrimente
+# Usuário sem privilégios (não roda como root).
+# curl: usado pelo HEALTHCHECK. A imagem do Java 25 (Ubuntu 26.04) não traz
+# wget nem curl; sem isso a API funcionava mas ficava sempre "unhealthy".
+RUN apt-get update     && apt-get install -y --no-install-recommends curl     && rm -rf /var/lib/apt/lists/*     && useradd --system --uid 1001 nutrimente
 COPY --from=build /app/target/api-*.jar app.jar
 USER nutrimente
 EXPOSE 8080
 
 # O Docker consulta o health check da API para saber se ela está pronta
 HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 \
-    CMD wget -qO- http://localhost:8080/actuator/health/readiness > /dev/null || exit 1
+    CMD curl -fsS http://localhost:8080/actuator/health/readiness > /dev/null || exit 1
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

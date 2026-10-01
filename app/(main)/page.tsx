@@ -33,7 +33,10 @@ export default function Landing() {
       <ReviewsSection/>
 
       {/* Secao CTA Final */}
-      <CTASection/>
+      <section className="grid min-h-screen items-center ">
+        <CTASection/>
+      </section>
+      
 
 
       {/* Footer  */}

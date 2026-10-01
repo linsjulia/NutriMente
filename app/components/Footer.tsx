@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <section className="border-t border-gray-300">
+    <footer className="border-t border-gray-300">
       <div className="min-h-screen gap-50 flex flex-col">
         <div className="p-20">
           <div className="flex flex-row gap-60 p-20 justify-center ">
@@ -35,6 +35,6 @@ export default function Footer() {
           <p>@Copyrights NutriMente todos os direitos reservados 2026</p>
         </div>
       </div>
-    </section>
+    </footer>
   );
 }

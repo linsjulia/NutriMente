@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Pause, Play } from "lucide-react";
 import { Autoplay, Pagination, A11y, Keyboard } from "swiper/modules";
@@ -75,12 +76,17 @@ export default function CarouselHeroSection() {
           clickable: true,
         }}
       >
-        {slides.map((slide) => (
-          <SwiperSlide key={slide.src} className="h-full w-full">
-            <img
+        {/* next/image: o Next entrega a foto no tamanho da tela e em formato
+            leve (WebP/AVIF). As originais têm até 8000px e 25 MB. */}
+        {slides.map((slide, index) => (
+          <SwiperSlide key={slide.src} className="relative h-full w-full">
+            <Image
               src={slide.src}
               alt={slide.alt}
-              className="h-full w-full object-cover object-center"
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              preload={index === 0}
+              className="object-cover object-center"
             />
           </SwiperSlide>
         ))}

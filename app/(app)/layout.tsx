@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { logout } from "@/app/actions/auth";
@@ -26,7 +27,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
       <header className="bg-blue1 text-white">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
           <Link href="/" className="flex items-center gap-2" aria-label="NutriMente: página inicial">
-            <img src="/logo/nutrimente-v1.png" alt="" className="h-10 w-auto" />
+            <Image src="/logo/nutrimente-v1.png" alt="" width={40} height={40} className="h-10 w-auto" />
           </Link>
           <AppNav links={links} />
           <div className="flex items-center gap-3">

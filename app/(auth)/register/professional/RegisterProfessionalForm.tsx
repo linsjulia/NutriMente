@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowLeft, ArrowRight, BadgeCheck } from "lucide-react";
@@ -187,7 +188,9 @@ export default function RegisterProfessionalForm() {
                   className="peer sr-only"
                 />
                 <label htmlFor={`profession-${p.type}`} className="profession-card">
-                  <img src={p.image} alt="" className="h-32 w-full object-cover sm:h-40" />
+                  <span className="relative block h-32 w-full sm:h-40">
+                    <Image src={p.image} alt="" fill sizes="(min-width: 640px) 288px, 100vw" className="object-cover" />
+                  </span>
                   <span className="flex items-center justify-between p-3">
                     <span>
                       <span className="block font-bold">{p.label}</span>

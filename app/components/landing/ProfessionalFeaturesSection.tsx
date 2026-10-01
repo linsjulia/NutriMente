@@ -1,6 +1,7 @@
+import Image from "next/image";
 import FadeScroll from "../fade-effect/FadeScroll";
 import CardFeatures from "../cards/CardFeatures";
-import { BadgeCheck, ClipboardPen, FileText, LaptopMinimalCheck, NotebookPen, Timer } from 'lucide-react'
+import { BadgeCheck, ClipboardPen, Timer } from 'lucide-react'
 
 export default function PatientFeaturesSection() {
   return (
@@ -41,10 +42,12 @@ export default function PatientFeaturesSection() {
           </div>
 
             <div className="relative min-h-80 overflow-hidden rounded-2xl shadow-lg shadow-blue-900/5">
-              <img
+              <Image
                 src="/doctor/profissionais.jpg"
                 alt=""
-                className="absolute inset-0 size-full object-cover object-bottom"
+                fill
+                sizes="(min-width: 1024px) 576px, 100vw"
+                className="object-cover object-bottom"
               />
             </div>
         </div>

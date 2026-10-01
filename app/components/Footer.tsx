@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 // Rodapé do site. <footer> (e não <section>) avisa ao leitor de tela que
@@ -13,7 +14,7 @@ export default function Footer() {
             <img src="/icons/email.png" alt="" className="w-8" />
             <a href="mailto:nutrimente@gmail.com" className="a-footer">nutrimente@gmail.com</a>
           </p>
-          <img src="/logo/nutrimente-v1.png" alt="NutriMente" className="w-32" />
+          <Image src="/logo/nutrimente-v1.png" alt="NutriMente" width={128} height={129} className="h-auto w-32" />
         </div>
 
         {/* Navegue */}

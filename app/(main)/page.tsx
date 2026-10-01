@@ -1,5 +1,4 @@
 import Hero from "../components/landing/HeroSection";
-import FadeScrollProps from "../components/fade-effect/FadeScroll";
 import Footer from "../components/Footer";
 import CTASection from "../components/landing/CTASection";
 import GettingStartedSection from "../components/landing/GettingStartedSection";

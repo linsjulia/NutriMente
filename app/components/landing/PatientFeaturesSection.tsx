@@ -1,3 +1,4 @@
+import Image from "next/image";
 import FadeScroll from "../fade-effect/FadeScroll";
 import CardFeatures from "../cards/CardFeatures";
 import { FileText, LaptopMinimalCheck, NotebookPen } from 'lucide-react'
@@ -16,10 +17,12 @@ export default function PatientFeaturesSection() {
         <div className="mx-auto grid w-full max-w-6xl gap-4 lg:grid-cols-2">
 
           <div className="relative min-h-80 overflow-hidden rounded-2xl shadow-lg shadow-blue-900/5">
-            <img
+            <Image
               src="/patient/pacientes.jfif"
               alt=""
-              className="absolute inset-0 size-full object-cover object-bottom"
+              fill
+              sizes="(min-width: 1024px) 576px, 100vw"
+              className="object-cover object-bottom"
             />
           </div>
 

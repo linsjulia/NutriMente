@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
@@ -36,7 +37,9 @@ export default function RegisterChoicePage() {
               href={option.href}
               className="group flex h-full flex-col overflow-hidden rounded-2xl border-2 border-gray-200 transition hover:border-blue1"
             >
-              <img src={option.image} alt="" className="h-36 w-full object-cover" />
+              <span className="relative block h-36 w-full">
+                <Image src={option.image} alt="" fill sizes="(min-width: 640px) 288px, 100vw" className="object-cover" />
+              </span>
               <span className="flex flex-1 flex-col gap-2 p-5">
                 <span className="flex items-center justify-between text-xl font-bold text-blue1">
                   {option.title}

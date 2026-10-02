@@ -299,4 +299,28 @@ Todos precisam do back-end ligado (`docker compose up -d`).
 | Testar pelo celular na mesma rede | O Next bloqueia endereços que não conhece | Coloque o IP de "Network:" do `npm run dev` em `ALLOWED_DEV_ORIGINS` no `.env` e reinicie o `npm run dev` |
 | Espaço em disco acabando | Imagens e caches antigos do Docker | `docker system prune` (não apaga os dados do banco) |
 
+| VS Code marca erros em todo o código Java (`release 25 is not found`) | A extensão Java não encontrou o JDK 25 | Veja a seção 11 |
+| VS Code avisa "Unknown at rule @theme" no CSS | Configurações do projeto não carregadas | Confira se a pasta `.vscode` veio no `git pull` e recarregue a janela (`Ctrl+Shift+P` > "Developer: Reload Window") |
+
 Ainda travou? Mande no grupo a saída de `docker compose ps` e de `docker compose logs <serviço>`.
+
+## 11. VS Code: programando a API Java (opcional)
+
+Só para quem vai **editar o código Java**. Para rodar o projeto, o Docker já basta.
+
+1. Instale o [JDK 25](https://adoptium.net/) (Temurin 25).
+2. Abra o projeto no VS Code. Ele sugere as extensões recomendadas (Java, ESLint, Tailwind, Playwright): clique em **Instalar**.
+3. Diga à extensão Java onde está o JDK 25. Esse caminho é **diferente em cada computador**, então ele vai nas **suas** configurações, não nas do projeto:
+   - `Ctrl+Shift+P` > **Preferences: Open User Settings (JSON)**
+   - Acrescente (troque o caminho pelo da sua instalação; no Windows, use `\\` entre as pastas):
+
+   ```json
+   "java.jdt.ls.java.home": "C:\\Program Files\\Eclipse Adoptium\\jdk-25.0.2-hotspot",
+   "java.configuration.runtimes": [
+     { "name": "JavaSE-25", "path": "C:\\Program Files\\Eclipse Adoptium\\jdk-25.0.2-hotspot", "default": true }
+   ]
+   ```
+
+4. `Ctrl+Shift+P` > **Java: Clean Java Language Server Workspace** > **Reload and delete**.
+
+A aba **Problemas** (`Ctrl+Shift+M`) deve ficar vazia. O arquivo `.vscode/settings.json` do projeto (compartilhado pelo Git) já configura o resto: as regras do Tailwind no CSS e a análise de nulos do Java desligada (explicação no próprio arquivo).

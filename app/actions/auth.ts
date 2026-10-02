@@ -32,7 +32,18 @@ export async function login(_state: FormState, formData: FormData): Promise<Form
 
   await createSession(result.data.accessToken, result.data.expiresAt);
   // redirect() precisa ficar FORA de try/catch: ele funciona lançando um erro especial
-  redirect(homeFor(result.data.user.role));
+  redirect(safeNext(text(formData, "next")) ?? homeFor(result.data.user.role));
+}
+
+/**
+ * Só aceita voltar para páginas DESTE site ("/account", "/dashboard?x=1").
+ * "//site.com" ou "https://site.com" seriam um redirecionamento aberto:
+ * alguém mandaria um link de login do NutriMente que, depois de entrar,
+ * leva a vítima para um site falso.
+ */
+function safeNext(next: string): string | null {
+  if (!next.startsWith("/") || next.startsWith("//") || next.startsWith("/\\") || next.startsWith("/login")) return null;
+  return next;
 }
 
 export async function logout() {

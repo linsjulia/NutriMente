@@ -10,6 +10,7 @@ import { Checkbox, FormAlert, GenderField, SubmitButton } from "@/app/components
 import type { FormState } from "@/app/lib/form";
 import { applyMask, maskCpf, maskPhone, maxBirthDate } from "@/app/lib/masks";
 import { COUNCIL, type ProfessionalType } from "@/app/lib/types";
+import { useFocusOnError } from "@/app/components/form/useFocusOnError";
 
 // Etapas e quais campos pertencem a cada uma (para voltar à etapa certa
 // quando a API apontar erro num campo)
@@ -76,6 +77,10 @@ export default function RegisterProfessionalForm() {
     headingRef.current?.focus();
   }, [step]);
 
+  // Depois do efeito acima: se a API apontou erro, o foco vai para o campo
+  const resultRef = useRef<HTMLDivElement>(null);
+  useFocusOnError(resultRef, state);
+
   /** Confere os campos da etapa atual com as regras do HTML (required, type=email...) */
   function currentStepIsValid() {
     const fieldset = stepRefs.current[step];
@@ -102,7 +107,7 @@ export default function RegisterProfessionalForm() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div ref={resultRef} className="flex flex-col gap-6">
       <div>
         <p className="font-bold tracking-widest text-green-700">CADASTRO PROFISSIONAL</p>
         <h1 className="mt-2 font-fraunces text-3xl font-medium sm:text-4xl">Sua jornada profissional começa aqui</h1>
@@ -139,7 +144,7 @@ export default function RegisterProfessionalForm() {
         {/* Etapa 1: acesso */}
         <fieldset ref={(el) => { stepRefs.current[0] = el; }} hidden={step !== 0} className="flex flex-col gap-5">
           <legend className="sr-only">Dados de acesso</legend>
-          <Field label="Nome completo" name="name" autoComplete="name" required minLength={3} error={e.name} />
+          <Field label="Nome completo" name="name" autoComplete="name" required minLength={3} hint="Nome e sobrenome, como no documento." error={e.name} />
           <Field label="E-mail" name="email" type="email" autoComplete="email" required error={e.email} />
           <div className="grid gap-5 sm:grid-cols-2">
             <Field
@@ -161,7 +166,7 @@ export default function RegisterProfessionalForm() {
           <legend className="sr-only">Identificação</legend>
           <div className="grid gap-5 sm:grid-cols-2">
             <Field label="CPF" name="cpf" inputMode="numeric" placeholder="000.000.000-00" required minLength={14} onInput={applyMask(maskCpf)} error={e.cpf} />
-            <Field label="Celular" name="telephone" type="tel" autoComplete="tel-national" placeholder="(11) 99999-9999" required minLength={14} onInput={applyMask(maskPhone)} error={e.telephone} />
+            <Field label="Celular" name="telephone" type="tel" autoComplete="tel-national" placeholder="(11) 99999-9999" hint="Com DDD." required minLength={15} onInput={applyMask(maskPhone)} error={e.telephone} />
           </div>
           <Field label="Data de nascimento" name="birthDate" type="date" autoComplete="bday" max={maxBirthDate()} required hint="É preciso ter 18 anos ou mais." error={e.birthDate} />
           <GenderField error={e.gender} />

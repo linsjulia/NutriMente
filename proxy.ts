@@ -24,7 +24,10 @@ export async function proxy(request: NextRequest) {
   const session = await decodeSession(request.cookies.get(SESSION_COOKIE)?.value);
 
   if (startsWithAny(path, PRIVATE_ROUTES) && !session) {
+    // Guarda de onde a pessoa veio para voltar depois do login
+    // (ex.: sessão expirou no meio da "Minha conta")
     const login = new URL("/login", request.nextUrl);
+    login.searchParams.set("next", path + request.nextUrl.search);
     return NextResponse.redirect(login);
   }
   if (session && startsWithAny(path, ADMIN_ROUTES) && session.role !== "ADMIN") {

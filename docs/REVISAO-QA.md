@@ -8,8 +8,8 @@ Varredura do projeto inteiro (front, API, banco e infraestrutura) testando como 
 
 | Suíte | Resultado | Como rodar |
 |---|---|---|
-| Front: acessibilidade, fluxos e auditoria WCAG | **38 de 38** | `npm run test:e2e` |
-| API Java (Java 25): regras, permissões e limite de tentativas | **18 de 18** | ver `backend/README.md` |
+| Front: acessibilidade, fluxos e auditoria WCAG | **49 de 49** | `npm run test:e2e` |
+| API Java (Java 25): regras, permissões, limite de tentativas e validação de campos | **32 de 32** | ver `backend/README.md` |
 | Banco (SQL Server + MongoDB) | **23 de 23** | `cd database/tests && npm test` |
 | Serviço de logs (Node) | **11 de 11** | `cd services/logs-service && npm test` |
 | Lint do front | **0 erros e 11 avisos** (eram 3 erros e 33 avisos; os 11 são ícones de 1 a 3 KB) | `npm run lint` |
@@ -72,6 +72,45 @@ Subi tudo como alguém da equipe faria (`docker compose up -d --build` + `npm ru
 | 🟡 | `allowedDevOrigins` com um IP fixo de uma máquina | Variável `ALLOWED_DEV_ORIGINS` no `.env` |
 | 🟡 | O lint do front analisava também o Java, o Node e os testes do banco | Lint restrito ao front; imports sem uso removidos |
 
+## Terceira rodada (outubro/2026): validação, textos, telas e padronização
+
+Revisão como QA sênior campo a campo, em celular (414px) e desktop (1024px+). Os testes que reproduzem cada problema estão em `tests/e2e/qa-regressions.spec.ts` e `backend/.../ValidationIntegrationTest.java`.
+
+### Validação de campos (regras na API)
+
+| | Problema | Correção |
+|---|---|---|
+| 🔴 | Valor da consulta "1.000,50" virava vazio e **o preço era apagado** com a mensagem "atualizado" | `parseBRL` aceita o formato brasileiro; texto inválido mostra erro e não apaga nada |
+| 🟠 | E-mail sem domínio (`ana@gmail`) era aceito e o e-mail de confirmação nunca chegava | Exige domínio com ponto (`@Email` com regex) |
+| 🟠 | Nome aceitava números, um só nome ou espaços sobrando | `@FullName` (nome e sobrenome, só letras) e `Names.normalize` ("  pedro   DE souza " → "Pedro de Souza") |
+| 🟠 | Celular aceitava DDD inexistente, número sem o 9 e "11111111111" | `@Celular`: DDD da Anatel, 9 na frente, 11 dígitos |
+| 🟠 | Psicólogo conseguia cadastrar CRN e nutricionista, CRP | `CouncilNumber`: o formato depende da profissão, com regiões válidas (CRN 1 a 11, CRP 01 a 24) |
+| 🟡 | Campo vazio mostrava "formato inválido" em vez de "obrigatório"; data ou opção inválida virava erro genérico sem campo | Mensagem de obrigatório tem prioridade; erros de leitura do JSON apontam o campo ("Data inválida", "Opção inválida") |
+| 🟡 | Data de nascimento de 1800 era aceita | Mais de 120 anos → "Data de nascimento inválida" |
+| 🟠 | Admin recusava profissional com um clique, sem confirmar e sem dizer o motivo | Recusa pede motivo (obrigatório na API) e confirmação; o motivo vai no e-mail |
+
+### Experiência de uso
+
+| | Problema | Correção |
+|---|---|---|
+| 🔴 | A home **não terminava de carregar** em 414px e 1024px (carrossel em loop + fotos de 25 MB) | Carrossel com `rewind` e fotos de `public/` reduzidas a 2000px (**63 MB → 7,8 MB**) |
+| 🟠 | Com erro no envio, o aviso ficava fora da tela no celular e parecia que nada tinha acontecido | `useFocusOnError` leva foco e rolagem ao primeiro campo errado, em todos os formulários |
+| 🟠 | Sessão expirada mandava para o login e, depois de entrar, a pessoa perdia a página onde estava | Login com `?next=` (volta para a página), protegido contra redirecionamento para outro site |
+| 🟠 | Telas paradas, sem sinal, enquanto a API respondia | `loading.tsx` na área logada e na busca |
+| 🟡 | Mensagens técnicas ("fetch failed", "timeout") | Frases simples: "Não conseguimos conectar agora..." |
+| 🟡 | Botão de acessibilidade no topo cobria o menu no celular | Movido para o canto inferior direito |
+| 🟡 | Links de texto com área de toque de ~20px | `py-2.5` (44px) |
+
+### Padronização
+
+| | Problema | Correção |
+|---|---|---|
+| 🟡 | "Home" no site público e "Início" na área logada | "Início" em todo lugar |
+| 🟡 | Rodapé só na home; páginas sem `<h1>` ou com dois | Rodapé no layout `(main)`, um `<h1>` por página; a 404 ganhou cabeçalho e rodapé |
+| 🟡 | Aba de "Esqueci minha senha" mostrava só "NutriMente" | `metadata` própria (página de servidor + formulário em arquivo separado) |
+| 🟡 | CTA "Agendar uma consulta" levava a um cadastro, sem agendamento | "Começar agora"; cards "Em breve" com etiqueta e contraste adequado |
+| 🟡 | Sem regra para a cor dos botões | [PADROES-DE-INTERFACE.md](PADROES-DE-INTERFACE.md): verde = marketing, azul = ação de formulário, vermelho = destrutivo |
+
 ## Decisões de arquitetura
 
 - **BFF (Backend for Frontend)**: o navegador só fala com o Next. O token fica num cookie `httpOnly`, fora do alcance de scripts maliciosos (XSS).
@@ -87,7 +126,6 @@ Subi tudo como alguém da equipe faria (`docker compose up -d --build` + `npm ru
 | Alta | **Invalidar sessões antigas** ao trocar a senha (coluna `token_version` no usuário e no JWT) | O token dura 8h; trocar a senha não desconecta outros aparelhos (a exclusão de conta já desconecta) |
 | Alta | **CI no GitHub Actions** rodando os testes em cada Pull Request | Hoje os testes dependem de alguém lembrar de rodar |
 | Média | Trocar os profissionais e depoimentos fixos da landing por dados da API | Hoje são exemplos inventados |
-| Média | Reduzir as fotos originais em `public/` (63 MB, uma delas com 8000px e 25 MB) | O site já entrega versões leves, mas o repositório fica pesado de clonar e o servidor gasta CPU otimizando na primeira visita |
 | Média | Migrations com Flyway | Hoje, mudar o banco depois da 1ª subida exige `docker compose down -v` (apaga os dados) |
 | Média | Revisão jurídica dos Termos e da Política de Privacidade | Os textos atuais são modelos |
 | Alta | Em produção: proxy reverso na frente do Next, SMTP real, HTTPS, segredos fora do `.env` e a API sem acesso público direto | Ver "Em produção" em `backend/README.md` |

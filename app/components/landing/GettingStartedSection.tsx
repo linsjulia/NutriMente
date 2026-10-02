@@ -30,9 +30,9 @@ export default function GettingStartedSection() {
             É simples começar
           </span>
 
-          <h1 className="text-center font-fraunces text-4xl font-medium text-[#102f42] sm:text-5xl">
-            Como Funciona?
-          </h1>
+          <h2 className="text-center font-fraunces text-4xl font-medium text-[#102f42] sm:text-5xl">
+            Como funciona?
+          </h2>
 
           <p className="mt-4 max-w-xl text-center text-base leading-relaxed text-slate-600 sm:text-lg">
             Cuidar da sua saúde pode ser simples, seguro e feito no seu ritmo.

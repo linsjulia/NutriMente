@@ -10,6 +10,7 @@ import { api } from "@/app/lib/api";
 import { requireRole, verifySession } from "@/app/lib/dal";
 import { deleteSession } from "@/app/lib/session";
 import { fromApiError, formValues, text, type FormState } from "@/app/lib/form";
+import { parseBRL } from "@/app/lib/money";
 
 export async function updateProfile(_state: FormState, formData: FormData): Promise<FormState> {
   const session = await verifySession();
@@ -27,11 +28,19 @@ export async function updateProfile(_state: FormState, formData: FormData): Prom
 export async function updateProfessionalProfile(_state: FormState, formData: FormData): Promise<FormState> {
   const session = await requireRole("PROFESSIONAL");
   const values = formValues(formData);
-  const price = text(formData, "consultationPrice").replace(",", ".");
+  const price = parseBRL(text(formData, "consultationPrice"));
+  if (!price.ok) {
+    return {
+      ok: false,
+      message: "Revise os campos destacados.",
+      errors: { consultationPrice: "Valor inválido. Use só números, ex.: 150 ou 1.000,50" },
+      values,
+    };
+  }
   const result = await api("/api/me/professional-profile", {
     method: "PUT",
     token: session.token,
-    body: { bio: text(formData, "bio") || null, consultationPrice: price === "" ? null : Number(price) },
+    body: { bio: text(formData, "bio") || null, consultationPrice: price.value },
   });
   if (!result.ok) return fromApiError(result.error, values);
   revalidatePath("/dashboard");
@@ -68,7 +77,14 @@ export async function reviewProfessional(formData: FormData) {
   const session = await requireRole("ADMIN");
   const id = Number(formData.get("id"));
   const status = text(formData, "status");
+  const reason = text(formData, "reason");
   if (!Number.isInteger(id) || !["APPROVED", "REJECTED"].includes(status)) return;
-  await api(`/api/admin/professionals/${id}/verification`, { method: "PATCH", token: session.token, body: { status } });
+  // A API exige motivo na recusa; o campo do formulário já é obrigatório
+  if (status === "REJECTED" && !reason) return;
+  await api(`/api/admin/professionals/${id}/verification`, {
+    method: "PATCH",
+    token: session.token,
+    body: { status, reason: reason || null },
+  });
   revalidatePath("/admin/professionals");
 }

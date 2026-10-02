@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { registerPatient } from "@/app/actions/auth";
 import Field from "@/app/components/form/Field";
 import { Checkbox, FormAlert, GenderField, SubmitButton } from "@/app/components/form/FormParts";
 import type { FormState } from "@/app/lib/form";
 import { applyMask, maskCpf, maskPhone, maxBirthDate } from "@/app/lib/masks";
+import { useFocusOnError } from "@/app/components/form/useFocusOnError";
 
 /**
  * Cadastro de PACIENTE (cliente).
@@ -19,11 +20,13 @@ import { applyMask, maskCpf, maskPhone, maxBirthDate } from "@/app/lib/masks";
  */
 export default function RegisterPatientForm() {
   const [state, action, pending] = useActionState<FormState, FormData>(registerPatient, {});
+  const resultRef = useRef<HTMLDivElement>(null);
+  useFocusOnError(resultRef, state);
   const v = state.values ?? {};
   const e = state.errors ?? {};
 
   return (
-    <div className="flex flex-col gap-8">
+    <div ref={resultRef} className="flex flex-col gap-8">
       <div>
         <p className="font-bold tracking-widest text-green-700">CADASTRO DE PACIENTE</p>
         <h1 className="mt-2 font-fraunces text-4xl font-medium">Comece seu cuidado</h1>
@@ -38,7 +41,7 @@ export default function RegisterPatientForm() {
       <FormAlert ok={false} message={state.message} />
 
       <form action={action} className="flex flex-col gap-5" noValidate>
-        <Field label="Nome completo" name="name" autoComplete="name" required defaultValue={v.name} error={e.name} />
+        <Field label="Nome completo" name="name" autoComplete="name" required hint="Nome e sobrenome, como no documento." defaultValue={v.name} error={e.name} />
         <Field label="E-mail" name="email" type="email" autoComplete="email" required defaultValue={v.email} error={e.email} />
 
         <div className="grid gap-5 sm:grid-cols-2">
@@ -54,6 +57,7 @@ export default function RegisterPatientForm() {
           />
           <Field
             label="Celular"
+            hint="Com DDD."
             name="telephone"
             type="tel"
             autoComplete="tel-national"

@@ -25,6 +25,8 @@ export function FormAlert({ ok, message, children }: { ok?: boolean; message?: s
   return (
     <div
       role={ok ? "status" : "alert"}
+      // tabIndex -1: pode receber foco por código (useFocusOnError), mas não entra no Tab
+      tabIndex={-1}
       className={`flex gap-3 rounded-xl border p-4 ${ok ? "border-green-600 bg-green-50 text-green-900" : "border-red-600 bg-red-50 text-red-900"}`}
     >
       {ok ? <CircleCheck aria-hidden className="shrink-0" /> : <CircleAlert aria-hidden className="shrink-0" />}

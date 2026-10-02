@@ -62,8 +62,8 @@ export default async function DashboardPage() {
     { href: "/account", icon: UserRound, title: "Meus dados", text: "Edite seu perfil e sua senha." },
   ];
   const soon = [
-    { icon: CalendarDays, title: "Minhas consultas", text: "Agendamento online (em breve)." },
-    { icon: ClipboardList, title: "Plano de ação", text: "Metas e rotina alimentar (em breve)." },
+    { icon: CalendarDays, title: "Minhas consultas", text: "Agende, remarque e acompanhe suas consultas." },
+    { icon: ClipboardList, title: "Plano de ação", text: "Metas, rotina alimentar e progresso." },
   ];
 
   return (
@@ -85,10 +85,14 @@ export default async function DashboardPage() {
           </li>
         ))}
         {soon.map(({ icon: Icon, title, text }) => (
-          <li key={title} className="card flex items-start gap-4 opacity-70">
-            <Icon aria-hidden className="shrink-0" size={32} />
+          <li key={title} className="card flex items-start gap-4 bg-gray-50">
+            <Icon aria-hidden className="shrink-0 text-gray-600" size={32} />
             <span>
-              <span className="block text-lg font-bold">{title}</span>
+              <span className="flex flex-wrap items-center gap-2 text-lg font-bold">
+                {title}
+                {/* Antes: opacity-70 deixava o texto com contraste abaixo do mínimo (WCAG) */}
+                <span className="rounded-full bg-gray-200 px-2 py-0.5 text-xs font-semibold text-gray-800">Em breve</span>
+              </span>
               <span className="text-gray-700">{text}</span>
             </span>
           </li>

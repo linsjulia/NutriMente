@@ -1,23 +1,27 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { changePassword, deleteAccount, updateProfile } from "@/app/actions/account";
 import Field from "@/app/components/form/Field";
 import { FormAlert, GenderField, SubmitButton } from "@/app/components/form/FormParts";
 import type { FormState } from "@/app/lib/form";
 import { applyMask, maskPhone } from "@/app/lib/masks";
+import { useFocusOnError } from "@/app/components/form/useFocusOnError";
 
 export function ProfileForm({ name, telephone, gender }: { name: string; telephone: string | null; gender: string | null }) {
   const [state, action, pending] = useActionState<FormState, FormData>(updateProfile, {});
+  const resultRef = useRef<HTMLFormElement>(null);
+  useFocusOnError(resultRef, state);
   const v = state.values;
 
   return (
-    <form action={action} className="flex flex-col gap-5" noValidate>
+    <form ref={resultRef} action={action} className="flex flex-col gap-5" noValidate>
       <FormAlert ok={state.ok} message={state.message} />
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Nome completo" name="name" autoComplete="name" required defaultValue={v?.name ?? name} error={state.errors?.name} />
         <Field
           label="Celular"
+          hint="Com DDD."
           name="telephone"
           type="tel"
           autoComplete="tel-national"
@@ -37,10 +41,12 @@ export function ProfileForm({ name, telephone, gender }: { name: string; telepho
 
 export function ChangePasswordForm() {
   const [state, action, pending] = useActionState<FormState, FormData>(changePassword, {});
+  const resultRef = useRef<HTMLFormElement>(null);
+  useFocusOnError(resultRef, state);
   const e = state.errors ?? {};
 
   return (
-    <form action={action} className="flex flex-col gap-5" noValidate>
+    <form ref={resultRef} action={action} className="flex flex-col gap-5" noValidate>
       <FormAlert ok={state.ok} message={state.message} />
       <Field label="Senha atual" name="currentPassword" type="password" autoComplete="current-password" required error={e.currentPassword} className="sm:max-w-sm" />
       <div className="grid gap-5 sm:grid-cols-2">
@@ -70,6 +76,8 @@ export function ChangePasswordForm() {
 export function DeleteAccountForm() {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState<FormState, FormData>(deleteAccount, {});
+  const resultRef = useRef<HTMLFormElement>(null);
+  useFocusOnError(resultRef, state);
 
   if (!open) {
     return (
@@ -80,7 +88,7 @@ export function DeleteAccountForm() {
   }
 
   return (
-    <form action={action} className="flex flex-col gap-5" noValidate>
+    <form ref={resultRef} action={action} className="flex flex-col gap-5" noValidate>
       <FormAlert ok={false} message={state.message} />
       <Field label='Digite "EXCLUIR" para confirmar' name="confirmation" required autoComplete="off" error={state.errors?.confirmation} className="sm:max-w-sm" />
       <Field label="Sua senha" name="password" type="password" autoComplete="current-password" required error={state.errors?.password} className="sm:max-w-sm" />

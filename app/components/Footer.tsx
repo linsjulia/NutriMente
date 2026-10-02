@@ -18,15 +18,15 @@ export default function Footer() {
         </div>
 
         {/* Navegue */}
-        <nav aria-label="Rodapé: navegação" className="flex flex-col gap-4">
+        <nav aria-label="Rodapé: navegação" className="flex flex-col gap-1">
           <h2 className="titulo-footer font-bold">Navegue</h2>
-          <Link className="a-footer" href="/">Home</Link>
+          <Link className="a-footer" href="/">Início</Link>
           <Link className="a-footer" href="/professionals">Profissionais</Link>
           <Link className="a-footer" href="/register">Cadastre-se</Link>
         </nav>
 
         {/* Institucional */}
-        <nav aria-label="Rodapé: institucional" className="flex flex-col gap-4">
+        <nav aria-label="Rodapé: institucional" className="flex flex-col gap-1">
           <h2 className="titulo-footer font-bold">Institucional</h2>
           <Link className="a-footer" href="/privacy">Política de Privacidade</Link>
           <Link className="a-footer" href="/terms">Termos de Uso</Link>

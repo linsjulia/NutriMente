@@ -1,17 +1,21 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { updateProfessionalProfile } from "@/app/actions/account";
 import Field from "@/app/components/form/Field";
 import { FormAlert, SubmitButton } from "@/app/components/form/FormParts";
 import type { FormState } from "@/app/lib/form";
+import { formatBRL } from "@/app/lib/money";
+import { useFocusOnError } from "@/app/components/form/useFocusOnError";
 
 export default function ProfessionalProfileForm({ bio, consultationPrice }: { bio: string | null; consultationPrice: number | null }) {
   const [state, action, pending] = useActionState<FormState, FormData>(updateProfessionalProfile, {});
+  const resultRef = useRef<HTMLFormElement>(null);
+  useFocusOnError(resultRef, state);
   const values = state.values;
 
   return (
-    <form action={action} className="flex flex-col gap-5" noValidate>
+    <form ref={resultRef} action={action} className="flex flex-col gap-5" noValidate>
       <FormAlert ok={state.ok} message={state.message} />
       <div className="flex flex-col gap-1.5">
         <label htmlFor="bio" className="font-semibold">
@@ -36,7 +40,8 @@ export default function ProfessionalProfileForm({ bio, consultationPrice }: { bi
         name="consultationPrice"
         inputMode="decimal"
         placeholder="150,00"
-        defaultValue={values?.consultationPrice ?? (consultationPrice != null ? String(consultationPrice).replace(".", ",") : "")}
+        defaultValue={values?.consultationPrice ?? formatBRL(consultationPrice)}
+        hint="Ex.: 150 ou 1.000,50. Deixe em branco para “valor a combinar”."
         error={state.errors?.consultationPrice}
         className="max-w-xs"
       />

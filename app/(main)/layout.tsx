@@ -1,4 +1,5 @@
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import { getSession, homeFor } from "../lib/session";
 
 // Layout das páginas públicas com cabeçalho (home, profissionais, sobre...).
@@ -12,6 +13,8 @@ export default async function MainLayout({ children }: LayoutProps<"/">) {
     <>
       <Header user={user} />
       {children}
+      {/* Rodapé em todas as páginas públicas (antes só aparecia na home) */}
+      <Footer />
     </>
   );
 }

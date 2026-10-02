@@ -84,14 +84,34 @@ export default async function AdminProfessionalsPage({ searchParams }: PageProps
                     </button>
                   </form>
                 )}
+                {/* Recusar pede motivo (vai no e-mail para a pessoa saber o que
+                    corrigir) e uma segunda confirmação. <details> abre e fecha
+                    sem JavaScript e funciona com teclado e leitor de tela. */}
                 {p.status !== "REJECTED" && (
-                  <form action={reviewProfessional}>
-                    <input type="hidden" name="id" value={p.id} />
-                    <input type="hidden" name="status" value="REJECTED" />
-                    <button type="submit" className="btn-danger" aria-label={`Recusar ${p.name}`}>
+                  <details className="w-full md:w-auto">
+                    <summary className="btn-danger cursor-pointer list-none" aria-label={`Recusar ${p.name}`}>
                       <X aria-hidden size={18} /> Recusar
-                    </button>
-                  </form>
+                    </summary>
+                    <form action={reviewProfessional} className="mt-3 flex flex-col gap-2 md:w-96">
+                      <input type="hidden" name="id" value={p.id} />
+                      <input type="hidden" name="status" value="REJECTED" />
+                      <label htmlFor={`reason-${p.id}`} className="font-semibold">
+                        Motivo da recusa (vai no e-mail para {p.name.split(" ")[0]})
+                      </label>
+                      <textarea
+                        id={`reason-${p.id}`}
+                        name="reason"
+                        required
+                        maxLength={500}
+                        rows={3}
+                        className="form-input"
+                        placeholder="Ex.: Não encontramos este CRN no site do CFN."
+                      />
+                      <button type="submit" className="btn-danger self-start">
+                        Confirmar recusa
+                      </button>
+                    </form>
+                  </details>
                 )}
               </div>
             </li>

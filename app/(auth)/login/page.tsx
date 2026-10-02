@@ -13,5 +13,6 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         ? "Sua sessão terminou. Entre novamente."
         : undefined;
 
-  return <LoginForm notice={notice} />;
+  const next = typeof params.next === "string" ? params.next : undefined;
+  return <LoginForm notice={notice ?? (next ? "Entre para continuar." : undefined)} next={next} />;
 }

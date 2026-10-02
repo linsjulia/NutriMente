@@ -91,8 +91,10 @@ export default function AccessibilityMenu() {
 
   return (
     // fixed + z-[1000]: fica sempre visível, por cima de tudo, no canto
-    // inferior esquerdo
-    <div className="fixed bottom-3 left-3 z-[1000] sm:bottom-5 sm:left-5 flex flex-col items-start gap-3">
+    // inferior DIREITO. À esquerda ele cobria os rótulos dos campos no
+    // celular (rótulos ficam alinhados à esquerda) e fica mais perto do
+    // polegar de quem é destro.
+    <div className="fixed bottom-3 right-3 z-[1000] flex flex-col items-end gap-3 sm:bottom-5 sm:right-5">
       {open && (
         <div
           ref={panelRef}

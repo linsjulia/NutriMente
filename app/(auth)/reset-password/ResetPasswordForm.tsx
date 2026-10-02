@@ -1,17 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { resetPassword } from "@/app/actions/auth";
 import Field from "@/app/components/form/Field";
 import { FormAlert, SubmitButton } from "@/app/components/form/FormParts";
 import type { FormState } from "@/app/lib/form";
+import { useFocusOnError } from "@/app/components/form/useFocusOnError";
 
 export default function ResetPasswordForm({ token }: { token: string }) {
   const [state, action, pending] = useActionState<FormState, FormData>(resetPassword, {});
+  const resultRef = useRef<HTMLDivElement>(null);
+  useFocusOnError(resultRef, state);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div ref={resultRef} className="flex flex-col gap-6">
       <h1 className="font-fraunces text-4xl font-medium">Criar nova senha</h1>
       {!token ? (
         <FormAlert ok={false} message="Link incompleto. Abra novamente o link que enviamos por e-mail." />

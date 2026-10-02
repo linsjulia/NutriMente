@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import Logo from "./Logo";
 
 const NAV = [
-  { href: "/", label: "Home" },
+  { href: "/", label: "Início" },
   { href: "/professionals", label: "Profissionais" },
   { href: "/about", label: "Sobre nós" },
 ];

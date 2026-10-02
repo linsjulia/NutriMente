@@ -38,7 +38,9 @@ test.afterAll(async () => {
 test("sem login, a área logada manda para o login", async ({ page }) => {
   for (const path of ["/dashboard", "/account", "/admin/professionals"]) {
     await page.goto(path);
-    await expect(page).toHaveURL(/\/login$/);
+    // Guarda a página de origem para voltar depois do login
+    await page.waitForURL(/\/login\?next=/);
+    expect(new URL(page.url()).searchParams.get("next")).toBe(path);
   }
 });
 
@@ -85,7 +87,8 @@ test("paciente: cadastro -> e-mail -> confirmação -> login -> editar conta -> 
 
   await logout(page);
   await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/login$/);
+  // Volta ao login guardando a página de origem (?next=/dashboard)
+  await page.waitForURL(/\/login\?next=/);
 });
 
 test("cadastro mostra os erros da API no campo certo", async ({ page }) => {
@@ -121,7 +124,9 @@ test("profissional: 3 etapas -> confirmação -> em análise -> admin aprova -> 
   test.skip(!adminEmail || !adminPassword, "ADMIN_EMAIL/ADMIN_PASSWORD não configurados no .env");
 
   const email = uniqueEmail("profissional");
-  const name = `Dra. Teste ${Date.now()}`;
+  // Nome só com letras (a API recusa números) e já no formato padronizado
+  const suffix = Array.from({ length: 8 }, () => String.fromCharCode(97 + Math.floor(Math.random() * 26))).join("");
+  const name = `Dra. Teste ${suffix[0].toUpperCase()}${suffix.slice(1)}`;
   created.push(email);
 
   await page.goto("/register/professional");
@@ -182,6 +187,9 @@ test("esqueci a senha -> link por e-mail -> nova senha -> login", async ({ page 
 
   await page.goto("/login");
   await page.getByRole("link", { name: "Esqueceu sua senha?" }).click();
+  // Espera a tela nova: o login também tem um campo "E-mail", e preencher
+  // antes da troca de página deixava o formulário de recuperação vazio
+  await expect(page.getByRole("heading", { level: 1, name: "Esqueceu sua senha?" })).toBeVisible();
   await page.getByLabel("E-mail").fill(email);
   await page.getByRole("button", { name: "Enviar link" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Se houver uma conta");

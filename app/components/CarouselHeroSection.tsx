@@ -58,7 +58,10 @@ export default function CarouselHeroSection() {
           if (paused) swiper.autoplay.stop();
         }}
         slidesPerView={1}
-        loop
+        // rewind (e não loop): no fim, volta ao primeiro slide. O "loop" move
+        // os slides de lugar no HTML enquanto as fotos ainda carregam, e na 1ª
+        // visita em 414px/1024px algumas fotos ficavam pendentes para sempre.
+        rewind
         keyboard={{ enabled: true }}
         a11y={{
           prevSlideMessage: "Slide anterior",

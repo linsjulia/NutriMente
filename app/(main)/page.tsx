@@ -1,5 +1,4 @@
 import Hero from "../components/landing/HeroSection";
-import Footer from "../components/Footer";
 import CTASection from "../components/landing/CTASection";
 import GettingStartedSection from "../components/landing/GettingStartedSection";
 import PatientFeaturesSection from "../components/landing/PatientFeaturesSection";
@@ -32,11 +31,7 @@ export default function Landing() {
       <ReviewsSection/>
 
       {/* Secao CTA Final */}
-      <CTASection/>
-
-
-      {/* Footer  */}
-      <Footer/>
+      <CTASection/>
 
       
     </main>

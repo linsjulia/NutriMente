@@ -192,6 +192,9 @@ body {
 
 .a-footer{
   font-size: 14px;
+  /* área de toque de 44px no celular (o texto continua do mesmo tamanho) */
+  display: inline-block;
+  padding-block: 0.75rem;
 }
 
 
@@ -643,6 +646,11 @@ input:focus-visible + .profession-card {
 }
 
 /* Links de filtro (abas) */
+/* <details> usado como botão (recusar profissional): esconde a setinha padrão */
+summary.list-none::-webkit-details-marker {
+  display: none;
+}
+
 .chip-link {
   display: inline-block;
   padding: 0.5rem 1rem;

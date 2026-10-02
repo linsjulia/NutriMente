@@ -80,9 +80,10 @@ export async function api<T>(path: string, { method = "GET", body, token }: Requ
       error: {
         status: timedOut ? 504 : 503,
         code: timedOut ? "API_TIMEOUT" : "API_UNAVAILABLE",
+        // Texto para quem usa o site (o detalhe técnico fica no log do servidor)
         detail: timedOut
-          ? "O servidor demorou demais para responder. Tente de novo em instantes."
-          : "Não foi possível falar com o servidor. Verifique se a API está rodando e tente de novo.",
+          ? "O NutriMente está demorando para responder. Tente de novo em alguns instantes."
+          : "Não conseguimos conectar agora. Tente de novo em alguns instantes.",
       },
     };
   }

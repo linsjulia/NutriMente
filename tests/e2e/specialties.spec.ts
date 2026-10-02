@@ -9,6 +9,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import {
+  API_URL,
   backendIsUp,
   confirmEmail,
   deleteAccountViaApi,
@@ -25,6 +26,27 @@ const adminPassword = process.env.ADMIN_PASSWORD;
 
 test.beforeAll(async () => {
   test.skip(!(await backendIsUp()), "API/Mailpit fora do ar: rode `docker compose up -d --build`");
+});
+
+/** Especialidades criadas pelos testes: removidas no fim, mesmo se o teste falhar no meio */
+const createdSpecialties: string[] = [];
+
+test.afterAll(async () => {
+  if (!createdSpecialties.length || !adminEmail || !adminPassword) return;
+  const login = await fetch(`${API_URL}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: adminEmail, password: adminPassword }),
+  });
+  if (!login.ok) return;
+  const { accessToken } = await login.json();
+  const all: { id: number; name: string }[] = await (await fetch(`${API_URL}/api/specialties`)).json();
+  for (const s of all.filter((s) => createdSpecialties.includes(s.name))) {
+    await fetch(`${API_URL}/api/admin/specialties/${s.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+  }
 });
 
 /** Nome só com letras (a API recusa números), diferente a cada execução */
@@ -118,6 +140,7 @@ test("profissional escolhe especialidades (limite de 5) e o paciente filtra a bu
 test("admin cadastra e remove especialidade", async ({ page }) => {
   test.skip(!adminEmail || !adminPassword, "ADMIN_EMAIL/ADMIN_PASSWORD não configurados no .env");
   const specialty = uniqueName("Teste");
+  createdSpecialties.push(specialty);
 
   await login(page, adminEmail!, adminPassword!);
   await page.getByRole("navigation", { name: "Área logada" }).getByRole("link", { name: "Especialidades" }).click();

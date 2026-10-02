@@ -1,3 +1,4 @@
+import Image from "next/image";
 import FadeScroll from "../fade-effect/FadeScroll";
 import ProfessionalCards from "../cards/ProfessionalCards"
 
@@ -7,7 +8,7 @@ export default function SpecialistsSection() {
       <FadeScroll>
               <section>
 
-                  <img src="/background/rectangle.svg" alt="" className="w-full" />
+                  <Image src="/background/rectangle.svg" alt="" width={1445} height={290} className="w-full" />
                   <div className="px-4 py-16 sm:px-8 md:py-24">
                     <h2 className="font-fraunces font-medium text-3xl sm:text-4xl text-center">
                       Conheça alguns de nossos especialistas
@@ -52,8 +53,8 @@ export default function SpecialistsSection() {
                       />
                     </div>
                                     <div className="flex flex-row justify-center gap-5">
-                  <img src="/icons/apple.png" alt="" className="w-15 h-fit" />
-                  <img src="/icons/caring-mental.png" alt="" className="w-17 object-contain h-fit" />
+                  <Image src="/icons/apple.png" alt="" width={64} height={64} className="w-15 h-fit" />
+                  <Image src="/icons/caring-mental.png" alt="" width={64} height={64} className="w-17 object-contain h-fit" />
                 </div>
                   </div>
 

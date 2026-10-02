@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="flex flex-col gap-5">
           <h2 className="titulo-footer font-bold">Contato</h2>
           <p className="flex items-center gap-3">
-            <img src="/icons/email.png" alt="" className="w-8" />
+            <Image src="/icons/email.png" alt="" width={64} height={64} className="w-8" />
             <a href="mailto:nutrimente@gmail.com" className="a-footer">nutrimente@gmail.com</a>
           </p>
           <Image src="/logo/nutrimente-v1.png" alt="NutriMente" width={128} height={129} className="h-auto w-32" />

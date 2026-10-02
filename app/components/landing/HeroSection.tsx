@@ -37,18 +37,22 @@ export default function Hero() {
 
             <div className="flex flex-col gap-4 font-bold sm:flex-row sm:flex-wrap sm:gap-8">
               <div className="flex items-center gap-2">
-                <img
+                <Image
                   src="/icons/security.png"
                   alt=""
+                  width={49}
+                  height={49}
                   className="h-8 w-8 object-contain"
                 />
                 <p>Segurança e Privacidade</p>
               </div>
 
               <div className="flex items-center gap-2">
-                <img
+                <Image
                   src="/icons/time.png"
                   alt=""
+                  width={49}
+                  height={49}
                   className="h-8 w-8 object-contain"
                 />
                 <p>Rápido Atendimento</p>

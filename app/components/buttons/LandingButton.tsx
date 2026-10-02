@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 // Botão "Começar agora" da landing page (leva ao cadastro de paciente).
@@ -10,7 +11,7 @@ export default function LandingButton({ href }: { href: string }) {
   return (
     <div>
       <Link href={href} className="button-test mb-10 inline-flex items-center rounded-4xl p-2 font-bold">
-        <img src="/icons/cronograma.png" alt="" className="mx-2 w-10" />
+        <Image src="/icons/cronograma.png" alt="" width={64} height={64} className="mx-2 w-10" />
         <span className="button__text">Começar agora</span>
       </Link>
     </div>

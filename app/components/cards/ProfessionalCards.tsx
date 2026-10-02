@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import CategoryBadge from "../badge/CategoryBagde";
 
@@ -19,7 +20,7 @@ export default function CardProfi({ titulo, tipoProfissional, documento, descric
   return (
     <article className="flex w-full max-w-105 flex-col gap-4 rounded-2xl border border-gray-400 p-6 shadow-xl sm:p-8">
       <div className="my-4 flex items-center justify-center gap-6">
-        <img src={img} alt={`Foto de ${titulo}`} className="w-20 rounded-full bg-green-700" />
+        <Image src={img} alt={`Foto de ${titulo}`} width={99} height={100} className="w-20 rounded-full bg-green-700" />
         <div>
           <h3 className="font-fraunces text-lg font-semibold">{titulo}</h3>
           <p>{tipoProfissional}</p>

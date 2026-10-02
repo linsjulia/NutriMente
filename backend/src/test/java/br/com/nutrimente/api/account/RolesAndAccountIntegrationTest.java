@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -57,7 +58,7 @@ class RolesAndAccountIntegrationTest extends IntegrationTest {
 		patchAs("/api/admin/professionals/" + id + "/verification", admin, "{\"status\": \"APPROVED\"}")
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.status").value("APPROVED"));
-		verify(emailService).sendProfessionalReviewed(eq(email), anyString(), eq(true));
+		verify(emailService).sendProfessionalReviewed(eq(email), anyString(), eq(true), isNull());
 
 		// Agora é público, sem dados pessoais
 		getAs("/api/professionals/" + id, null)

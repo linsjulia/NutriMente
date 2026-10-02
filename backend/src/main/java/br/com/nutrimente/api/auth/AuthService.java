@@ -1,6 +1,7 @@
 package br.com.nutrimente.api.auth;
 
 import java.util.Locale;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,8 @@ import br.com.nutrimente.api.auth.AuthDtos.SessionUser;
 import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
+import br.com.nutrimente.api.common.validation.Names;
+import br.com.nutrimente.api.user.CouncilNumber;
 import br.com.nutrimente.api.config.JwtService;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.notification.EmailService;
@@ -78,7 +81,7 @@ public class AuthService {
 		String cpf = Digits.only(request.cpf());
 		ensureUnique(email, cpf);
 
-		User user = users.save(User.withPersonalData(request.name().strip(), email,
+		User user = users.save(User.withPersonalData(Names.normalize(request.name()), email,
 				passwordEncoder.encode(request.password()), Role.PATIENT, cpf, request.birthDate(),
 				Digits.only(request.telephone()), request.gender()));
 		patients.save(new Patient(user));
@@ -91,14 +94,17 @@ public class AuthService {
 	public void registerProfessional(RegisterProfessionalRequest request, String ip) {
 		String email = normalizeEmail(request.email());
 		String cpf = Digits.only(request.cpf());
-		String document = request.documentProfessional().strip().toUpperCase(Locale.ROOT);
+		String document = CouncilNumber.normalize(request.professionalType(), request.documentProfessional())
+				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
+						"Revise os campos destacados.",
+						Map.of("documentProfessional", CouncilNumber.errorMessage(request.professionalType()))));
 		ensureUnique(email, cpf);
 		if (professionals.existsByTypeAndDocument(request.professionalType(), document)) {
 			throw ApiException.conflict("documentProfessional",
 					"Este " + request.professionalType().council() + " já está cadastrado");
 		}
 
-		User user = users.save(User.withPersonalData(request.name().strip(), email,
+		User user = users.save(User.withPersonalData(Names.normalize(request.name()), email,
 				passwordEncoder.encode(request.password()), Role.PROFESSIONAL, cpf, request.birthDate(),
 				Digits.only(request.telephone()), request.gender()));
 		professionals.save(new Professional(user, request.professionalType(), document, Digits.trimToNull(request.bio())));

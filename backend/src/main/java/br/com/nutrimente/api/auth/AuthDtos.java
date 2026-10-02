@@ -4,7 +4,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import br.com.nutrimente.api.common.validation.Adult;
+import br.com.nutrimente.api.common.validation.Celular;
 import br.com.nutrimente.api.common.validation.Cpf;
+import br.com.nutrimente.api.common.validation.FullName;
 import br.com.nutrimente.api.common.validation.StrongPassword;
 import br.com.nutrimente.api.user.Gender;
 import br.com.nutrimente.api.user.ProfessionalType;
@@ -14,7 +16,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
@@ -33,11 +34,12 @@ public final class AuthDtos {
 	/** Campos comuns aos dois cadastros */
 	public record RegisterPatientRequest(
 			@NotBlank(message = "Informe seu nome completo")
-			@Size(min = 3, max = 150, message = "O nome precisa ter entre 3 e 150 caracteres")
+			@Size(max = 150, message = "O nome pode ter até 150 caracteres")
+			@FullName
 			String name,
 
 			@NotBlank(message = "Informe seu e-mail")
-			@Email(message = "E-mail inválido")
+			@Email(regexp = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$", message = "E-mail inválido")
 			@Size(max = 255)
 			String email,
 
@@ -54,7 +56,7 @@ public final class AuthDtos {
 			LocalDate birthDate,
 
 			@NotBlank(message = "Informe seu celular")
-			@Pattern(regexp = "^\\D*(\\d\\D*){10,11}$", message = "Celular inválido (use DDD + número)")
+			@Celular
 			String telephone,
 
 			Gender gender,
@@ -68,11 +70,12 @@ public final class AuthDtos {
 
 	public record RegisterProfessionalRequest(
 			@NotBlank(message = "Informe seu nome completo")
-			@Size(min = 3, max = 150, message = "O nome precisa ter entre 3 e 150 caracteres")
+			@Size(max = 150, message = "O nome pode ter até 150 caracteres")
+			@FullName
 			String name,
 
 			@NotBlank(message = "Informe seu e-mail")
-			@Email(message = "E-mail inválido")
+			@Email(regexp = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$", message = "E-mail inválido")
 			@Size(max = 255)
 			String email,
 
@@ -89,7 +92,7 @@ public final class AuthDtos {
 			LocalDate birthDate,
 
 			@NotBlank(message = "Informe seu celular")
-			@Pattern(regexp = "^\\D*(\\d\\D*){10,11}$", message = "Celular inválido (use DDD + número)")
+			@Celular
 			String telephone,
 
 			Gender gender,
@@ -97,10 +100,10 @@ public final class AuthDtos {
 			@NotNull(message = "Selecione sua profissão")
 			ProfessionalType professionalType,
 
-			// Formatos aceitos: CRN "3-12345" / "12345"; CRP "06/123456"
+			// O formato depende da profissão (CRN ou CRP): conferido no AuthService
+			// com CouncilNumber, que também padroniza o número
 			@NotBlank(message = "Informe o número do seu conselho")
-			@Pattern(regexp = "^[0-9]{1,2}[-/]?[0-9]{3,6}(/[A-Za-z]{1,2})?$", message = "Número do conselho inválido")
-			@Size(max = 20)
+			@Size(max = 20, message = "Número do conselho inválido")
 			String documentProfessional,
 
 			@Size(max = 500, message = "A bio pode ter até 500 caracteres")
@@ -126,7 +129,7 @@ public final class AuthDtos {
 	}
 
 	public record EmailRequest(
-			@NotBlank(message = "Informe seu e-mail") @Email(message = "E-mail inválido") String email) {
+			@NotBlank(message = "Informe seu e-mail") @Email(regexp = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]{2,}$", message = "E-mail inválido") String email) {
 	}
 
 	public record ResetPasswordRequest(

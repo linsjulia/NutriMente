@@ -50,7 +50,7 @@ public class EmailService {
 	}
 
 	@Async
-	public void sendProfessionalReviewed(String to, String name, boolean approved) {
+	public void sendProfessionalReviewed(String to, String name, boolean approved, String reason) {
 		String link = properties.frontendUrl() + "/login";
 		if (approved) {
 			send(to, "Seu cadastro no NutriMente foi aprovado", name,
@@ -58,8 +58,8 @@ public class EmailService {
 					"Acessar minha conta", link, "Complete seu perfil com uma bio e o valor da consulta.");
 		} else {
 			send(to, "Seu cadastro no NutriMente precisa de revisão", name,
-					"Não conseguimos confirmar seu registro profissional com os dados informados.",
-					"Acessar minha conta", link, "Confira o número do seu conselho ou fale com nossa equipe.");
+					"Não conseguimos confirmar seu registro profissional. Motivo: " + reason,
+					"Acessar minha conta", link, "Confira os dados ou responda este e-mail para falar com nossa equipe.");
 		}
 	}
 
@@ -82,7 +82,10 @@ public class EmailService {
 		return "Olá, " + name + "!\n\n" + intro + "\n\n" + link + "\n\n" + footer + "\n\nEquipe NutriMente";
 	}
 
-	/** HtmlUtils.htmlEscape evita que um nome como "<script>" vire código no e-mail */
+	/**
+	 * HtmlUtils.htmlEscape evita que um nome como "<script>" (ou o motivo
+	 * digitado pelo admin) vire código no e-mail.
+	 */
 	private static String html(String name, String intro, String button, String link, String footer) {
 		return """
 				<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;color:#183245">
@@ -95,6 +98,6 @@ public class EmailService {
 				  <p style="font-size:13px;color:#555">Se o botão não funcionar, copie e cole no navegador:<br>%s</p>
 				  <p style="font-size:13px;color:#555">%s</p>
 				</div>
-				""".formatted(HtmlUtils.htmlEscape(name), intro, link, button, link, footer);
+				""".formatted(HtmlUtils.htmlEscape(name), HtmlUtils.htmlEscape(intro), link, button, link, footer);
 	}
 }

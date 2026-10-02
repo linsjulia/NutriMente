@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import br.com.nutrimente.api.common.validation.Celular;
+import br.com.nutrimente.api.common.validation.FullName;
 import br.com.nutrimente.api.common.validation.StrongPassword;
 import br.com.nutrimente.api.user.Gender;
 import br.com.nutrimente.api.user.Professional;
@@ -15,7 +17,6 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /** JSON de entrada e saída da área "Minha conta". */
@@ -70,11 +71,12 @@ public final class AccountDtos {
 	/** O que qualquer pessoa pode editar no próprio perfil */
 	public record UpdateProfileRequest(
 			@NotBlank(message = "Informe seu nome completo")
-			@Size(min = 3, max = 150, message = "O nome precisa ter entre 3 e 150 caracteres")
+			@Size(max = 150, message = "O nome pode ter até 150 caracteres")
+			@FullName
 			String name,
 
 			@NotBlank(message = "Informe seu celular")
-			@Pattern(regexp = "^\\D*(\\d\\D*){10,11}$", message = "Celular inválido (use DDD + número)")
+			@Celular
 			String telephone,
 
 			Gender gender) {

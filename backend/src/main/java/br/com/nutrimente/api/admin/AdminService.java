@@ -37,10 +37,15 @@ public class AdminService {
 	}
 
 	@Transactional
-	public ProfessionalForReview review(Long adminId, Long professionalId, VerificationStatus decision) {
+	public ProfessionalForReview review(Long adminId, Long professionalId, VerificationStatus decision, String reason) {
 		if (decision == VerificationStatus.PENDING) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Escolha aprovar ou recusar.",
 					Map.of("status", "Use APPROVED ou REJECTED"));
+		}
+		String cleanReason = reason == null ? null : reason.strip();
+		if (decision == VerificationStatus.REJECTED && (cleanReason == null || cleanReason.isEmpty())) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Informe o motivo da recusa.",
+					Map.of("reason", "Informe o motivo da recusa"));
 		}
 		Professional professional = professionals.findById(professionalId)
 				.filter(p -> p.getUser().canLogin())
@@ -51,7 +56,8 @@ public class AdminService {
 		String email = user.getEmail();
 		String name = user.getName();
 		AfterCommit.run(() -> {
-			emailService.sendProfessionalReviewed(email, name, decision == VerificationStatus.APPROVED);
+			emailService.sendProfessionalReviewed(email, name, decision == VerificationStatus.APPROVED,
+					decision == VerificationStatus.REJECTED ? cleanReason : null);
 			logClient.audit(adminId, "ADMIN", "UPDATE", "professionals.verification", professionalId, professionalId);
 		});
 		return ProfessionalForReview.of(professional);

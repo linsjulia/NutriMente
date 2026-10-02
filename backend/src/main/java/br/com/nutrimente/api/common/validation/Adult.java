@@ -35,11 +35,18 @@ public @interface Adult {
 
 		@Override
 		public boolean isValid(LocalDate birthDate, ConstraintValidatorContext context) {
-			if (birthDate == null) {
+			LocalDate today = LocalDate.now(ZoneOffset.UTC);
+			// Vazio é do @NotNull e data futura é do @Past ("Data de nascimento inválida")
+			if (birthDate == null || birthDate.isAfter(today)) {
 				return true;
 			}
-			int age = Period.between(birthDate, LocalDate.now(ZoneOffset.UTC)).getYears();
-			return age >= 18 && age <= 120;
+			int age = Period.between(birthDate, today).getYears();
+			if (age > 120) {
+				context.disableDefaultConstraintViolation();
+				context.buildConstraintViolationWithTemplate("Data de nascimento inválida").addConstraintViolation();
+				return false;
+			}
+			return age >= 18;
 		}
 	}
 }

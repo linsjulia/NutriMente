@@ -13,6 +13,7 @@ import br.com.nutrimente.api.account.AccountDtos.UpdateProfileRequest;
 import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
+import br.com.nutrimente.api.common.validation.Names;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.user.Professional;
 import br.com.nutrimente.api.user.ProfessionalRepository;
@@ -47,7 +48,7 @@ public class AccountService {
 	@Transactional
 	public MeResponse updateProfile(Long userId, UpdateProfileRequest request) {
 		User user = activeUser(userId);
-		user.updateProfile(request.name().strip(), Digits.only(request.telephone()), request.gender());
+		user.updateProfile(Names.normalize(request.name()), Digits.only(request.telephone()), request.gender());
 		audit(user, "UPDATE", "users");
 		return MeResponse.of(user, professionalOf(user));
 	}

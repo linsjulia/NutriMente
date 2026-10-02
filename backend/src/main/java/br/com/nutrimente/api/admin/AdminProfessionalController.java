@@ -21,6 +21,7 @@ import br.com.nutrimente.api.user.ProfessionalType;
 import br.com.nutrimente.api.user.VerificationStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Área do administrador: verificar o registro dos profissionais.
@@ -54,10 +55,13 @@ public class AdminProfessionalController {
 	@PatchMapping("/{id}/verification")
 	public ProfessionalForReview review(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id,
 			@Valid @RequestBody ReviewRequest request) {
-		return adminService.review(CurrentUser.id(jwt), id, request.status());
+		return adminService.review(CurrentUser.id(jwt), id, request.status(), request.reason());
 	}
 
-	public record ReviewRequest(@NotNull(message = "Informe a decisão") VerificationStatus status) {
+	/** reason: obrigatório ao recusar; vai no e-mail para a pessoa saber o que corrigir */
+	public record ReviewRequest(
+			@NotNull(message = "Informe a decisão") VerificationStatus status,
+			@Size(max = 500, message = "O motivo pode ter até 500 caracteres") String reason) {
 	}
 
 	/** O admin vê o e-mail e o número do conselho para conferir o registro */

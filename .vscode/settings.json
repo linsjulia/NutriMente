@@ -8,11 +8,11 @@
     // Este arquivo ensina essas regras a ele (e mostra a documentação ao passar o mouse).
     "css.customData": [".vscode/tailwind.css-data.json"],
 
-    // Análise de nulos da extensão Java: o Spring Boot 4 marca as APIs dele com
-    // anotações JSpecify (@NonNull/@Nullable), mas o nosso código ainda não usa.
-    // Com a análise ligada, cada chamada ao Spring vira um aviso "Null type safety"
-    // (~45 avisos sem bug real). Adotar JSpecify no projeto é um item do backlog.
-    "java.compile.nullAnalysis.mode": "disabled",
+    // Análise de nulos da extensão Java (lê as anotações @NonNull/@Nullable
+    // do Spring Boot 4). Fica LIGADA: ajuda a achar NullPointerException antes
+    // de rodar. Se aparecer "Null type safety" numa referência de método
+    // (ex.: User::canLogin), troque por uma lambda (u -> u.canLogin()).
+    "java.compile.nullAnalysis.mode": "automatic",
 
     // Se o pom.xml mudar, a extensão Java atualiza o projeto sozinha
     "java.configuration.updateBuildConfiguration": "automatic"

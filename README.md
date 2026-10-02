@@ -169,6 +169,8 @@ Sobe os bancos e o serviço de logs com um único comando, sem instalar nada al�
 
 # 🚀 Instalação e execução
 
+> 📘 **Primeira vez?** Siga o guia completo, com requisitos de computador, instalação de cada programa e solução de problemas: **[docs/INSTALACAO.md](docs/INSTALACAO.md)**. Abaixo está o resumo.
+
 ### 1. Pré-requisitos
 
 Instale uma vez no seu computador:

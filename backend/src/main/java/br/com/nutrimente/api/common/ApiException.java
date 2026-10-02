@@ -14,9 +14,15 @@ import org.springframework.http.HttpStatus;
  */
 public class ApiException extends RuntimeException {
 
+	// Exceções em Java são "serializáveis" (podem ser gravadas em bytes).
+	// O número de versão evita o aviso do compilador; nunca serializamos esta
+	// exceção, então o valor fixo 1 basta.
+	private static final long serialVersionUID = 1L;
+
 	private final HttpStatus status;
 	private final String code;
-	private final Map<String, String> fieldErrors;
+	// "transient" = fica de fora da serialização (Map não é garantidamente serializável)
+	private final transient Map<String, String> fieldErrors;
 
 	public ApiException(HttpStatus status, String code, String message) {
 		this(status, code, message, Map.of());

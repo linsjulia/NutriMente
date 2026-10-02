@@ -13,8 +13,12 @@ import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.notification.EmailService;
 import br.com.nutrimente.api.professional.ProfessionalController.PageResponse;
+import br.com.nutrimente.api.specialty.Specialty;
+import br.com.nutrimente.api.specialty.SpecialtyDto;
+import br.com.nutrimente.api.specialty.SpecialtyRepository;
 import br.com.nutrimente.api.user.Professional;
 import br.com.nutrimente.api.user.ProfessionalRepository;
+import br.com.nutrimente.api.user.ProfessionalType;
 import br.com.nutrimente.api.user.User;
 import br.com.nutrimente.api.user.VerificationStatus;
 
@@ -22,11 +26,14 @@ import br.com.nutrimente.api.user.VerificationStatus;
 public class AdminService {
 
 	private final ProfessionalRepository professionals;
+	private final SpecialtyRepository specialties;
 	private final EmailService emailService;
 	private final LogClient logClient;
 
-	public AdminService(ProfessionalRepository professionals, EmailService emailService, LogClient logClient) {
+	public AdminService(ProfessionalRepository professionals, SpecialtyRepository specialties,
+			EmailService emailService, LogClient logClient) {
 		this.professionals = professionals;
+		this.specialties = specialties;
 		this.emailService = emailService;
 		this.logClient = logClient;
 	}
@@ -61,5 +68,33 @@ public class AdminService {
 			logClient.audit(adminId, "ADMIN", "UPDATE", "professionals.verification", professionalId, professionalId);
 		});
 		return ProfessionalForReview.of(professional);
+	}
+
+	@Transactional
+	public SpecialtyDto createSpecialty(Long adminId, String name, ProfessionalType type) {
+		// "  nutrição   funcional " -> "nutrição funcional": evita duplicatas por espaços
+		String cleanName = name.strip().replaceAll("\\s+", " ");
+		// Confere antes de gravar para devolver uma mensagem clara (o banco
+		// também tem a regra UNIQUE, que protege mesmo em cliques simultâneos)
+		if (specialties.existsByTypeAndNameIgnoreCase(type, cleanName)) {
+			throw ApiException.conflict("name", "Essa especialidade já existe para esta profissão");
+		}
+		Specialty specialty = specialties.save(new Specialty(cleanName, type));
+		long id = specialty.getId();
+		AfterCommit.run(() -> logClient.audit(adminId, "ADMIN", "CREATE", "specialties", id, null));
+		return SpecialtyDto.of(specialty);
+	}
+
+	/**
+	 * Remove a especialidade. A tabela de ligação (professional_specialties)
+	 * tem ON DELETE CASCADE: o banco tira a especialidade de todos os
+	 * profissionais que a tinham marcado.
+	 */
+	@Transactional
+	public void deleteSpecialty(Long adminId, Integer id) {
+		Specialty specialty = specialties.findById(id)
+				.orElseThrow(() -> ApiException.notFound("Especialidade não encontrada."));
+		specialties.delete(specialty);
+		AfterCommit.run(() -> logClient.audit(adminId, "ADMIN", "DELETE", "specialties", (long) id, null));
 	}
 }

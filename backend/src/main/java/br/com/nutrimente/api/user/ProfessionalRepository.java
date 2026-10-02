@@ -17,19 +17,24 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 	 * conta ativa. "JOIN FETCH" traz o usuário na mesma consulta (evita uma
 	 * consulta extra por profissional, o famoso problema "N+1").
 	 * type = null -> todas as profissões.
+	 * specialtyId = null -> qualquer especialidade; senão, só quem a marcou
+	 * (o EXISTS olha a tabela de ligação professional_specialties).
 	 */
 	@Query(value = """
 			SELECT p FROM Professional p JOIN FETCH p.user u
 			WHERE p.verificationStatus = br.com.nutrimente.api.user.VerificationStatus.APPROVED
 			  AND u.active = true AND u.emailVerified = true
 			  AND (:type IS NULL OR p.type = :type)
+			  AND (:specialtyId IS NULL OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id = :specialtyId))
 			""", countQuery = """
 			SELECT COUNT(p) FROM Professional p JOIN p.user u
 			WHERE p.verificationStatus = br.com.nutrimente.api.user.VerificationStatus.APPROVED
 			  AND u.active = true AND u.emailVerified = true
 			  AND (:type IS NULL OR p.type = :type)
+			  AND (:specialtyId IS NULL OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id = :specialtyId))
 			""")
-	Page<Professional> findPublic(@Param("type") ProfessionalType type, Pageable pageable);
+	Page<Professional> findPublic(@Param("type") ProfessionalType type, @Param("specialtyId") Integer specialtyId,
+			Pageable pageable);
 
 	@Query("""
 			SELECT p FROM Professional p JOIN FETCH p.user u

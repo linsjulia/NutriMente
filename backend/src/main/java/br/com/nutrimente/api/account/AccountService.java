@@ -1,5 +1,7 @@
 package br.com.nutrimente.api.account;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,8 @@ import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.common.validation.Names;
 import br.com.nutrimente.api.logging.LogClient;
+import br.com.nutrimente.api.specialty.Specialty;
+import br.com.nutrimente.api.specialty.SpecialtyRepository;
 import br.com.nutrimente.api.user.Professional;
 import br.com.nutrimente.api.user.ProfessionalRepository;
 import br.com.nutrimente.api.user.Role;
@@ -27,13 +31,15 @@ public class AccountService {
 
 	private final UserRepository users;
 	private final ProfessionalRepository professionals;
+	private final SpecialtyRepository specialties;
 	private final PasswordEncoder passwordEncoder;
 	private final LogClient logClient;
 
 	public AccountService(UserRepository users, ProfessionalRepository professionals,
-			PasswordEncoder passwordEncoder, LogClient logClient) {
+			SpecialtyRepository specialties, PasswordEncoder passwordEncoder, LogClient logClient) {
 		this.users = users;
 		this.professionals = professionals;
+		this.specialties = specialties;
 		this.passwordEncoder = passwordEncoder;
 		this.logClient = logClient;
 	}
@@ -59,6 +65,9 @@ public class AccountService {
 		Professional professional = professionals.findById(userId)
 				.orElseThrow(() -> ApiException.notFound("Perfil profissional não encontrado."));
 		professional.updateProfile(Digits.trimToNull(request.bio()), request.consultationPrice());
+		if (request.specialtyIds() != null) {
+			professional.replaceSpecialties(specialtiesFor(professional, request.specialtyIds()));
+		}
 		audit(user, "UPDATE", "professionals");
 		return MeResponse.of(user, professional);
 	}
@@ -96,6 +105,23 @@ public class AccountService {
 		return users.findById(userId).filter(User::canLogin)
 				.orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "SESSION_INVALID",
 						"Sua sessão não é mais válida. Entre novamente."));
+	}
+
+	/**
+	 * Confere os ids enviados: todos precisam existir e ser da MESMA profissão
+	 * do profissional (um psicólogo não marca "Nutrição Esportiva").
+	 * Ids repetidos contam uma vez só.
+	 */
+	private HashSet<Specialty> specialtiesFor(Professional professional, List<Integer> ids) {
+		List<Integer> uniqueIds = ids.stream().distinct().toList();
+		List<Specialty> found = specialties.findAllById(uniqueIds);
+		boolean allValid = found.size() == uniqueIds.size()
+				&& found.stream().allMatch(s -> s.getType() == professional.getType());
+		if (!allValid) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Revise as especialidades escolhidas.",
+					Map.of("specialtyIds", "Escolha especialidades da lista da sua profissão"));
+		}
+		return new HashSet<>(found);
 	}
 
 	private Professional professionalOf(User user) {

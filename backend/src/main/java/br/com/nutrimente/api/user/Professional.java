@@ -2,8 +2,15 @@ package br.com.nutrimente.api.user;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.hibernate.annotations.BatchSize;
 
 import br.com.nutrimente.api.common.Clock;
+import br.com.nutrimente.api.specialty.Specialty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,6 +18,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
@@ -59,6 +68,19 @@ public class Professional {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
+	/**
+	 * Especialidades marcadas pelo profissional (relação N:N pela tabela
+	 * professional_specialties). LAZY: só são lidas quando alguém usa.
+	 * BatchSize: numa lista de 12 profissionais, busca as especialidades de
+	 * todos numa consulta só, em vez de uma por profissional ("N+1").
+	 */
+	@ManyToMany(fetch = FetchType.LAZY)
+	@JoinTable(name = "professional_specialties",
+			joinColumns = @JoinColumn(name = "professional_id"),
+			inverseJoinColumns = @JoinColumn(name = "specialty_id"))
+	@BatchSize(size = 50)
+	private Set<Specialty> specialties = new HashSet<>();
+
 	protected Professional() {
 	}
 
@@ -79,6 +101,12 @@ public class Professional {
 		this.consultationPrice = consultationPrice;
 	}
 
+	/** Troca todas as especialidades de uma vez (as regras ficam no AccountService) */
+	public void replaceSpecialties(Set<Specialty> newSpecialties) {
+		specialties.clear();
+		specialties.addAll(newSpecialties);
+	}
+
 	/** Decisão do admin sobre o cadastro */
 	public void review(VerificationStatus status) {
 		this.verificationStatus = status;
@@ -88,6 +116,7 @@ public class Professional {
 	/** Parte da exclusão de conta (LGPD): libera o número do conselho e apaga a bio */
 	public void anonymize() {
 		this.bio = null;
+		this.specialties.clear();
 		this.document = "REMOVIDO-" + id;
 		this.verificationStatus = VerificationStatus.REJECTED;
 	}
@@ -130,5 +159,10 @@ public class Professional {
 
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
+	}
+
+	/** Em ordem alfabética, para a tela mostrar sempre igual */
+	public List<Specialty> getSpecialties() {
+		return specialties.stream().sorted(Comparator.comparing(Specialty::getName)).toList();
 	}
 }

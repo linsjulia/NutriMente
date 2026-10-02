@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.nutrimente.api.common.ApiException;
+import br.com.nutrimente.api.specialty.SpecialtyDto;
 import br.com.nutrimente.api.user.Professional;
 import br.com.nutrimente.api.user.ProfessionalRepository;
 import br.com.nutrimente.api.user.ProfessionalType;
@@ -24,6 +25,7 @@ import br.com.nutrimente.api.user.ProfessionalType;
  *
  * <pre>
  * GET /api/professionals?type=PSICOLOGO&page=0&size=12
+ * GET /api/professionals?specialty=3          só quem marcou a especialidade 3
  * GET /api/professionals/{id}
  * </pre>
  */
@@ -43,12 +45,13 @@ public class ProfessionalController {
 	@Transactional(readOnly = true)
 	public PageResponse<PublicProfessional> list(
 			@RequestParam(required = false) ProfessionalType type,
+			@RequestParam(required = false) Integer specialty,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "12") int size) {
 		// Limites: ninguém pede a página -1 ou 10 mil itens de uma vez
 		PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.clamp(size, 1, MAX_PAGE_SIZE),
 				Sort.by(Sort.Order.desc("ratingAverage"), Sort.Order.asc("user.name")));
-		return PageResponse.of(professionals.findPublic(type, pageable).map(PublicProfessional::of));
+		return PageResponse.of(professionals.findPublic(type, specialty, pageable).map(PublicProfessional::of));
 	}
 
 	@GetMapping("/{id}")
@@ -59,11 +62,12 @@ public class ProfessionalController {
 	}
 
 	public record PublicProfessional(Long id, String name, ProfessionalType type, String document, String bio,
-			BigDecimal consultationPrice, BigDecimal ratingAverage, int ratingCount) {
+			BigDecimal consultationPrice, BigDecimal ratingAverage, int ratingCount, List<SpecialtyDto> specialties) {
 
 		static PublicProfessional of(Professional p) {
 			return new PublicProfessional(p.getId(), p.getUser().getName(), p.getType(), p.getDocument(), p.getBio(),
-					p.getConsultationPrice(), p.getRatingAverage(), p.getRatingCount());
+					p.getConsultationPrice(), p.getRatingAverage(), p.getRatingCount(),
+					p.getSpecialties().stream().map(SpecialtyDto::of).toList());
 		}
 	}
 

@@ -113,6 +113,8 @@ docker run --rm --network nutrimente_default --env-file .env -e DB_HOST=sqlserve
 
 ## Em produção
 
+O passo a passo completo (Hostinger, HTTPS com Caddy, SMTP e backups) está em [docs/DEPLOY-HOSTINGER.md](../docs/DEPLOY-HOSTINGER.md). Os itens abaixo já estão resolvidos no `docker-compose.prod.yml`.
+
 - **Coloque um proxy reverso** (nginx, Caddy ou o da hospedagem) na frente do Next.js, acrescentando o IP do visitante no `X-Forwarded-For`. Sem ele, o Next repassa o cabeçalho que o próprio visitante mandou, e o IP dos logs, dos consentimentos e do limite de tentativas pode ser forjado.
 - **Não exponha a porta da API** (8080) na internet: só o servidor do Next deve chamá-la.
 - **Troque o Mailpit por um SMTP real** (`MAIL_HOST`, `MAIL_PORT`) e use HTTPS.

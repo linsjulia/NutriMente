@@ -1,0 +1,34 @@
+# =============================================================
+# Caddy: a "porta de entrada" do site em produção.
+#
+# - Gera e renova SOZINHO o certificado HTTPS (Let's Encrypt). Basta o
+#   domínio já apontar para o IP do servidor.
+# - Repassa as visitas para o Next.js (serviço "web", porta 3000).
+# - Acrescenta o IP real do visitante no X-Forwarded-For. A API usa esse IP
+#   nos logs, no consentimento da LGPD e no limite de tentativas de login.
+#
+# {$DOMAIN} vem do .env (ex.: DOMAIN=nutrimente.com.br).
+# =============================================================
+
+# www.nutrimente.com.br -> nutrimente.com.br (um endereço só)
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}
+
+{$DOMAIN} {
+	# Compacta as respostas (páginas carregam mais rápido)
+	encode zstd gzip
+
+	# Recusa envios gigantes (o maior formulário do site tem poucos KB)
+	request_body {
+		max_size 5MB
+	}
+
+	reverse_proxy web:3000
+
+	# Registro de acessos (docker compose logs caddy)
+	log {
+		output stdout
+		format console
+	}
+}

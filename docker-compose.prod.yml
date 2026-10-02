@@ -1,0 +1,98 @@
+# =============================================================
+# NutriMente - ajustes para PRODUÇÃO (servidor na Hostinger)
+#
+# Este arquivo é usado JUNTO com o docker-compose.yml: o Docker junta os
+# dois, e o que está aqui substitui/acrescenta ao original.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# (no servidor, o arquivo .env tem a linha COMPOSE_FILE=... e basta
+#  "docker compose up -d --build"; veja docs/DEPLOY-HOSTINGER.md)
+#
+# Diferenças em relação ao ambiente local:
+#   - Nenhum banco, nem a API, fica aberto na internet ("ports: !reset []").
+#     Só o Caddy (portas 80 e 443) recebe visitas.
+#   - SQL Server na edição Express (gratuita e liberada para produção;
+#     a Developer, usada no PC, NÃO pode ser usada em produção).
+#   - Sem Mailpit: os e-mails saem por um SMTP de verdade.
+#   - Sobem mais dois serviços: "web" (o site Next.js) e "caddy" (HTTPS).
+# =============================================================
+
+services:
+  sqlserver:
+    environment:
+      MSSQL_PID: Express
+      # Limite de memória do SQL Server (o resto fica para API, site e Mongo)
+      MSSQL_MEMORY_LIMIT_MB: ${MSSQL_MEMORY_LIMIT_MB:-2048}
+    ports: !reset []
+
+  mongodb:
+    ports: !reset []
+
+  logs-service:
+    ports: !reset []
+
+  # O Mailpit só sobe se alguém pedir o perfil "dev" (em produção, nunca)
+  mailpit:
+    profiles: ["dev"]
+    ports: !reset []
+
+  api:
+    environment:
+      FRONTEND_URL: https://${DOMAIN}
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT:-465}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_SMTP_AUTH: "true"
+      MAIL_SSL: ${MAIL_SSL:-true}
+      MAIL_STARTTLS: ${MAIL_STARTTLS:-false}
+      MAIL_FROM: ${MAIL_FROM}
+      # A JVM usa no máximo 60% da memória que o container pode ter
+      JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60
+    mem_limit: ${API_MEMORY_LIMIT:-1g}
+    ports: !reset []
+    # Igual ao original, mas sem o Mailpit
+    depends_on: !override
+      sqlserver:
+        condition: service_healthy
+      logs-service:
+        condition: service_healthy
+
+  # O site (Next.js), construído pelo Dockerfile da raiz do projeto
+  web:
+    build: .
+    container_name: nutrimente-web
+    environment:
+      # Dentro da rede do Docker a API é "api:8080" (não precisa sair na internet)
+      API_URL: http://api:8080
+      # Mesma chave da API: o site confere o token de login com ela
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Porta de entrada: HTTPS automático e repasse para o site
+  caddy:
+    image: caddy:2.10-alpine
+    container_name: nutrimente-caddy
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # HTTP/3
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Certificados HTTPS: precisam persistir (há limite de emissão por semana)
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  caddy-data:
+  caddy-config:

@@ -1,0 +1,19 @@
+# Arquivos que NÃO entram na imagem do site (Dockerfile da raiz).
+# Deixa o build mais rápido e evita levar senhas (.env) para dentro da imagem.
+node_modules
+.next
+.git
+.vscode
+.env*
+*.log
+backend
+database
+services
+deploy
+docs
+tests
+test-results
+playwright-report
+tsconfig.tsbuildinfo
+docker-compose*.yml
+Dockerfile

@@ -149,7 +149,7 @@ public class AuthService {
 	@Transactional(noRollbackFor = ApiException.class)
 	public LoginResponse login(LoginRequest request, String ip) {
 		String email = normalizeEmail(request.email());
-		User user = users.findByEmail(email).filter(User::canLogin).orElse(null);
+		User user = users.findByEmail(email).filter(u -> u.canLogin()).orElse(null);
 
 		if (user == null) {
 			passwordEncoder.matches(request.password(), dummyHash); // mesmo tempo de resposta
@@ -216,7 +216,7 @@ public class AuthService {
 
 	@Transactional
 	public void requestPasswordReset(String email, String ip) {
-		users.findByEmail(normalizeEmail(email)).filter(User::canLogin).ifPresent(user -> {
+		users.findByEmail(normalizeEmail(email)).filter(u -> u.canLogin()).ifPresent(user -> {
 			String token = createToken(user, TokenPurpose.PASSWORD_RESET);
 			AfterCommit.run(() -> {
 				emailService.sendPasswordReset(user.getEmail(), user.getName(), token);
@@ -251,7 +251,7 @@ public class AuthService {
 	/** Confere o token do link e marca como usado (não funciona duas vezes) */
 	private UserToken consume(String rawToken, TokenPurpose purpose) {
 		UserToken token = tokens.findByHash(SecureTokens.hash(rawToken), purpose)
-				.filter(UserToken::isUsable)
+				.filter(t -> t.isUsable())
 				.filter(t -> t.getUser().canLogin())
 				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "INVALID_TOKEN",
 						"Este link é inválido ou expirou. Peça um novo."));

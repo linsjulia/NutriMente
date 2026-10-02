@@ -163,6 +163,6 @@ public class Professional {
 
 	/** Em ordem alfabética, para a tela mostrar sempre igual */
 	public List<Specialty> getSpecialties() {
-		return specialties.stream().sorted(Comparator.comparing(Specialty::getName)).toList();
+		return specialties.stream().sorted(Comparator.comparing(s -> s.getName())).toList();
 	}
 }

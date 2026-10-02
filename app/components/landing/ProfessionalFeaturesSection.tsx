@@ -1,20 +1,21 @@
+import Image from "next/image";
 import FadeScroll from "../fade-effect/FadeScroll";
 import CardFeatures from "../cards/CardFeatures";
-import { BadgeCheck, ClipboardPen, FileText, LaptopMinimalCheck, NotebookPen, Timer } from 'lucide-react'
+import { BadgeCheck, ClipboardPen, Timer } from 'lucide-react'
 
 export default function PatientFeaturesSection() {
   return (
     <FadeScroll>
-      <section className="bg-white min-h-screen flex flex-col justify-center">
-        <h1 className="font-fraunces font-medium text-5xl text-center">
-          Para <span className="text-[#00d6d6]">Nutricionistas </span>
-            e <span className="text-[#00e485]">Psicólogos</span>
-        </h1>
-        <h2 className="text-[18px] text-center mb-20">
-          Cuidado personalizado, do primeiro contato ao acompanhamento contínuo.
+      <section className="bg-white flex flex-col justify-center px-4 py-16 sm:px-8 lg:min-h-screen">
+        <h2 className="font-fraunces font-medium text-3xl sm:text-4xl md:text-5xl text-center">
+          Para <span className="text-[#007a7a]">Nutricionistas </span>
+            e <span className="text-[#00754a]">Psicólogos</span>
         </h2>
+        <p className="text-lg text-center mt-3 mb-10 lg:mb-20">
+          Cuidado personalizado, do primeiro contato ao acompanhamento contínuo.
+        </p>
 
-        <div className="mx-auto grid w-full max-w-6xl gap-30 lg:grid-cols-2">
+        <div className="mx-auto grid w-full max-w-6xl gap-8 lg:gap-16 lg:grid-cols-2">
 
           <div className="flex flex-col gap-4">
             <CardFeatures
@@ -41,10 +42,12 @@ export default function PatientFeaturesSection() {
           </div>
 
             <div className="relative min-h-80 overflow-hidden rounded-2xl shadow-lg shadow-blue-900/5">
-              <img
+              <Image
                 src="/doctor/profissionais.jpg"
                 alt=""
-                className="absolute inset-0 size-full object-cover object-bottom"
+                fill
+                sizes="(min-width: 1024px) 576px, 100vw"
+                className="object-cover object-bottom"
               />
             </div>
         </div>

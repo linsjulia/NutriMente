@@ -6,7 +6,7 @@ import LandingButton from "../buttons/LandingButton";
 export default function CTASection() {
   return (
     <FadeScroll>
-      <section className="flex justify-center min-h-scren px-4 pb-16 pt-28 md:px-8 md:pb-28 md:pt-36">
+      <section className="flex justify-center md:min-h-screen px-4 pb-16 pt-28 md:px-8 md:pb-28 md:pt-36">
         <div className="relative flex w-full max-w-355 flex-col items-center rounded-4xl bg-linear-to-t from-green2 to-blue4 md:min-h-120 md:flex-row">
           {/* Fundo decorativo: só ele é cortado pelos cantos arredondados */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-4xl">
@@ -36,7 +36,7 @@ export default function CTASection() {
             <h2 className="font-fraunces text-3xl font-medium text-white md:text-4xl">
               Pronto para transformar sua saúde mental e alimentar?
             </h2>
-            <LandingButton href="/login" />
+            <LandingButton href="/register/patient" />
           </div>
         </div>
       </section>

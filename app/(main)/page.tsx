@@ -1,18 +1,16 @@
 import Hero from "../components/landing/HeroSection";
-import FadeScrollProps from "../components/fade-effect/FadeScroll";
-import Footer from "../components/Footer";
 import CTASection from "../components/landing/CTASection";
 import GettingStartedSection from "../components/landing/GettingStartedSection";
 import PatientFeaturesSection from "../components/landing/PatientFeaturesSection";
 import ProfessionalFeaturesSection from "../components/landing/ProfessionalFeaturesSection";
 import SpecialistsSection from "../components/landing/SpecialistsSection";
 import ReviewsSection from "../components/landing/ReviewsSection";
-import TestButton from "../components/buttons/LandingButton";
 
 
 export default function Landing() {
   return (
-    <main>
+    // id="conteudo": destino do link "Pular para o conteúdo" (SkipLink)
+    <main id="conteudo">
       <Hero/>
 
       {/* Primeiros passos do site */}
@@ -33,11 +31,7 @@ export default function Landing() {
       <ReviewsSection/>
 
       {/* Secao CTA Final */}
-      <CTASection/>
-
-
-      {/* Footer  */}
-      <Footer/>
+      <CTASection/>
 
       
     </main>

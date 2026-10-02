@@ -24,8 +24,10 @@ Mapa de **quem pode fazer o quê** e de **como cada fluxo funciona**, do navegad
 | Ver e editar os próprios dados (`/account`) | — | ✅ | ✅ | ✅ |
 | Trocar a própria senha | — | ✅ | ✅ | ✅ |
 | Excluir a própria conta | — | ✅ | ✅ | ❌ |
-| Editar bio e valor da consulta | — | ❌ | ✅ | ❌ |
+| Editar bio, valor da consulta e especialidades (até 5) | — | ❌ | ✅ | ❌ |
+| Filtrar profissionais por especialidade | ✅ | ✅ | ✅ | ✅ |
 | Aprovar ou recusar profissionais | — | ❌ | ❌ | ✅ |
+| Cadastrar e remover especialidades (`/admin/specialties`) | — | ❌ | ❌ | ✅ |
 
 **Onde cada regra é garantida (defesa em camadas):**
 
@@ -79,7 +81,7 @@ O navegador **nunca** vê o token: ele fica num cookie `httpOnly` que só o serv
 
 ```text
 Cadastro (3 etapas) → confirma e-mail → login → "Cadastro: Em análise"
-  → completa bio e valor → ADMIN confere o CRN/CRP no site do conselho
+  → completa bio, valor e especialidades → ADMIN confere o CRN/CRP no site do conselho
   → Aprovar → e-mail "Seu cadastro foi aprovado" → aparece em /professionals
 ```
 
@@ -112,6 +114,7 @@ Cadastro (3 etapas) → confirma e-mail → login → "Cadastro: Em análise"
 |---|---|---|
 | `tests/e2e/auth-flow.spec.ts` | `npm run test:e2e` | Os fluxos acima, no navegador, com API, banco e e-mail de verdade |
 | `tests/e2e/axe.spec.ts` | `npm run test:e2e` | Auditoria WCAG (contraste, rótulos, alvos de toque) em todas as páginas públicas |
+| `tests/e2e/specialties.spec.ts` | `npm run test:e2e` | Escolha de especialidades (limite de 5), filtro na busca e cadastro pelo admin |
 | `backend/src/test` | ver backend/README | Regras da API e permissões por papel |
 
 Os testes de ponta a ponta precisam do back-end no ar (`docker compose up -d --build`). Sem ele, são pulados automaticamente.

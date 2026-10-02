@@ -3,7 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CalendarDays, ClipboardList, Search, UserRound } from "lucide-react";
 import { getMe } from "@/app/lib/dal";
-import { COUNCIL, PROFESSION_LABELS, STATUS_LABELS } from "@/app/lib/types";
+import { COUNCIL, PROFESSION_LABELS, STATUS_LABELS, type Specialty } from "@/app/lib/types";
+import { api } from "@/app/lib/api";
 import ProfessionalProfileForm from "./ProfessionalProfileForm";
 
 export const metadata: Metadata = { title: "Início | NutriMente" };
@@ -11,7 +12,7 @@ export const metadata: Metadata = { title: "Início | NutriMente" };
 /**
  * Página inicial da área logada. O conteúdo muda conforme o PAPEL:
  * - PATIENT: atalhos para buscar profissionais e editar a conta
- * - PROFESSIONAL: situação da verificação + bio e valor da consulta
+ * - PROFESSIONAL: situação da verificação + bio, valor da consulta e especialidades
  * - ADMIN: vai direto para a fila de aprovação
  */
 export default async function DashboardPage() {
@@ -22,6 +23,8 @@ export default async function DashboardPage() {
 
   if (me.role === "PROFESSIONAL" && me.professional) {
     const p = me.professional;
+    // Só as especialidades da profissão dele (a API recusa as de outra)
+    const specialties = await api<Specialty[]>(`/api/specialties?type=${p.type}`);
     return (
       <div className="flex flex-col gap-8">
         <div>
@@ -50,7 +53,12 @@ export default async function DashboardPage() {
             Perfil profissional
           </h2>
           <p className="mb-5 text-gray-700">É o que os pacientes veem quando encontram você.</p>
-          <ProfessionalProfileForm bio={p.bio} consultationPrice={p.consultationPrice} />
+          <ProfessionalProfileForm
+            bio={p.bio}
+            consultationPrice={p.consultationPrice}
+            specialtyOptions={specialties.ok ? specialties.data : null}
+            specialtyIds={p.specialties.map((s) => s.id)}
+          />
         </section>
       </div>
     );

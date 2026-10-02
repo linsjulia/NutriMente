@@ -14,6 +14,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     session.role === "ADMIN"
       ? [
           { href: "/admin/professionals", label: "Profissionais" },
+          { href: "/admin/specialties", label: "Especialidades" },
           { href: "/account", label: "Minha conta" },
         ]
       : [

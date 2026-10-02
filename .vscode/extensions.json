@@ -1,0 +1,9 @@
+{
+    // Extensões recomendadas: o VS Code sugere instalá-las ao abrir o projeto.
+    "recommendations": [
+        "vscjava.vscode-java-pack",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss",
+        "ms-playwright.playwright"
+    ]
+}

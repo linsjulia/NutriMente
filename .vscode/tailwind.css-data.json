@@ -1,0 +1,45 @@
+{
+  "version": 1.1,
+  "atDirectives": [
+    {
+      "name": "@theme",
+      "description": "Tailwind 4: define as variáveis do tema (cores, fontes, espaçamentos) que viram classes utilitárias.",
+      "references": [{ "name": "Documentação", "url": "https://tailwindcss.com/docs/theme" }]
+    },
+    {
+      "name": "@custom-variant",
+      "description": "Tailwind 4: cria uma variante própria (ex.: dark:, contrast:).",
+      "references": [{ "name": "Documentação", "url": "https://tailwindcss.com/docs/adding-custom-styles#adding-custom-variants" }]
+    },
+    {
+      "name": "@apply",
+      "description": "Tailwind: aplica classes utilitárias dentro de uma regra CSS.",
+      "references": [{ "name": "Documentação", "url": "https://tailwindcss.com/docs/functions-and-directives#apply-directive" }]
+    },
+    {
+      "name": "@utility",
+      "description": "Tailwind 4: cria uma classe utilitária própria.",
+      "references": [{ "name": "Documentação", "url": "https://tailwindcss.com/docs/adding-custom-styles#adding-custom-utilities" }]
+    },
+    {
+      "name": "@variant",
+      "description": "Tailwind 4: aplica uma variante (ex.: dark) dentro de uma regra CSS.",
+      "references": [{ "name": "Documentação", "url": "https://tailwindcss.com/docs/functions-and-directives#variant-directive" }]
+    },
+    {
+      "name": "@source",
+      "description": "Tailwind 4: indica arquivos extras onde procurar classes.",
+      "references": [{ "name": "Documentação", "url": "https://tailwindcss.com/docs/functions-and-directives#source-directive" }]
+    },
+    {
+      "name": "@plugin",
+      "description": "Tailwind 4: carrega um plugin.",
+      "references": [{ "name": "Documentação", "url": "https://tailwindcss.com/docs/functions-and-directives#plugin-directive" }]
+    },
+    {
+      "name": "@reference",
+      "description": "Tailwind 4: importa o tema sem gerar CSS (para usar @apply em outros arquivos).",
+      "references": [{ "name": "Documentação", "url": "https://tailwindcss.com/docs/functions-and-directives#reference-directive" }]
+    }
+  ]
+}

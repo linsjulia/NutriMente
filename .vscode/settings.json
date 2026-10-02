@@ -1,0 +1,19 @@
+// Configurações do VS Code compartilhadas pela equipe (vão para o Git).
+// Coisas pessoais, como o caminho do Java na sua máquina, ficam nas
+// configurações do USUÁRIO (Ctrl+Shift+P > "Preferences: Open User Settings (JSON)").
+// Veja docs/INSTALACAO.md.
+{
+    // O CSS do projeto usa regras do Tailwind 4 (@theme, @custom-variant, @apply).
+    // O validador de CSS do VS Code não as conhece e marcava "Unknown at rule".
+    // Este arquivo ensina essas regras a ele (e mostra a documentação ao passar o mouse).
+    "css.customData": [".vscode/tailwind.css-data.json"],
+
+    // Análise de nulos da extensão Java: o Spring Boot 4 marca as APIs dele com
+    // anotações JSpecify (@NonNull/@Nullable), mas o nosso código ainda não usa.
+    // Com a análise ligada, cada chamada ao Spring vira um aviso "Null type safety"
+    // (~45 avisos sem bug real). Adotar JSpecify no projeto é um item do backlog.
+    "java.compile.nullAnalysis.mode": "disabled",
+
+    // Se o pom.xml mudar, a extensão Java atualiza o projeto sozinha
+    "java.configuration.updateBuildConfiguration": "automatic"
+}

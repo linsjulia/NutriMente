@@ -86,14 +86,14 @@ public class AccountService {
 			throw new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", "Contas de administrador não podem ser excluídas por aqui.");
 		}
 		checkPassword(user, password, "password");
-		professionals.findById(userId).ifPresent(Professional::anonymize);
+		professionals.findById(userId).ifPresent(professional -> professional.anonymize());
 		user.anonymize();
 		audit(user, "ANONYMIZE", "users");
 	}
 
 	private User activeUser(Long userId) {
 		// Conta excluída depois do login: o token ainda é válido, mas a conta não
-		return users.findById(userId).filter(User::canLogin)
+		return users.findById(userId).filter(user -> user.canLogin())
 				.orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "SESSION_INVALID",
 						"Sua sessão não é mais válida. Entre novamente."));
 	}

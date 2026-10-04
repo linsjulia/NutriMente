@@ -57,9 +57,10 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
 			windows.values().removeIf(window -> window.isExpired(now));
 		}
 
-		// getRemoteAddr() já é o IP real (ver server.forward-headers-strategy)
+		// getRemoteAddr() já é o IP real (ver server.forward-headers-strategy).
+		// "_" = parâmetro que não usamos (a chave, o IP); recurso do Java 22+.
 		Window window = windows.compute(request.getRemoteAddr(),
-				(ip, current) -> current == null || current.isExpired(now) ? new Window(now) : current.increment());
+				(_, current) -> current == null || current.isExpired(now) ? new Window(now) : current.increment());
 
 		if (window.count > limit) {
 			long retryAfterSeconds = Math.max(1, (window.start + WINDOW.toMillis() - now) / 1000);

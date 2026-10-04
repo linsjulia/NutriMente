@@ -105,7 +105,11 @@ body {
 }
 
 /* *HEADER */
-.header a{
+/* Só os links do MENU (dentro de <nav>) ganham o sublinhado animado.
+   Antes era ".header a": como este CSS fica fora das camadas do Tailwind,
+   ele vencia as classes dos botões "Entrar"/"Cadastre-se" (px-6 py-3)
+   e os botões ficavam sem espaço interno, com o texto colado na borda. */
+.header nav a{
 
   display: block;
   position: relative;
@@ -113,7 +117,7 @@ body {
 }
 
 
-.header a::after {
+.header nav a::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -125,8 +129,8 @@ body {
   transition: opacity 300ms, transform 300ms;
 }
 
-.header a:hover::after,
-.header a:focus::after {
+.header nav a:hover::after,
+.header nav a:focus::after {
   opacity: 1;
   transform: translate3d(0, 0.2em, 0);
 }

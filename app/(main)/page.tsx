@@ -1,17 +1,15 @@
 import Hero from "../components/landing/HeroSection";
-import FadeScrollProps from "../components/fade-effect/FadeScroll";
-import Footer from "../components/Footer";
 import CTASection from "../components/landing/CTASection";
 import GettingStartedSection from "../components/landing/GettingStartedSection";
 import PatientFeaturesSection from "../components/landing/PatientFeaturesSection";
 import ProfessionalFeaturesSection from "../components/landing/ProfessionalFeaturesSection";
 import SpecialistsSection from "../components/landing/SpecialistsSection";
 import ReviewsSection from "../components/landing/ReviewsSection";
-import TestButton from "../components/buttons/LandingButton";
 
 
 export default function Landing() {
   return (
+    // id="conteudo": destino do link "Pular para o conteúdo" (SkipLink)
     <main id="conteudo">
       <Hero/>
 
@@ -33,14 +31,12 @@ export default function Landing() {
       <ReviewsSection/>
 
       {/* Secao CTA Final */}
-      <section className="grid min-h-screen items-center ">
+      {/* No desktop a chamada final ocupa uma tela e fica centralizada;
+          no celular segue o fluxo normal (sem espaço vazio) */}
+      <div className="grid items-center lg:min-h-screen">
         <CTASection/>
-      </section>
-      
+      </div>
 
-
-      {/* Footer  */}
-      <Footer/>
 
       
     </main>

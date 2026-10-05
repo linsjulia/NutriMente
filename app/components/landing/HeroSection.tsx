@@ -1,5 +1,5 @@
-"use client";
 
+import Image from "next/image";
 import FadeScroll from "../fade-effect/FadeScroll";
 import CarouselHeroSection from "../CarouselHeroSection";
 import Button from "../buttons/LandingButton";
@@ -12,10 +12,14 @@ export default function Hero() {
           {/* Conteúdo principal */}
           <div className="relative z-10 flex w-full flex-col justify-center gap-6 overflow-hidden bg-green-100 px-6 sm:px-10 md:px-12 lg:w-1/2 lg:px-20">
             <div className="max-w-3xl">
-              <img
+              {/* Logo original tem 1916px; aqui aparece com 160-192px */}
+              <Image
                 src="/logo/nutrimente-v2.png"
-                alt="Nutrimente"
-                className="w-40 sm:w-48"
+                alt="NutriMente"
+                width={192}
+                height={194}
+                preload
+                className="h-auto w-40 sm:w-48"
               />
 
               <h1 className="font-fraunces text-3xl leading-tight sm:text-4xl md:text-5xl xl:text-6xl">
@@ -29,7 +33,7 @@ export default function Hero() {
               </h2>
             </div>
 
-            <Button href="/login" />
+            <Button href="/register/patient" />
 
             <div className="flex flex-col gap-4 font-bold sm:flex-row sm:flex-wrap sm:gap-8">
               <div className="flex items-center gap-2">

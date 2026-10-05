@@ -12,7 +12,7 @@ import TestButton from "../components/buttons/LandingButton";
 
 export default function Landing() {
   return (
-    <main>
+    <main id="conteudo">
       <Hero/>
 
       {/* Primeiros passos do site */}

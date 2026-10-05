@@ -133,7 +133,7 @@ Responsável pela interface e experiência de interação dos usuários.
 
 **Java + Spring Boot**
 
-Responsável pela API REST e pelas regras de negócio da aplicação.
+Responsável pela API REST e pelas regras de negócio: cadastro, login, confirmação de e-mail, perfis e permissões por papel. Detalhes em [backend/README.md](backend/README.md).
 
 **Node.js**
 
@@ -168,6 +168,8 @@ Sobe os bancos e o serviço de logs com um único comando, sem instalar nada al�
 ---
 
 # 🚀 Instalação e execução
+
+> 📘 **Primeira vez?** Siga o guia completo, com requisitos de computador, instalação de cada programa e solução de problemas: **[docs/INSTALACAO.md](docs/INSTALACAO.md)**. Abaixo está o resumo.
 
 ### 1. Pré-requisitos
 
@@ -212,7 +214,7 @@ Abra o `.env` e troque as senhas. A senha do SQL Server precisa ter **8 ou mais 
 
 > 🔐 O `.env` guarda senhas e **nunca** deve ser enviado ao GitHub. Ele já está no `.gitignore`.
 
-### 4. Subir os bancos de dados
+### 4. Subir o back-end (bancos, API e serviços)
 
 Com o **Docker Desktop aberto**, rode na pasta do projeto:
 
@@ -226,7 +228,7 @@ Na primeira vez ele baixa as imagens (alguns minutos). Depois, confira se está 
 docker compose ps
 ```
 
-Os três serviços (`nutrimente-sqlserver`, `nutrimente-mongodb` e `nutrimente-logs-service`) devem aparecer como **healthy**. O SQL Server leva uns 30 segundos para ficar pronto.
+Os cinco serviços (`nutrimente-sqlserver`, `nutrimente-mongodb`, `nutrimente-logs-service`, `nutrimente-mailpit` e `nutrimente-api`) devem aparecer como **healthy** ou **running**. Na primeira vez, a API espera o banco terminar de ser criado: pode levar 1 a 2 minutos.
 
 O banco, as tabelas e os dados iniciais são criados automaticamente. Para ver o andamento:
 
@@ -253,6 +255,15 @@ Acesse http://localhost:3000 no navegador.
 | SQL Server | `localhost,1433` |
 | MongoDB | `mongodb://localhost:27017` |
 | Serviço de logs | http://localhost:4000/health |
+| API Java | http://localhost:8080/actuator/health |
+| E-mails de teste (Mailpit) | http://localhost:8025 |
+
+### 7. Primeiro acesso
+
+- **Administrador**: entre com `ADMIN_EMAIL` e `ADMIN_PASSWORD` do `.env`. Ele aprova os profissionais.
+- **Cadastro**: os e-mails de confirmação não vão para a sua caixa de entrada; abra o **Mailpit** (http://localhost:8025) e clique no link.
+- As rotas da API e as regras de cada papel estão em [backend/README.md](backend/README.md).
+- O mapa de papéis e fluxos (paciente, profissional, admin) está em `docs/PAPEIS-E-FLUXOS.md` (branch do front).
 
 ### Comandos do dia a dia
 
@@ -266,14 +277,18 @@ Acesse http://localhost:3000 no navegador.
 | `docker compose down -v` | Desliga e **apaga** os dados; na próxima subida tudo é recriado do zero |
 | `cd database/tests && npm test` | Roda os testes de integração dos bancos (containers ligados; `npm install` na 1ª vez) |
 | `cd services/logs-service && npm test` | Roda os testes de integração do serviço de logs (containers ligados; `npm install` na 1ª vez) |
+| `npm run test:e2e` | Testes do front no navegador: fluxos completos (precisa do `docker compose` no ar) e auditoria de acessibilidade. Na 1ª vez: `npx playwright install chromium` |
+| `docker compose logs -f api` | Acompanha os logs da API Java |
+| `docker compose up -d --build api` | Recompila e reinicia a API depois de mudar o código Java |
 
 ### Problemas comuns
 
 | Sintoma | Solução |
 |---|---|
 | `error during connect` ou `cannot find the file specified` | O Docker Desktop não está aberto. Abra e espere o ícone ficar verde. |
-| `port is already allocated` | A porta já está em uso (ex.: um SQL Server instalado no PC). Mude `MSSQL_PORT`, `MONGO_PORT` ou `LOGS_SERVICE_PORT` no `.env`. |
+| `port is already allocated` | A porta já está em uso (ex.: um SQL Server instalado no PC). Mude a porta correspondente no `.env` (`MSSQL_PORT`, `MONGO_PORT`, `LOGS_SERVICE_PORT`, `API_PORT`, `MAILPIT_UI_PORT`). |
 | `nutrimente-sqlserver` reiniciando sem parar | A senha `MSSQL_SA_PASSWORD` é fraca. Troque no `.env` e rode `docker compose down -v` e depois `docker compose up -d --build`. |
+| `nutrimente-api` reiniciando sem parar | Veja o motivo com `docker compose logs api`. O mais comum é `JWT_SECRET` vazio ou com menos de 32 caracteres. |
 | Alterei um script `.sql` e nada mudou | Os scripts só rodam na criação do banco. Rode `docker compose down -v` e suba de novo (apaga os dados locais). |
 
 ### Fluxo de contribuição

@@ -12,6 +12,13 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Projetos separados, com as próprias ferramentas (não são o Next.js)
+    "backend/**",
+    "services/**",
+    "database/**",
+    // Relatórios gerados pelos testes
+    "test-results/**",
+    "playwright-report/**",
   ]),
 ]);
 

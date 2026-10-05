@@ -1,46 +1,20 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Open_Sans, Fraunces } from "next/font/google";
-import "../globals.css";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
+import { getSession, homeFor } from "../lib/session";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// Layout das páginas públicas com cabeçalho (home, profissionais, sobre...).
+// <html>, <body>, fontes e acessibilidade ficam no layout raiz (app/layout.tsx).
+// Lê a sessão só para o cabeçalho mostrar "Entrar" ou "Minha área".
+export default async function MainLayout({ children }: LayoutProps<"/">) {
+  const session = await getSession();
+  const user = session ? { name: session.name, home: homeFor(session.role) } : null;
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const openSans = Open_Sans({
-  variable: "--font-open-sans",
-  subsets: ["latin"],
-})
-
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"]
-})
-
-export const metadata: Metadata = {
-  title: "NutriMente",
-  description: "Plataforma que conecta pacientes a profissionais da área da nutrição e psicologia",
-  icons: {
-    icon: "/logo/nutrimente-v3.png"
-  }
-};
-
-export default function MainLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${openSans.variable} ${fraunces.variable} text-blue2 font-open-sans h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col text-blue2 {`${openSans.variable} font-open-sans`}">
-        <Header/>
-        {children}
-        </body>
-    </html>
+    <>
+      <Header user={user} />
+      {children}
+      {/* Rodapé em todas as páginas públicas (antes só aparecia na home) */}
+      <Footer />
+    </>
   );
 }

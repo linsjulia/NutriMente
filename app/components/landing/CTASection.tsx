@@ -23,7 +23,7 @@ export default function CTASection() {
             <h2 className="font-fraunces text-3xl font-medium text-white md:text-4xl">
               Pronto para transformar sua saúde mental e alimentar?
             </h2>
-            <LandingButton href="/login" />
+            <LandingButton href="/register/patient" />
           </div>
 
           {/* Foto: mobile no fluxo normal / desktop absoluta, proporcional ao card */}

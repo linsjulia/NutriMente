@@ -18,6 +18,7 @@ import {
   PASSWORD,
   randomCpf,
   randomCrn,
+  reloadAndSettle,
   uniqueEmail,
 } from "./helpers";
 
@@ -104,7 +105,7 @@ test("profissional escolhe especialidades (limite de 5) e o paciente filtra a bu
   const first = (await boxes.nth(0).getAttribute("id"))!;
   await page.getByRole("button", { name: "Salvar perfil" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Perfil profissional atualizado");
-  await page.reload();
+  await reloadAndSettle(page, page.locator(`#${first}`));
   await expect(page.locator(`#${first}`)).toBeChecked();
   await expect(specialties.getByLabel("Nutrição Esportiva")).toBeChecked();
   await expect(specialties.getByText("2 de 5 escolhidas")).toBeVisible();

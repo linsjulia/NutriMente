@@ -1,6 +1,6 @@
 // Utilidades dos testes de ponta a ponta (front + API + banco + e-mail).
 
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 export const API_URL = process.env.API_URL ?? "http://localhost:8080";
 export const MAILPIT_URL = process.env.MAILPIT_URL ?? `http://localhost:${process.env.MAILPIT_UI_PORT ?? 8025}`;
@@ -55,6 +55,20 @@ export async function login(page: Page, email: string, password = PASSWORD) {
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Senha", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
+}
+
+/**
+ * Recarrega a página e espera o streaming do Next terminar.
+ *
+ * Nas páginas com loading.tsx, o Next manda primeiro o "Carregando..." e
+ * depois o conteúdo. Por ~150 ms o HTML tem DUAS cópias do conteúdo (uma
+ * escondida, que está sendo encaixada no lugar). A pessoa só vê uma, mas um
+ * teste que olha nesse instante encontra dois campos e falha. Esperar o
+ * elemento existir uma vez só garante que a troca terminou.
+ */
+export async function reloadAndSettle(page: Page, element: Locator) {
+  await page.reload();
+  await expect(element).toHaveCount(1);
 }
 
 export async function logout(page: Page) {

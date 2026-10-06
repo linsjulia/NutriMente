@@ -15,6 +15,7 @@ import {
   randomCpf,
   randomCrn,
   registerPatient,
+  reloadAndSettle,
   uniqueEmail,
 } from "./helpers";
 
@@ -125,14 +126,14 @@ test.describe("com back-end", () => {
     await price.fill("1.000,50");
     await page.getByRole("button", { name: "Salvar perfil" }).click();
     await expect(page.getByRole("main").getByRole("status")).toContainText("Perfil profissional atualizado");
-    await page.reload();
+    await reloadAndSettle(page, page.getByLabel("Valor da consulta (R$)"));
     await expect(page.getByLabel("Valor da consulta (R$)")).toHaveValue("1.000,50");
 
     await page.getByLabel("Valor da consulta (R$)").fill("abc");
     await page.getByRole("button", { name: "Salvar perfil" }).click();
     await expect(page.getByText("Valor inválido. Use só números")).toBeVisible();
     await expect(page.getByLabel("Valor da consulta (R$)")).toBeFocused();
-    await page.reload();
+    await reloadAndSettle(page, page.getByLabel("Valor da consulta (R$)"));
     await expect(page.getByLabel("Valor da consulta (R$)")).toHaveValue("1.000,50"); // não apagou
     await deleteAccountViaApi(email);
   });

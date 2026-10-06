@@ -29,10 +29,11 @@ const allowedDevOrigins = (process.env.ALLOWED_DEV_ORIGINS ?? "")
   .filter(Boolean);
 
 const nextConfig: NextConfig = {
-  // Gera em .next/standalone uma versão enxuta do site, só com o necessário
-  // para rodar em produção (usada pelo Dockerfile do deploy). Não muda nada
-  // no "npm run dev".
-  output: "standalone",
+  // "standalone" gera em .next/standalone uma versão enxuta do site para rodar
+  // em Docker (deploy na VPS). Só liga quando o Dockerfile pede
+  // (NEXT_OUTPUT=standalone): o Vercel tem o próprio jeito de empacotar o
+  // Next, e o deploy dele falha com esse modo ligado.
+  output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   allowedDevOrigins,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

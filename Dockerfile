@@ -19,6 +19,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Liga o modo "standalone" do next.config.ts (só para a imagem Docker)
+ENV NEXT_OUTPUT=standalone
 RUN npm run build
 
 # 3) Imagem final: só o necessário para rodar

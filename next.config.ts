@@ -29,6 +29,10 @@ const allowedDevOrigins = (process.env.ALLOWED_DEV_ORIGINS ?? "")
   .filter(Boolean);
 
 const nextConfig: NextConfig = {
+  // Gera em .next/standalone uma versão enxuta do site, só com o necessário
+  // para rodar em produção (usada pelo Dockerfile do deploy). Não muda nada
+  // no "npm run dev".
+  output: "standalone",
   allowedDevOrigins,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];

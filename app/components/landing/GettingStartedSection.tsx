@@ -1,3 +1,4 @@
+import Image from "next/image";
 import FadeScroll from "../fade-effect/FadeScroll";
 
 const steps = [
@@ -60,9 +61,11 @@ export default function GettingStartedSection() {
                 </p>
 
                 <div className="mt-auto flex h-20 items-end justify-center pt-8">
-                  <img
+                  <Image
                     src={step.icon}
                     alt=""
+                    width={64}
+                    height={64}
                     className="h-16 w-16 object-contain"
                   />
                 </div>

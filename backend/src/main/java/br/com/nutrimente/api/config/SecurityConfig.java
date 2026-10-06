@@ -41,6 +41,7 @@ public class SecurityConfig {
 						// Rotas públicas
 						.requestMatchers("/api/auth/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/professionals/**").permitAll()
+						.requestMatchers(HttpMethod.GET, "/api/specialties").permitAll()
 						.requestMatchers("/actuator/health/**").permitAll()
 						.requestMatchers("/error").permitAll()
 						// Área administrativa: só ADMIN

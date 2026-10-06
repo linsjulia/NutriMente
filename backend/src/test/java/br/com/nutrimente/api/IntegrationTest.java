@@ -145,6 +145,10 @@ public abstract class IntegrationTest {
 		return send(put(url), token, json);
 	}
 
+	protected ResultActions postAs(String url, String token, String json) throws Exception {
+		return send(post(url), token, json);
+	}
+
 	protected ResultActions patchAs(String url, String token, String json) throws Exception {
 		return send(patch(url), token, json);
 	}

@@ -76,14 +76,20 @@ test("todas as 24 tabelas foram criadas", async () => {
   assert.equal(recordset[0].total, 24);
 });
 
+// O admin pode cadastrar especialidades novas (/admin/specialties), então
+// o teste confere que as 12 do seed EXISTEM, e não que sejam as únicas.
 test("seed cadastrou as 12 especialidades (6 de cada profissão)", async () => {
-  const { recordset } = await pool.query(
-    "SELECT professional_type, COUNT(*) AS total FROM specialties GROUP BY professional_type ORDER BY professional_type"
-  );
-  assert.deepEqual(
-    recordset.map((r) => [r.professional_type, r.total]),
-    [["NUTRICIONISTA", 6], ["PSICOLOGO", 6]]
-  );
+  const seed = {
+    NUTRICIONISTA: ["Nutrição Clínica", "Nutrição Esportiva", "Nutrição Comportamental", "Emagrecimento",
+      "Nutrição Materno-Infantil", "Vegetarianismo e Veganismo"],
+    PSICOLOGO: ["Transtornos Alimentares", "Ansiedade", "Depressão", "Terapia Cognitivo-Comportamental",
+      "Psicologia da Saúde", "Autoestima e Imagem Corporal"],
+  };
+  const { recordset } = await pool.query("SELECT name, professional_type FROM specialties");
+  for (const [type, names] of Object.entries(seed)) {
+    const found = recordset.filter((r) => r.professional_type === type).map((r) => r.name);
+    for (const name of names) assert.ok(found.includes(name), `falta "${name}" (${type})`);
+  }
 });
 
 test("busca ignora acentos e maiúsculas (collation CI_AI)", async () => {

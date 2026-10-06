@@ -3,10 +3,12 @@ package br.com.nutrimente.api.account;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import br.com.nutrimente.api.common.validation.Celular;
 import br.com.nutrimente.api.common.validation.FullName;
 import br.com.nutrimente.api.common.validation.StrongPassword;
+import br.com.nutrimente.api.specialty.SpecialtyDto;
 import br.com.nutrimente.api.user.Gender;
 import br.com.nutrimente.api.user.Professional;
 import br.com.nutrimente.api.user.ProfessionalType;
@@ -60,11 +62,12 @@ public final class AccountDtos {
 			String document,
 			String bio,
 			BigDecimal consultationPrice,
-			VerificationStatus verificationStatus) {
+			VerificationStatus verificationStatus,
+			List<SpecialtyDto> specialties) {
 
 		static ProfessionalProfile of(Professional p) {
 			return new ProfessionalProfile(p.getType(), p.getDocument(), p.getBio(), p.getConsultationPrice(),
-					p.getVerificationStatus());
+					p.getVerificationStatus(), p.getSpecialties().stream().map(SpecialtyDto::of).toList());
 		}
 	}
 
@@ -82,7 +85,11 @@ public final class AccountDtos {
 			Gender gender) {
 	}
 
-	/** Só profissionais: bio e valor da consulta */
+	/**
+	 * Só profissionais: bio, valor da consulta e especialidades.
+	 * specialtyIds: lista com os ids escolhidos ([] = nenhuma).
+	 * Se o campo não vier no JSON (null), as especialidades não mudam.
+	 */
 	public record UpdateProfessionalProfileRequest(
 			@Size(max = 500, message = "A bio pode ter até 500 caracteres")
 			String bio,
@@ -90,7 +97,13 @@ public final class AccountDtos {
 			@DecimalMin(value = "0.00", message = "O valor não pode ser negativo")
 			@DecimalMax(value = "9999.99", message = "Valor muito alto")
 			@Digits(integer = 4, fraction = 2, message = "Use no máximo 2 casas decimais")
-			BigDecimal consultationPrice) {
+			BigDecimal consultationPrice,
+
+			@Size(max = MAX_SPECIALTIES, message = "Escolha no máximo " + MAX_SPECIALTIES + " especialidades")
+			List<Integer> specialtyIds) {
+
+		/** Limite para o perfil continuar objetivo para o paciente */
+		public static final int MAX_SPECIALTIES = 5;
 	}
 
 	public record ChangePasswordRequest(

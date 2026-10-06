@@ -32,7 +32,8 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | POST | `/api/auth/login` | Login: devolve o token JWT |
 | POST | `/api/auth/forgot-password` | Envia o link de redefinição de senha |
 | POST | `/api/auth/reset-password` | Define a nova senha (`{"token", "password"}`) |
-| GET | `/api/professionals?type=PSICOLOGO` | Profissionais aprovados (paginado) |
+| GET | `/api/professionals?type=PSICOLOGO&specialty=3` | Profissionais aprovados (paginado), com as especialidades; filtros opcionais |
+| GET | `/api/specialties?type=NUTRICIONISTA` | Especialidades (todas ou de uma profissão) |
 | GET | `/api/professionals/{id}` | Um profissional aprovado |
 
 ### Com login (header `Authorization: Bearer <token>`)
@@ -43,9 +44,11 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | PUT | `/api/me` | todos | Editar nome, celular e gênero |
 | PUT | `/api/me/password` | todos | Trocar a senha |
 | DELETE | `/api/me` | PATIENT, PROFESSIONAL | Excluir a conta (pede a senha; os dados pessoais são anonimizados) |
-| PUT | `/api/me/professional-profile` | PROFESSIONAL | Editar bio e valor da consulta |
+| PUT | `/api/me/professional-profile` | PROFESSIONAL | Editar bio, valor da consulta e especialidades (`specialtyIds`, até 5, da própria profissão) |
 | GET | `/api/admin/professionals?status=PENDING` | ADMIN | Fila de verificação |
 | PATCH | `/api/admin/professionals/{id}/verification` | ADMIN | `{"status": "APPROVED"}` ou `"REJECTED"` |
+| POST | `/api/admin/specialties` | ADMIN | Nova especialidade `{"name", "type"}` |
+| DELETE | `/api/admin/specialties/{id}` | ADMIN | Remove (sai também do perfil de quem a marcou) |
 
 ### Formato dos erros
 
@@ -82,7 +85,8 @@ src/main/java/br/com/nutrimente/api/
 ├── auth/          cadastro, login, confirmação de e-mail, senha
 ├── account/       "minha conta" (/api/me)
 ├── professional/  lista pública de profissionais
-├── admin/         aprovação de profissionais
+├── admin/         aprovação de profissionais e cadastro de especialidades
+├── specialty/     especialidades (lista pública)
 ├── user/          entidades User, Patient, Professional e repositórios
 ├── notification/  e-mails
 ├── logging/       envio de logs para o serviço Node.js

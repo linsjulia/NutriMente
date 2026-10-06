@@ -7,8 +7,18 @@ import { FormAlert, SubmitButton } from "@/app/components/form/FormParts";
 import type { FormState } from "@/app/lib/form";
 import { formatBRL } from "@/app/lib/money";
 import { useFocusOnError } from "@/app/components/form/useFocusOnError";
+import type { Specialty } from "@/app/lib/types";
+import SpecialtyPicker from "./SpecialtyPicker";
 
-export default function ProfessionalProfileForm({ bio, consultationPrice }: { bio: string | null; consultationPrice: number | null }) {
+type Props = {
+  bio: string | null;
+  consultationPrice: number | null;
+  /** null = a lista não carregou (a API ficou fora); o resto do formulário funciona */
+  specialtyOptions: Specialty[] | null;
+  specialtyIds: number[];
+};
+
+export default function ProfessionalProfileForm({ bio, consultationPrice, specialtyOptions, specialtyIds }: Props) {
   const [state, action, pending] = useActionState<FormState, FormData>(updateProfessionalProfile, {});
   const resultRef = useRef<HTMLFormElement>(null);
   useFocusOnError(resultRef, state);
@@ -45,6 +55,17 @@ export default function ProfessionalProfileForm({ bio, consultationPrice }: { bi
         error={state.errors?.consultationPrice}
         className="max-w-xs"
       />
+      {specialtyOptions ? (
+        <SpecialtyPicker
+          // Depois de um erro, mantém o que a pessoa marcou (e não o que estava salvo)
+          key={values?.specialtyIds ?? "salvo"}
+          options={specialtyOptions}
+          selected={values?.specialtyIds != null ? values.specialtyIds.split(",").filter(Boolean).map(Number) : specialtyIds}
+          error={state.errors?.specialtyIds}
+        />
+      ) : (
+        <p className="text-sm text-gray-700">Não conseguimos carregar as especialidades agora. Tente de novo em instantes.</p>
+      )}
       <SubmitButton pending={pending} className="self-start">
         Salvar perfil
       </SubmitButton>

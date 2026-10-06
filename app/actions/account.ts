@@ -27,7 +27,9 @@ export async function updateProfile(_state: FormState, formData: FormData): Prom
 
 export async function updateProfessionalProfile(_state: FormState, formData: FormData): Promise<FormState> {
   const session = await requireRole("PROFESSIONAL");
-  const values = formValues(formData);
+  // Várias caixas marcadas = vários "specialtyIds" no formulário (getAll)
+  const specialtyIds = formData.getAll("specialtyIds").map(Number).filter(Number.isInteger);
+  const values = { ...formValues(formData, "specialtyIds"), specialtyIds: specialtyIds.join(",") };
   const price = parseBRL(text(formData, "consultationPrice"));
   if (!price.ok) {
     return {
@@ -40,7 +42,12 @@ export async function updateProfessionalProfile(_state: FormState, formData: For
   const result = await api("/api/me/professional-profile", {
     method: "PUT",
     token: session.token,
-    body: { bio: text(formData, "bio") || null, consultationPrice: price.value },
+    body: {
+      bio: text(formData, "bio") || null,
+      consultationPrice: price.value,
+      // Só envia se a lista apareceu na tela; senão a API mantém as atuais
+      ...(formData.has("specialtiesShown") ? { specialtyIds } : {}),
+    },
   });
   if (!result.ok) return fromApiError(result.error, values);
   revalidatePath("/dashboard");

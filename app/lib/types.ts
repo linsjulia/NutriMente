@@ -6,6 +6,8 @@ export type Gender = "FEMALE" | "MALE" | "OTHER" | "UNDISCLOSED";
 export type ProfessionalType = "NUTRICIONISTA" | "PSICOLOGO";
 export type VerificationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
+export type Specialty = { id: number; name: string; type: ProfessionalType };
+
 export type Me = {
   id: number;
   name: string;
@@ -22,6 +24,7 @@ export type Me = {
     bio: string | null;
     consultationPrice: number | null;
     verificationStatus: VerificationStatus;
+    specialties: Specialty[];
   } | null;
 };
 
@@ -34,6 +37,7 @@ export type PublicProfessional = {
   consultationPrice: number | null;
   ratingAverage: number;
   ratingCount: number;
+  specialties: Specialty[];
 };
 
 export type ProfessionalForReview = {

@@ -18,7 +18,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { AArrowDown, AArrowUp, Accessibility, Contrast, RotateCcw, X } from "lucide-react";
-import { useAccessibility } from "./AccessibilityProvider";
+import { useAccessibility } from "./useAccessibility";
 import { AccessibilityPreferences, FONT_SCALES } from "./preferences";
 
 type ToggleKey = Exclude<keyof AccessibilityPreferences, "fontLevel">;

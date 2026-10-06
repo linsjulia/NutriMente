@@ -36,7 +36,7 @@ As escolhas ficam salvas no navegador e valem para todas as páginas e visitas.
 ```text
 app/components/accessibility/
 ├── preferences.ts             tipos, padrões, salvar/ler e aplicar no <html>
-├── AccessibilityProvider.tsx  estado compartilhado entre os componentes
+├── useAccessibility.ts        lê e altera as preferências (store + hook, sem Context)
 ├── AccessibilityMenu.tsx      o botão flutuante e o painel com as opções
 └── SkipLink.tsx               link "Pular para o conteúdo"
 ```
@@ -50,10 +50,10 @@ Clique em "Alto contraste"
 AccessibilityMenu chama update({ highContrast: true })
    │
    ▼
-AccessibilityProvider:
+useAccessibility (store):
    1. salva no localStorage ("nutrimente:a11y")
    2. coloca data-a11y-contrast="high" na tag <html>
-   3. avisa os componentes que usam useAccessibility()
+   3. avisa só os componentes que usam useAccessibility() (o menu)
    │
    ▼
 globals.css tem a regra html[data-a11y-contrast="high"] { ... }

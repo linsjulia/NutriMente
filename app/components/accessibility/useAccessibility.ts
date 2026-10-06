@@ -1,18 +1,29 @@
 "use client";
 
 // =============================================================
-// AccessibilityProvider
+// useAccessibility
 //
-// Guarda as preferências de acessibilidade num "Context" do React: um jeito
-// de compartilhar um estado com QUALQUER componente da árvore sem passar
-// props de pai para filho. Qualquer componente pode fazer:
+// Lê e altera as preferências de acessibilidade (tamanho da fonte e alto
+// contraste). Uso:
 //
-//   const { prefs } = useAccessibility();
-//   if (prefs.highContrast) { ... }
+//   const { prefs, update, reset } = useAccessibility();
+//   update({ highContrast: true });
 //
+// Por que NÃO usamos Context (<Provider> em volta do site)?
+// Antes havia um AccessibilityProvider envolvendo a página inteira. Logo
+// depois de abrir a página, ele trocava as preferências padrão pelas salvas,
+// e o valor do Context mudava. No React, uma mudança de Context que chega a
+// um trecho que ainda está recebendo HTML do servidor (streaming, com o
+// loading.tsx) faz o React DESCARTAR esse HTML e desenhar tudo de novo no
+// navegador. Resultado: trabalho em dobro e uma cópia escondida do conteúdo
+// sobrando na página (os testes chegavam a encontrar dois formulários).
+//
+// Agora cada componente que precisa das preferências lê direto do "store"
+// abaixo com useSyncExternalStore. Quando elas mudam, só esses componentes
+// são atualizados; o resto da página nem fica sabendo.
 // =============================================================
 
-import { createContext, useContext, useLayoutEffect, useSyncExternalStore } from "react";
+import { useLayoutEffect, useSyncExternalStore } from "react";
 import {
   AccessibilityPreferences,
   DEFAULT_PREFERENCES,
@@ -58,23 +69,19 @@ function setPreferences(next: AccessibilityPreferences) {
   listeners.forEach((listener) => listener());
 }
 
+/** Altera uma ou mais preferências, salva e aplica na página */
+function update(changes: Partial<AccessibilityPreferences>) {
+  setPreferences({ ...getSnapshot(), ...changes });
+}
+
+/** Volta tudo ao padrão */
+function reset() {
+  setPreferences(DEFAULT_PREFERENCES);
+}
+
 // -------------------------------------------------------------
 
-type AccessibilityContextValue = {
-  prefs: AccessibilityPreferences;
-  /** Altera uma ou mais preferências, salva e aplica na página */
-  update: (changes: Partial<AccessibilityPreferences>) => void;
-  /** Volta tudo ao padrão */
-  reset: () => void;
-};
-
-const AccessibilityContext = createContext<AccessibilityContextValue | null>(null);
-
-const update = (changes: Partial<AccessibilityPreferences>) =>
-  setPreferences({ ...getSnapshot(), ...changes });
-const reset = () => setPreferences(DEFAULT_PREFERENCES);
-
-export function AccessibilityProvider({ children }: { children: React.ReactNode }) {
+export function useAccessibility() {
   const prefs = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   // Em desenvolvimento, o Strict Mode do React "remonta" a página e apaga os
@@ -85,17 +92,5 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     applyPreferences(getSnapshot());
   }, []);
 
-  return (
-    <AccessibilityContext.Provider value={{ prefs, update, reset }}>
-      {children}
-    </AccessibilityContext.Provider>
-  );
-}
-
-export function useAccessibility() {
-  const context = useContext(AccessibilityContext);
-  if (!context) {
-    throw new Error("useAccessibility precisa estar dentro de <AccessibilityProvider>");
-  }
-  return context;
+  return { prefs, update, reset };
 }

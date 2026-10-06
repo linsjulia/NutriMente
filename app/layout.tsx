@@ -3,7 +3,6 @@ import { Geist, Geist_Mono, Open_Sans, Fraunces } from "next/font/google";
 import "./globals.css";
 import SkipLink from "./components/accessibility/SkipLink";
 import AccessibilityMenu from "./components/accessibility/AccessibilityMenu";
-import { AccessibilityProvider } from "./components/accessibility/AccessibilityProvider";
 import { INLINE_APPLY_SCRIPT } from "./components/accessibility/preferences";
 
 const geistSans = Geist({
@@ -55,12 +54,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       {/* pb-20: espaço para o botão flutuante de acessibilidade não cobrir o fim da página */}
       <body className="min-h-full flex flex-col pb-20 text-blue2 font-open-sans sm:pb-0">
-        <AccessibilityProvider>
-          {/* Primeiros itens do Tab: pular conteúdo e menu de acessibilidade */}
-          <SkipLink />
-          <AccessibilityMenu />
-          {children}
-        </AccessibilityProvider>
+        {/* Primeiros itens do Tab: pular conteúdo e menu de acessibilidade.
+            Sem <Provider> em volta: o menu lê as preferências direto do store
+            (ver useAccessibility.ts, que explica o porquê) */}
+        <SkipLink />
+        <AccessibilityMenu />
+        {children}
       </body>
     </html>
   );

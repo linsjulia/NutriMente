@@ -8,7 +8,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -73,6 +76,7 @@ public abstract class IntegrationTest {
 	void cleanUp() {
 		createdUsers.forEach(id -> {
 			// Consultas não somem em cascata (histórico importante): apaga antes do usuário
+			jdbc.update("DELETE FROM reviews WHERE patient_id = ? OR professional_id = ?", id, id);
 			jdbc.update("DELETE FROM appointments WHERE patient_id = ? OR professional_id = ?", id, id);
 			jdbc.update("DELETE FROM users WHERE id = ?", id);
 		});
@@ -201,6 +205,56 @@ public abstract class IntegrationTest {
 		track(email);
 		postJson("/api/auth/verify-email", "{\"token\": \"%s\"}".formatted(capturedVerificationToken(email)));
 		return login(email, PASSWORD);
+	}
+
+	// ---------------- Agenda (usados nos testes de consultas e avaliações) ----------------
+
+	/** Atende todos os dias, o dia inteiro: sempre há horários livres, seja qual for a hora do teste */
+	protected static final String ALL_DAY = """
+			{"windows": [
+			  {"dayOfWeek": 0, "startTime": "00:00", "endTime": "23:59"},
+			  {"dayOfWeek": 1, "startTime": "00:00", "endTime": "23:59"},
+			  {"dayOfWeek": 2, "startTime": "00:00", "endTime": "23:59"},
+			  {"dayOfWeek": 3, "startTime": "00:00", "endTime": "23:59"},
+			  {"dayOfWeek": 4, "startTime": "00:00", "endTime": "23:59"},
+			  {"dayOfWeek": 5, "startTime": "00:00", "endTime": "23:59"},
+			  {"dayOfWeek": 6, "startTime": "00:00", "endTime": "23:59"}
+			]}""";
+
+	protected record Pro(String token, Long id, String email) {
+	}
+
+	/** Profissional aprovado, com preço e agenda aberta todos os dias */
+	protected Pro readyProfessional(String admin) throws Exception {
+		String email = uniqueEmail();
+		String token = registerVerifiedProfessional(email, "NUTRICIONISTA", randomDocument());
+		Long id = jdbc.queryForObject("SELECT id FROM users WHERE email = ?", Long.class, email);
+		putAs("/api/me/professional-profile", token, "{\"consultationPrice\": 150.00}").andExpect(status().isOk());
+		putAs("/api/me/availability", token, ALL_DAY).andExpect(status().isOk());
+		patchAs("/api/admin/professionals/" + id + "/verification", admin, "{\"status\": \"APPROVED\"}")
+				.andExpect(status().isOk());
+		return new Pro(token, id, email);
+	}
+
+	/** Todos os horários livres (startsAt) dos próximos dias */
+	protected List<String> freeSlots(Long professionalId, int days) throws Exception {
+		String body = getAs("/api/professionals/" + professionalId + "/slots?days=" + days, null)
+				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+		return JsonPath.read(body, "$[*].slots[*].startsAt");
+	}
+
+	/** Primeiro horário livre a pelo menos "after" de agora */
+	protected String slotAfter(Long professionalId, Duration after) throws Exception {
+		Instant limit = Instant.now().plus(after);
+		return freeSlots(professionalId, 5).stream().filter(s -> Instant.parse(s).isAfter(limit)).findFirst()
+				.orElseThrow();
+	}
+
+	protected String book(String patientToken, Long professionalId, String startsAt) throws Exception {
+		return postAs("/api/appointments", patientToken,
+				"{\"professionalId\": %d, \"startsAt\": \"%s\", \"notes\": \"Primeira consulta\"}"
+						.formatted(professionalId, startsAt))
+				.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
 	}
 
 	/** Cria um ADMIN direto no banco (não existe cadastro público de admin) e faz login */

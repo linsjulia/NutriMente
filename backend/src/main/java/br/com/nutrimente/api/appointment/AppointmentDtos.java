@@ -88,7 +88,7 @@ public final class AppointmentDtos {
 
 	/**
 	 * Uma consulta como aparece para quem está logado.
-	 * canCancel / canReschedule / canConfirm / canComplete: o que ESTA pessoa
+	 * canCancel / canReschedule / canConfirm / canComplete / canReview: o que ESTA pessoa
 	 * pode fazer agora (a tela só mostra os botões que valem; a API confere de novo).
 	 */
 	public record AppointmentResponse(
@@ -107,6 +107,8 @@ public final class AppointmentDtos {
 			boolean canCancel,
 			boolean canReschedule,
 			boolean canConfirm,
-			boolean canComplete) {
+			boolean canComplete,
+			/** Paciente, consulta realizada e ainda sem avaliação: mostrar "Avaliar" */
+			boolean canReview) {
 	}
 }

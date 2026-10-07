@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,6 +27,7 @@ import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.config.AppProperties;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.notification.EmailService;
+import br.com.nutrimente.api.review.ReviewRepository;
 import br.com.nutrimente.api.user.Patient;
 import br.com.nutrimente.api.user.PatientRepository;
 import br.com.nutrimente.api.user.Professional;
@@ -54,17 +56,19 @@ public class AppointmentService {
 	private final ScheduleService schedule;
 	private final EmailService emailService;
 	private final LogClient logClient;
+	private final ReviewRepository reviews;
 	private final AppProperties.Appointments rules;
 
 	public AppointmentService(AppointmentRepository appointments, PatientRepository patients,
 			ProfessionalRepository professionals, ScheduleService schedule, EmailService emailService,
-			LogClient logClient, AppProperties properties) {
+			LogClient logClient, ReviewRepository reviews, AppProperties properties) {
 		this.appointments = appointments;
 		this.patients = patients;
 		this.professionals = professionals;
 		this.schedule = schedule;
 		this.emailService = emailService;
 		this.logClient = logClient;
+		this.reviews = reviews;
 		this.rules = properties.appointments();
 	}
 
@@ -123,7 +127,12 @@ public class AppointmentService {
 		List<Appointment> found = scope == Scope.PAST
 				? appointments.findPast(userId, now, AppointmentStatus.UPCOMING, limit)
 				: appointments.findUpcoming(userId, now, AppointmentStatus.UPCOMING, limit);
-		return found.stream().map(a -> toResponse(a, userId)).toList();
+		// Quais já foram avaliadas: UMA consulta ao banco para a lista toda
+		List<Long> completedIds = found.stream().filter(a -> a.getStatus() == AppointmentStatus.COMPLETED)
+				.map(a -> a.getId()).toList();
+		Set<Long> reviewed = completedIds.isEmpty() ? Set.of()
+				: Set.copyOf(reviews.findReviewedAppointmentIds(completedIds));
+		return found.stream().map(a -> toResponse(a, userId, reviewed.contains(a.getId()))).toList();
 	}
 
 	@Transactional(readOnly = true)
@@ -339,6 +348,11 @@ public class AppointmentService {
 	}
 
 	private AppointmentResponse toResponse(Appointment a, Long viewerId) {
+		boolean reviewed = a.getStatus() == AppointmentStatus.COMPLETED && reviews.existsByAppointmentId(a.getId());
+		return toResponse(a, viewerId, reviewed);
+	}
+
+	private AppointmentResponse toResponse(Appointment a, Long viewerId, boolean reviewed) {
 		Instant now = Instant.now();
 		boolean viewerIsPatient = isPatient(a, viewerId);
 		boolean beforeStart = now.isBefore(startsAt(a));
@@ -363,6 +377,7 @@ public class AppointmentService {
 				changeable && (!viewerIsPatient || withinPatientLimit),
 				changeable && viewerIsPatient && withinPatientLimit,
 				!viewerIsPatient && a.getStatus() == AppointmentStatus.SCHEDULED && now.isBefore(endsAt(a)),
-				!viewerIsPatient && a.getStatus().isChangeable() && !beforeStart);
+				!viewerIsPatient && a.getStatus().isChangeable() && !beforeStart,
+				viewerIsPatient && a.getStatus() == AppointmentStatus.COMPLETED && !reviewed);
 	}
 }

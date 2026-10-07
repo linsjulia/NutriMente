@@ -71,7 +71,11 @@ public abstract class IntegrationTest {
 
 	@AfterEach
 	void cleanUp() {
-		createdUsers.forEach(id -> jdbc.update("DELETE FROM users WHERE id = ?", id));
+		createdUsers.forEach(id -> {
+			// Consultas não somem em cascata (histórico importante): apaga antes do usuário
+			jdbc.update("DELETE FROM appointments WHERE patient_id = ? OR professional_id = ?", id, id);
+			jdbc.update("DELETE FROM users WHERE id = ?", id);
+		});
 		createdUsers.clear();
 	}
 

@@ -34,6 +34,7 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | POST | `/api/auth/reset-password` | Define a nova senha (`{"token", "password"}`) |
 | GET | `/api/professionals?type=PSICOLOGO&specialty=3&minPrice=100&maxPrice=200&sort=PRICE_ASC` | Profissionais aprovados (paginado), com as especialidades; filtros e ordenação opcionais (detalhes em [docs/API.md](../docs/API.md)) |
 | GET | `/api/specialties?type=NUTRICIONISTA` | Especialidades (todas ou de uma profissão) |
+| GET | `/api/professionals/{id}/slots?from=2026-10-20&days=7` | Horários livres para agendar |
 | GET | `/api/professionals/{id}` | Um profissional aprovado |
 
 ### Com login (header `Authorization: Bearer <token>`)
@@ -46,6 +47,13 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | DELETE | `/api/me` | PATIENT, PROFESSIONAL | Excluir a conta (pede a senha; os dados pessoais são anonimizados) |
 | PUT | `/api/me/professional-profile` | PROFESSIONAL | Editar bio, valor da consulta e especialidades (`specialtyIds`, até 5, da própria profissão) |
 | GET | `/api/admin/professionals?status=PENDING` | ADMIN | Fila de verificação |
+| GET / PUT | `/api/me/availability` | PROFESSIONAL | Horários de atendimento semanais |
+| POST | `/api/appointments` | PATIENT | Agendar consulta |
+| GET | `/api/appointments?scope=UPCOMING\|PAST` | PATIENT, PROFESSIONAL | Minhas consultas (próximas ou histórico) |
+| GET | `/api/appointments/{id}` | participantes | Uma consulta |
+| POST | `/api/appointments/{id}/cancel` | participantes | Cancelar (paciente até 24 h antes) |
+| POST | `/api/appointments/{id}/reschedule` | PATIENT | Remarcar |
+| POST | `/api/appointments/{id}/confirm` / `complete` | PROFESSIONAL | Confirmar / concluir |
 | PATCH | `/api/admin/professionals/{id}/verification` | ADMIN | `{"status": "APPROVED"}` ou `"REJECTED"` |
 | POST | `/api/admin/specialties` | ADMIN | Nova especialidade `{"name", "type"}` |
 | DELETE | `/api/admin/specialties/{id}` | ADMIN | Remove (sai também do perfil de quem a marcou) |
@@ -87,6 +95,7 @@ src/main/java/br/com/nutrimente/api/
 ├── professional/  lista pública de profissionais
 ├── admin/         aprovação de profissionais e cadastro de especialidades
 ├── specialty/     especialidades (lista pública)
+├── appointment/   agenda: horários de atendimento, horários livres e consultas
 ├── user/          entidades User, Patient, Professional e repositórios
 ├── notification/  e-mails
 ├── logging/       envio de logs para o serviço Node.js

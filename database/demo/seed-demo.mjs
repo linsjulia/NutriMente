@@ -12,7 +12,8 @@
 //     bio, valor, especialidades, horários de atendimento e avaliações
 //   - 1 profissional PENDENTE (para mostrar a aprovação pelo admin)
 //   - 6 pacientes, entre eles a paciente de demonstração (Ana Souza) com
-//     consultas futuras (uma confirmada, com link de vídeo) e no histórico
+//     consultas futuras (uma confirmada, com link de vídeo), no histórico e
+//     2 planos de ação (nutrição e psicologia) já em andamento
 //
 // Pode rodar quantas vezes quiser: antes de criar, APAGA só as contas
 // @nutrimente.demo (e as consultas/avaliações delas). Nada mais é tocado.
@@ -451,6 +452,115 @@ async function createUpcoming(professionals, patients) {
   log("8 consultas futuras agendadas (1 confirmada)");
 }
 
+/** Data local (AAAA-MM-DD) de "daysAgo" dias atrás, no fuso da agenda */
+function localDate(daysAgo = 0) {
+  const d = new Date(Date.now() + UTC_OFFSET_HOURS * 3600_000);
+  d.setUTCDate(d.getUTCDate() - daysAgo);
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Planos de ação da paciente de demonstração (pela API, como o profissional
+ * e a paciente fariam nas telas):
+ * - Camila (nutrição): metas, cardápio e checklist, com os últimos 6 dias já
+ *   marcados e HOJE em aberto (para marcar ao vivo na apresentação), e peso
+ * - Mariana (psicologia): rotina de autocuidado. Os dois juntos mostram o
+ *   acompanhamento integrado nutrição + psicologia
+ */
+async function createPlans(professionals, patients) {
+  const ana = patients.ana;
+  const anaToken = await login(ana.email);
+  const camila = professionals.camila;
+  const mariana = professionals.mariana;
+
+  const nutrition = await api("POST", "/api/plans", {
+    token: camila.token,
+    body: {
+      patientId: ana.id,
+      title: "Reeducação alimentar sem neura",
+      description: "Comer com regularidade, mais fibras e água, sem cortar nada que você gosta. Revisamos juntas a cada 15 dias.",
+      startDate: localDate(6),
+      endDate: localDate(-60),
+      goals: [
+        { description: "Perder 3 kg com saúde", targetValue: 3, unit: "kg", dueDate: localDate(-60) },
+        { description: "Comer frutas em 2 refeições por dia" },
+        { description: "Caminhar 30 minutos, 3 vezes por semana" },
+      ],
+      meals: [
+        { mealType: "CAFE_DA_MANHA", mealTime: "07:30", description: "Pão integral com ovo mexido e uma fruta (mamão ou banana)" },
+        { mealType: "LANCHE_MANHA", mealTime: "10:00", description: "Iogurte natural com aveia" },
+        { mealType: "ALMOCO", mealTime: "12:30", description: "Metade do prato com salada e legumes, arroz, feijão e uma proteína grelhada" },
+        { mealType: "LANCHE_TARDE", mealTime: "16:00", description: "Uma fruta e um punhado de castanhas" },
+        { mealType: "JANTAR", mealTime: "19:30", description: "Sopa de legumes com frango desfiado ou omelete com salada" },
+      ],
+      checklist: [
+        { description: "Beber 2 litros de água", frequency: "DAILY" },
+        { description: "Comer pelo menos 2 frutas", frequency: "DAILY" },
+        { description: "Não pular o café da manhã", frequency: "DAILY" },
+        { description: "Planejar as refeições da semana", frequency: "WEEKLY" },
+        { description: "Fazer exame de sangue de rotina", frequency: "ONCE" },
+      ],
+    },
+  });
+
+  // Marcações dos últimos 6 dias (hoje fica em aberto). 1 = fez, 0 = não fez
+  const pattern = {
+    "Beber 2 litros de água": [1, 1, 0, 1, 1, 1],
+    "Comer pelo menos 2 frutas": [1, 0, 1, 1, 0, 1],
+    "Não pular o café da manhã": [1, 1, 1, 1, 1, 1],
+  };
+  for (const item of nutrition.checklist) {
+    const marks = pattern[item.description];
+    if (!marks) continue;
+    for (const [i, done] of marks.entries()) {
+      await api("PUT", `/api/plans/${nutrition.summary.id}/checklist/${item.id}/${localDate(6 - i)}`, {
+        token: anaToken,
+        body: { completed: done === 1 },
+      });
+    }
+  }
+  const weekly = nutrition.checklist.find((i) => i.frequency === "WEEKLY");
+  await api("PUT", `/api/plans/${nutrition.summary.id}/checklist/${weekly.id}/${localDate(2)}`, { token: anaToken, body: { completed: true } });
+  const fruitGoal = nutrition.goals.find((g) => g.description.startsWith("Comer frutas"));
+  await api("PUT", `/api/plans/${nutrition.summary.id}/goals/${fruitGoal.id}`, { token: anaToken, body: { completed: true } });
+
+  // Progresso: pesagens da paciente e uma observação da nutricionista
+  await api("POST", `/api/plans/${nutrition.summary.id}/progress`, {
+    token: anaToken, body: { recordDate: localDate(6), weightKg: 72.4, moodScore: 3, notes: "Começando! Um pouco ansiosa com a mudança." },
+  });
+  await api("POST", `/api/plans/${nutrition.summary.id}/progress`, {
+    token: anaToken, body: { recordDate: localDate(1), weightKg: 71.6, moodScore: 4, notes: "Semana boa, só esqueci a água num dia corrido." },
+  });
+  await api("POST", `/api/plans/${nutrition.summary.id}/progress`, {
+    token: camila.token, body: { recordDate: localDate(1), notes: "Ótima adesão ao café da manhã. Próximo foco: frutas no lanche da tarde." },
+  });
+
+  const psychology = await api("POST", "/api/plans", {
+    token: mariana.token,
+    body: {
+      patientId: ana.id,
+      title: "Rotina de autocuidado",
+      description: "Pequenos hábitos para reconhecer e lidar com a ansiedade no dia a dia.",
+      startDate: localDate(4),
+      goals: [{ description: "Identificar 3 gatilhos de ansiedade" }, { description: "Dormir antes da meia-noite em 5 dias da semana" }],
+      checklist: [
+        { description: "Respiração guiada (5 minutos)", frequency: "DAILY" },
+        { description: "Escrever no diário de emoções", frequency: "DAILY" },
+      ],
+    },
+  });
+  for (const item of psychology.checklist) {
+    const marks = item.description.startsWith("Respiração") ? [1, 1, 0, 1] : [1, 0, 1, 1];
+    for (const [i, done] of marks.entries()) {
+      await api("PUT", `/api/plans/${psychology.summary.id}/checklist/${item.id}/${localDate(4 - i)}`, {
+        token: anaToken,
+        body: { completed: done === 1 },
+      });
+    }
+  }
+  log("2 planos de ação para a Ana (nutrição e psicologia), com checklist e progresso dos últimos dias");
+}
+
 async function clearMailpit() {
   try {
     await fetch(`${MAILPIT}/api/v1/messages`, { method: "DELETE" });
@@ -490,7 +600,9 @@ async function main() {
     await createHistory(db, professionals, patients);
     console.log("6. Próximas consultas");
     await createUpcoming(professionals, patients);
-    console.log("7. Mailpit");
+    console.log("7. Planos de ação");
+    await createPlans(professionals, patients);
+    console.log("8. Mailpit");
     await clearMailpit();
   } finally {
     await db.close();
@@ -499,7 +611,7 @@ async function main() {
   console.log(`
 Pronto! Contas para a apresentação (senha de todas: ${PASSWORD})
 
-  Paciente      ana@${DOMAIN}       consultas futuras e histórico
+  Paciente      ana@${DOMAIN}       consultas, histórico e 2 planos de ação (checklist de hoje em aberto)
   Profissional  camila@${DOMAIN}    nutricionista com agenda movimentada
   Psicóloga     mariana@${DOMAIN}
   Admin         ${ADMIN_EMAIL}  (senha do .env) -> "${PENDING.name}" aguardando aprovação

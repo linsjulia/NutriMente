@@ -1,0 +1,16 @@
+{
+  "name": "nutrimente-dados-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cria dados de demonstração do NutriMente (profissionais, pacientes, consultas e avaliações)",
+  "type": "module",
+  "scripts": {
+    "seed": "node --env-file=../../.env seed-demo.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "mssql": "^11.0.1"
+  }
+}

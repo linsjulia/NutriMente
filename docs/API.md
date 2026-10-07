@@ -4,6 +4,16 @@ Referência das rotas da API Java para quem está construindo as telas. Cada rot
 
 Este arquivo cresce a cada entrega do back-end. **Rotas novas aparecem marcadas com 🆕.**
 
+## Dados para testar as telas
+
+Para não montar telas com o banco vazio, rode o script de demonstração (com o back-end no ar):
+
+```bash
+cd database/demo && npm install && npm run seed
+```
+
+Ele cria profissionais com foto, preço, especialidades, agenda e avaliações, pacientes e consultas. Logins prontos (senha `Demo1234`): **`ana@nutrimente.demo`** (paciente) e **`camila@nutrimente.demo`** (nutricionista). Detalhes em [database/README.md](../database/README.md#dados-de-demonstração).
+
 ## Como chamar a API no front
 
 O navegador **nunca** chama a API direto. Quem chama é o servidor do Next, em páginas (Server Components) ou Server Actions, usando o helper `api()` de `app/lib/api.ts`:

@@ -80,6 +80,7 @@ database/
     └── init/
         └── 01-init-logs.js     # collections de log, validação e TTL
 tests/                          # testes de integração dos dois bancos
+demo/                           # script de dados de demonstração (npm run seed)
 services/
 └── logs-service/               # API Node.js de logs
     ├── src/app.js              # rotas
@@ -178,6 +179,50 @@ npm test
 Cada teste do SQL Server roda dentro de uma **transação desfeita no final** (ROLLBACK), e os do MongoDB apagam o que criaram. Por isso podem rodar a qualquer momento, sem sujar o banco.
 
 Ao criar uma tabela ou regra nova, adicione um teste em `sqlserver.test.js` ou `mongodb.test.js` seguindo os exemplos.
+
+## Dados de demonstração
+
+O script `database/demo/seed-demo.mjs` enche o banco com dados realistas para desenvolver as telas e para a **apresentação**:
+
+| O quê | Detalhes |
+|---|---|
+| 8 profissionais **aprovados** | 4 nutricionistas e 4 psicólogos, com foto, bio, valor, especialidades, horários de atendimento e avaliações |
+| 1 profissional **pendente** | André Nogueira, para mostrar a aprovação pelo admin |
+| 6 pacientes | Entre eles a paciente de demonstração **Ana Souza** |
+| Consultas futuras | 8 agendadas pelo caminho normal da API (com link de vídeo nas online); a da Ana com a Camila já está **confirmada** |
+| Histórico | Consultas realizadas em dias e horários da agenda de cada profissional, com 18 avaliações (a nota média aparece na busca) |
+
+```bash
+# Com o back-end no ar (docker compose up -d --build)
+cd database/demo
+npm install     # só na primeira vez
+npm run seed    # leva ~1 minuto
+```
+
+**Contas criadas** (senha de todas: `Demo1234`):
+
+| Papel | E-mail | Para mostrar |
+|---|---|---|
+| Paciente | `ana@nutrimente.demo` | Próximas consultas (vídeo, cancelar, remarcar) e histórico |
+| Nutricionista | `camila@nutrimente.demo` | Agenda movimentada: confirmar consultas, horários de atendimento |
+| Psicóloga | `mariana@nutrimente.demo` | Outro profissional com consultas |
+| Admin | o `ADMIN_EMAIL` do `.env` | Fila de aprovação com o André |
+
+- **Pode rodar de novo** quando quiser: antes de criar, o script apaga **só** as contas `@nutrimente.demo` e o que depende delas (consultas, avaliações). Nada mais é tocado. As datas são sempre relativas a hoje, então as "próximas consultas" continuam no futuro.
+- Ele usa a própria API para cadastrar, aprovar e agendar (mesmas regras e senhas do uso real) e o banco direto só para confirmar e-mails, criar consultas **no passado** e avaliações.
+- No fim, limpa a caixa do Mailpit.
+
+### Banco limpo para a apresentação
+
+Os testes automáticos criam contas de teste (`@teste.local`), e às vezes alguma sobra aparece na busca. Antes da apresentação, recrie o banco do zero e rode o script:
+
+```bash
+docker compose down -v          # ⚠️ apaga TODOS os dados locais
+docker compose up -d --build    # espere todos ficarem healthy (docker compose ps)
+cd database/demo && npm run seed
+```
+
+**Depois disso, não rode os testes de ponta a ponta (`npm run test:e2e`) na máquina da apresentação**: eles criam contas novas. Se rodar, repita os três comandos acima.
 
 ## Conectando a API Java (Spring Boot)
 

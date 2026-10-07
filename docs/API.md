@@ -359,7 +359,7 @@ Sugestão de tela: no perfil, a nota média em estrelas (`ratingAverage` / `rati
 
 ---
 
-## 🆕 Plano de ação (Etapa 4)
+## Plano de ação (Etapa 4)
 
 O profissional monta um plano para o paciente: **metas**, **rotina alimentar** e **checklist de hábitos**. O paciente marca o checklist todo dia e os dois acompanham o progresso.
 
@@ -473,12 +473,64 @@ A lista traz só o `summary` de cada plano (paciente: os planos que recebeu; pro
 
 ---
 
+## 🆕 Notificações (Etapa 4)
+
+Avisos do "sininho" da área logada. Servem para **qualquer papel** (paciente, profissional, admin) e são gerados sozinhos pela API quando algo acontece:
+
+| Evento | Quem recebe | `type` | `linkUrl` |
+|---|---|---|---|
+| Consulta agendada | profissional (e o paciente, como comprovante) | `APPOINTMENT` | `/appointments/{id}` |
+| Consulta confirmada / remarcada / cancelada | a outra pessoa | `APPOINTMENT` | `/appointments/{id}` |
+| Plano de ação novo ou atualizado; observação do profissional no plano | paciente | `PLAN` | `/plans/{id}` |
+| Avaliação recebida | profissional | `REVIEW` | `/professionals/{id}` |
+| Cadastro aprovado ou recusado | profissional | `SYSTEM` | `/dashboard` |
+
+> Os `linkUrl` são **sugestões de rota** para as telas. Se o front usar outras rotas, avise: elas ficam num lugar só na API (`NotificationLinks.java`).
+
+### `GET /api/notifications/unread-count`
+
+```json
+{ "count": 3 }
+```
+
+Para o número no sininho. É leve: pode ser chamado em toda página da área logada.
+
+### `GET /api/notifications`
+
+Paginada (`page`, `size` até 50, padrão 20), **mais recentes primeiro**:
+
+```json
+{
+  "items": [
+    {
+      "id": 51,
+      "type": "APPOINTMENT",
+      "title": "Consulta confirmada",
+      "body": "Camila Rocha confirmou sua consulta de sexta-feira, 09/10 às 16:00.",
+      "linkUrl": "/appointments/7",
+      "read": false,
+      "createdAt": "2026-10-07T20:30:00Z"
+    }
+  ],
+  "page": 0, "size": 20, "totalItems": 4, "totalPages": 1
+}
+```
+
+### `POST /api/notifications/{id}/read` · `POST /api/notifications/read-all`
+
+- Marca **uma** como lida (devolve a notificação com `read: true`). A notificação de outra pessoa dá **404**.
+- Marca **todas** como lidas: `{ "updated": 3 }`.
+
+Sugestão de tela: sino no cabeçalho com o contador; ao abrir, a lista (ícone por `type`); clicar numa notificação marca como lida e leva ao `linkUrl`; botão "Marcar todas como lidas".
+
+Na demonstração (`npm run seed`), as contas já têm notificações reais: a Ana tem "Consulta confirmada" e "Novo plano de ação"; a Camila, "Nova consulta agendada".
+
+---
+
 ## Outras rotas já existentes
 
 Cadastro, login, confirmação de e-mail, minha conta, perfil do profissional e área do admin já estão em uso pelas telas atuais. A lista completa fica em [backend/README.md](../backend/README.md#rotas). Os exemplos de uso estão nas Server Actions em `app/actions/`.
 
-## Em breve (back-end em andamento)
+## Situação do back-end
 
-| Entrega | Rotas | Previsão |
-|---|---|---|
-| Acompanhamento (Etapa 4) | notificações | até 26/10 |
+Todas as rotas planejadas para a apresentação de **30/10** estão prontas: busca com filtros, perfil, agenda e consultas, avaliações, plano de ação e notificações. Ficam para depois: chat entre paciente e profissional, pagamento (modo de teste), envio de foto e de documento do conselho pela tela.

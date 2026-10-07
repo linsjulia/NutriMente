@@ -32,6 +32,9 @@ import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.config.AppProperties;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.notification.EmailService;
+import br.com.nutrimente.api.notification.Notification;
+import br.com.nutrimente.api.notification.NotificationLinks;
+import br.com.nutrimente.api.notification.NotificationService;
 import br.com.nutrimente.api.plan.PlanDtos.ChecklistInput;
 import br.com.nutrimente.api.plan.PlanDtos.ChecklistView;
 import br.com.nutrimente.api.plan.PlanDtos.DayMark;
@@ -81,17 +84,19 @@ public class PlanService {
 	private final AppointmentRepository appointments;
 	private final EmailService emailService;
 	private final LogClient logClient;
+	private final NotificationService notifications;
 	private final ZoneId zone;
 
 	public PlanService(ActionPlanRepository plans, PatientRepository patients, ProfessionalRepository professionals,
 			AppointmentRepository appointments, EmailService emailService, LogClient logClient,
-			AppProperties properties) {
+			NotificationService notifications, AppProperties properties) {
 		this.plans = plans;
 		this.patients = patients;
 		this.professionals = professionals;
 		this.appointments = appointments;
 		this.emailService = emailService;
 		this.logClient = logClient;
+		this.notifications = notifications;
 		this.zone = ZoneId.of(properties.appointments().timezone());
 	}
 
@@ -138,6 +143,8 @@ public class PlanService {
 		String name = to.getName();
 		String intro = "%s criou um plano de ação para você: \"%s\".".formatted(professional.getUser().getName(),
 				plan.getTitle());
+		notifications.notify(patient.getId(), Notification.Type.PLAN, "Novo plano de ação", intro,
+				NotificationLinks.plan(plan.getId()));
 		AfterCommit.run(() -> emailService.sendPlanNotice(email, name, "Novo plano de ação", intro));
 		audit(professionalId, "PROFESSIONAL", "CREATE", plan);
 		return detail(plan, professionalId);
@@ -148,6 +155,9 @@ public class PlanService {
 		ActionPlan plan = ownedPlan(professionalId, planId);
 		apply(plan, request);
 		plans.flush(); // grava agora: metas e itens novos ganham id antes de montar a resposta
+		notifications.notify(plan.getPatient().getId(), Notification.Type.PLAN, "Plano de ação atualizado",
+				"%s atualizou o plano \"%s\".".formatted(plan.getProfessional().getUser().getName(), plan.getTitle()),
+				NotificationLinks.plan(plan.getId()));
 		audit(professionalId, "PROFESSIONAL", "UPDATE", plan);
 		return detail(plan, professionalId);
 	}
@@ -282,6 +292,11 @@ public class PlanService {
 		plan.getProgress().add(new ProgressRecord(plan, author, date, request.weightKg(), request.moodScore(),
 				Digits.trimToNull(request.notes())));
 		plans.flush(); // o registro novo ganha id antes de montar a resposta
+		if (!plan.isPatient(userId) && request.notes() != null) {
+			notifications.notify(plan.getPatient().getId(), Notification.Type.PLAN, "Nova observação no seu plano",
+					"%s: %s".formatted(author.getName(), Digits.trimToNull(request.notes())),
+					NotificationLinks.plan(plan.getId()));
+		}
 		return detail(plan, userId);
 	}
 

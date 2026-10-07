@@ -145,7 +145,7 @@ Vem em ordem alfabética (por profissão, quando sem `type`). Tipo: `Specialty[]
 
 ---
 
-## 🆕 Agenda e consultas (Etapa 3)
+## Agenda e consultas (Etapa 3)
 
 ### Como funciona
 
@@ -267,10 +267,12 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
   "canCancel": true,
   "canReschedule": true,
   "canConfirm": false,
-  "canComplete": false
+  "canComplete": false,
+  "canReview": false
 }
 ```
 
+- 🆕 `canReview`: `true` para o **paciente** numa consulta `COMPLETED` que ainda não avaliou. Mostre "Avaliar" (ver "Avaliações" abaixo).
 - **`can*` dizem quais botões mostrar** para quem está logado agora. Exemplo: `canConfirm` só é `true` para o profissional, numa consulta `SCHEDULED`. A API confere de novo ao receber a ação.
 - `status`: `SCHEDULED` (agendada), `CONFIRMED` (confirmada), `COMPLETED` (realizada), `CANCELLED` (cancelada), `RESCHEDULED` (remarcada; a nova consulta aponta para ela em `rescheduledFromId`).
 - `videoUrl`: link da videochamada (Jitsi, abre no navegador, sem cadastro). `null` na presencial.
@@ -308,6 +310,55 @@ Cancelar, remarcar e confirmar mandam e-mail para a outra pessoa. Na remarcaçã
 
 ---
 
+## 🆕 Avaliações (Etapa 4)
+
+### `POST /api/appointments/{id}/review`: avaliar uma consulta (PATIENT)
+
+```json
+{ "rating": 5, "comment": "Muito atenciosa, saí com um plano possível de seguir!" }
+```
+
+- `rating`: de 1 a 5 (obrigatório). `comment`: opcional, até 1000 caracteres.
+- Só vale para consulta **realizada** (`COMPLETED`) de que a pessoa foi a paciente, e **uma vez** por consulta. Use `canReview` da consulta para mostrar o botão.
+- A nota média (`ratingAverage`) e a quantidade (`ratingCount`) do profissional são **recalculadas na hora**: a busca e o perfil já mostram a nota nova.
+
+Resposta **201** (mesmo formato da lista abaixo). Erros:
+
+| Erro | Quando |
+|---|---|
+| 400 `VALIDATION_ERROR` | `errors.rating`: "Escolha de 1 a 5 estrelas"; `errors.comment`: comentário longo demais |
+| 409 `NOT_COMPLETED` | A consulta ainda não foi realizada |
+| 409 `ALREADY_REVIEWED` | Essa consulta já foi avaliada |
+| 403 | O profissional tentando avaliar |
+| 404 | A consulta não existe ou não é dessa pessoa |
+
+### `GET /api/professionals/{id}/reviews`: avaliações no perfil (público)
+
+Paginada (`page`, `size` até 50, padrão 10), **das mais recentes para as mais antigas**:
+
+```json
+{
+  "items": [
+    {
+      "id": 31,
+      "rating": 5,
+      "comment": "A Camila é muito acolhedora.",
+      "patientName": "Ana S.",
+      "createdAt": "2026-09-16T14:50:00Z"
+    }
+  ],
+  "page": 0, "size": 10, "totalItems": 4, "totalPages": 1
+}
+```
+
+- `patientName` vem **abreviado** ("Ana S.") por privacidade: quem se consulta com quem é dado de saúde (LGPD). Conta excluída aparece como "Paciente".
+- `comment` pode ser `null` (avaliação só com estrelas).
+- **404** se o profissional não existe ou não está aprovado.
+
+Sugestão de tela: no perfil, a nota média em estrelas (`ratingAverage` / `ratingCount`) e a lista de avaliações. No histórico do paciente, o botão "Avaliar" (quando `canReview`) abre as estrelas e o comentário.
+
+---
+
 ## Outras rotas já existentes
 
 Cadastro, login, confirmação de e-mail, minha conta, perfil do profissional e área do admin já estão em uso pelas telas atuais. A lista completa fica em [backend/README.md](../backend/README.md#rotas). Os exemplos de uso estão nas Server Actions em `app/actions/`.
@@ -316,4 +367,4 @@ Cadastro, login, confirmação de e-mail, minha conta, perfil do profissional e 
 
 | Entrega | Rotas | Previsão |
 |---|---|---|
-| Acompanhamento (Etapa 4) | avaliações, plano de ação, notificações | até 26/10 |
+| Acompanhamento (Etapa 4) | plano de ação, notificações | até 26/10 |

@@ -101,6 +101,12 @@ public class Professional {
 		this.consultationPrice = consultationPrice;
 	}
 
+	/** Nota média e quantidade de avaliações (recalculadas a cada avaliação nova) */
+	public void updateRating(BigDecimal average, int count) {
+		this.ratingAverage = average;
+		this.ratingCount = count;
+	}
+
 	/** Troca todas as especialidades de uma vez (as regras ficam no AccountService) */
 	public void replaceSpecialties(Set<Specialty> newSpecialties) {
 		specialties.clear();

@@ -27,54 +27,6 @@ import br.com.nutrimente.api.IntegrationTest;
 /** Agenda: horários de atendimento, horários livres, agendar, cancelar, remarcar, confirmar e concluir. */
 class AppointmentIntegrationTest extends IntegrationTest {
 
-	/** Atende todos os dias, o dia inteiro: sempre há horários livres, seja qual for a hora do teste */
-	private static final String ALL_DAY = """
-			{"windows": [
-			  {"dayOfWeek": 0, "startTime": "00:00", "endTime": "23:59"},
-			  {"dayOfWeek": 1, "startTime": "00:00", "endTime": "23:59"},
-			  {"dayOfWeek": 2, "startTime": "00:00", "endTime": "23:59"},
-			  {"dayOfWeek": 3, "startTime": "00:00", "endTime": "23:59"},
-			  {"dayOfWeek": 4, "startTime": "00:00", "endTime": "23:59"},
-			  {"dayOfWeek": 5, "startTime": "00:00", "endTime": "23:59"},
-			  {"dayOfWeek": 6, "startTime": "00:00", "endTime": "23:59"}
-			]}""";
-
-	private record Pro(String token, Long id, String email) {
-	}
-
-	/** Profissional aprovado, com preço e agenda aberta todos os dias */
-	private Pro readyProfessional(String admin) throws Exception {
-		String email = uniqueEmail();
-		String token = registerVerifiedProfessional(email, "NUTRICIONISTA", randomDocument());
-		Long id = jdbc.queryForObject("SELECT id FROM users WHERE email = ?", Long.class, email);
-		putAs("/api/me/professional-profile", token, "{\"consultationPrice\": 150.00}").andExpect(status().isOk());
-		putAs("/api/me/availability", token, ALL_DAY).andExpect(status().isOk());
-		patchAs("/api/admin/professionals/" + id + "/verification", admin, "{\"status\": \"APPROVED\"}")
-				.andExpect(status().isOk());
-		return new Pro(token, id, email);
-	}
-
-	/** Todos os horários livres (startsAt) dos próximos dias */
-	private List<String> freeSlots(Long professionalId, int days) throws Exception {
-		String body = getAs("/api/professionals/" + professionalId + "/slots?days=" + days, null)
-				.andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
-		return JsonPath.read(body, "$[*].slots[*].startsAt");
-	}
-
-	/** Primeiro horário livre a pelo menos "after" de agora */
-	private String slotAfter(Long professionalId, Duration after) throws Exception {
-		Instant limit = Instant.now().plus(after);
-		return freeSlots(professionalId, 5).stream().filter(s -> Instant.parse(s).isAfter(limit)).findFirst()
-				.orElseThrow();
-	}
-
-	private String book(String patientToken, Long professionalId, String startsAt) throws Exception {
-		return postAs("/api/appointments", patientToken,
-				"{\"professionalId\": %d, \"startsAt\": \"%s\", \"notes\": \"Primeira consulta\"}"
-						.formatted(professionalId, startsAt))
-				.andExpect(status().isCreated()).andReturn().getResponse().getContentAsString();
-	}
-
 	@Test
 	@DisplayName("horários de atendimento: validação, só o profissional edita, e a lista volta ordenada")
 	void availability() throws Exception {

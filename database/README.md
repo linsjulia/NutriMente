@@ -191,6 +191,7 @@ O script `database/demo/seed-demo.mjs` enche o banco com dados realistas para de
 | 6 pacientes | Entre eles a paciente de demonstração **Ana Souza** |
 | Consultas futuras | 8 agendadas pelo caminho normal da API (com link de vídeo nas online); a da Ana com a Camila já está **confirmada** |
 | Histórico | Consultas realizadas em dias e horários da agenda de cada profissional, com 18 avaliações (a nota média aparece na busca) |
+| Planos de ação | A Ana recebe 2 planos: nutrição (Camila: metas, cardápio, checklist e pesagens) e psicologia (Mariana: autocuidado). Os últimos 6 dias já vêm marcados; **o checklist de hoje fica em aberto** para marcar ao vivo |
 
 ```bash
 # Com o back-end no ar (docker compose up -d --build)
@@ -203,8 +204,8 @@ npm run seed    # leva ~1 minuto
 
 | Papel | E-mail | Para mostrar |
 |---|---|---|
-| Paciente | `ana@nutrimente.demo` | Próximas consultas (vídeo, cancelar, remarcar) e histórico |
-| Nutricionista | `camila@nutrimente.demo` | Agenda movimentada: confirmar consultas, horários de atendimento |
+| Paciente | `ana@nutrimente.demo` | Próximas consultas (vídeo, cancelar, remarcar), histórico, avaliar a consulta com a Mariana e os 2 planos de ação |
+| Nutricionista | `camila@nutrimente.demo` | Agenda movimentada (confirmar consultas), horários de atendimento, plano da Ana com a adesão da semana |
 | Psicóloga | `mariana@nutrimente.demo` | Outro profissional com consultas |
 | Admin | o `ADMIN_EMAIL` do `.env` | Fila de aprovação com o André |
 

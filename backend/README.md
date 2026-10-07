@@ -32,7 +32,7 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | POST | `/api/auth/login` | Login: devolve o token JWT |
 | POST | `/api/auth/forgot-password` | Envia o link de redefinição de senha |
 | POST | `/api/auth/reset-password` | Define a nova senha (`{"token", "password"}`) |
-| GET | `/api/professionals?type=PSICOLOGO&specialty=3` | Profissionais aprovados (paginado), com as especialidades; filtros opcionais |
+| GET | `/api/professionals?type=PSICOLOGO&specialty=3&minPrice=100&maxPrice=200&sort=PRICE_ASC` | Profissionais aprovados (paginado), com as especialidades; filtros e ordenação opcionais (detalhes em [docs/API.md](../docs/API.md)) |
 | GET | `/api/specialties?type=NUTRICIONISTA` | Especialidades (todas ou de uma profissão) |
 | GET | `/api/professionals/{id}` | Um profissional aprovado |
 

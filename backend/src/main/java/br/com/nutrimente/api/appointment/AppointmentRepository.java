@@ -82,4 +82,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 			WHERE a.id = :id
 			""")
 	Optional<Appointment> findWithPeople(@Param("id") Long id);
+
+	/** O paciente tem (ou teve) consulta com este profissional? Usado no plano de ação */
+	@Query("""
+			SELECT COUNT(a) > 0 FROM Appointment a
+			WHERE a.patient.id = :patientId AND a.professional.id = :professionalId AND a.status IN :statuses
+			""")
+	boolean linked(@Param("patientId") Long patientId, @Param("professionalId") Long professionalId,
+			@Param("statuses") Collection<AppointmentStatus> statuses);
+
+	/** Consultas do profissional (mais recentes primeiro), para montar a lista "meus pacientes" */
+	@Query("""
+			SELECT a FROM Appointment a JOIN FETCH a.patient pa JOIN FETCH pa.user
+			WHERE a.professional.id = :professionalId AND a.status IN :statuses
+			ORDER BY a.startsAt DESC
+			""")
+	List<Appointment> findOfProfessional(@Param("professionalId") Long professionalId,
+			@Param("statuses") Collection<AppointmentStatus> statuses);
 }

@@ -56,6 +56,12 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | POST | `/api/appointments/{id}/reschedule` | PATIENT | Remarcar |
 | POST | `/api/appointments/{id}/confirm` / `complete` | PROFESSIONAL | Confirmar / concluir |
 | POST | `/api/appointments/{id}/review` | PATIENT | Avaliar consulta realizada (1 a 5 estrelas) |
+| GET | `/api/me/patients` | PROFESSIONAL | Pacientes que atendo |
+| POST / PUT | `/api/plans` · `/api/plans/{id}` | PROFESSIONAL | Criar / editar plano de ação (metas, refeições, checklist) |
+| GET | `/api/plans` · `/api/plans/{id}` | participantes | Meus planos / plano completo com progresso |
+| PATCH | `/api/plans/{id}/status` | PROFESSIONAL | Ativar, pausar, concluir |
+| PUT | `/api/plans/{id}/checklist/{itemId}/{data}` | PATIENT | Marcar o checklist do dia |
+| PUT / POST | `/api/plans/{id}/goals/{goalId}` · `/api/plans/{id}/progress` | participantes | Meta cumprida / registrar progresso |
 | PATCH | `/api/admin/professionals/{id}/verification` | ADMIN | `{"status": "APPROVED"}` ou `"REJECTED"` |
 | POST | `/api/admin/specialties` | ADMIN | Nova especialidade `{"name", "type"}` |
 | DELETE | `/api/admin/specialties/{id}` | ADMIN | Remove (sai também do perfil de quem a marcou) |
@@ -99,6 +105,7 @@ src/main/java/br/com/nutrimente/api/
 ├── specialty/     especialidades (lista pública)
 ├── appointment/   agenda: horários de atendimento, horários livres e consultas
 ├── review/        avaliações e nota média dos profissionais
+├── plan/          plano de ação: metas, rotina alimentar, checklist e progresso
 ├── user/          entidades User, Patient, Professional e repositórios
 ├── notification/  e-mails
 ├── logging/       envio de logs para o serviço Node.js

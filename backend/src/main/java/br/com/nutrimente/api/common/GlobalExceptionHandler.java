@@ -75,8 +75,10 @@ public class GlobalExceptionHandler {
 		String field = fieldOf(ex);
 		Map<String, String> errors = field == null ? Map.of() : Map.of(field, switch (field) {
 			case "birthDate" -> "Data inválida";
-			case "gender", "professionalType", "status", "type", "sort", "scope", "modality" -> "Opção inválida";
-			case "startsAt", "from" -> "Data ou horário inválido";
+			case "gender", "professionalType", "status", "type", "sort", "scope", "modality", "mealType", "frequency" ->
+				"Opção inválida";
+			case "startsAt", "from", "mealTime" -> "Data ou horário inválido";
+			case "date", "startDate", "endDate", "dueDate", "recordDate" -> "Data inválida";
 			case "consultationPrice" -> "Valor inválido";
 			default -> "Valor inválido";
 		});

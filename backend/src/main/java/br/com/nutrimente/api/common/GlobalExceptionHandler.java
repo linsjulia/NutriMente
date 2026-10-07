@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
 		String field = fieldOf(ex);
 		Map<String, String> errors = field == null ? Map.of() : Map.of(field, switch (field) {
 			case "birthDate" -> "Data inválida";
-			case "gender", "professionalType", "status" -> "Opção inválida";
+			case "gender", "professionalType", "status", "type", "sort" -> "Opção inválida";
 			case "consultationPrice" -> "Valor inválido";
 			default -> "Valor inválido";
 		});
@@ -83,8 +83,11 @@ public class GlobalExceptionHandler {
 				field == null ? "Dados enviados em formato inválido." : "Revise os campos destacados.", errors);
 	}
 
-	/** Nome do campo do JSON que causou o erro de leitura (ou null) */
+	/** Nome do campo do JSON (ou do parâmetro da URL, ex.: ?minPrice=abc) que causou o erro, ou null */
 	private static String fieldOf(Throwable ex) {
+		if (ex instanceof MethodArgumentTypeMismatchException mismatch) {
+			return mismatch.getName();
+		}
 		for (Throwable t = ex; t != null; t = t.getCause()) {
 			if (t instanceof JacksonException jackson && !jackson.getPath().isEmpty()) {
 				return jackson.getPath().getLast().getPropertyName();

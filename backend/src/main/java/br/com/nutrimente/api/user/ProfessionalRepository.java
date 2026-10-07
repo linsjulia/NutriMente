@@ -1,5 +1,6 @@
 package br.com.nutrimente.api.user;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -19,6 +20,8 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 	 * type = null -> todas as profissões.
 	 * specialtyId = null -> qualquer especialidade; senão, só quem a marcou
 	 * (o EXISTS olha a tabela de ligação professional_specialties).
+	 * minPrice/maxPrice = faixa de preço da consulta (null = sem limite).
+	 * Com faixa de preço, quem deixou "valor a combinar" (preço vazio) não aparece.
 	 */
 	@Query(value = """
 			SELECT p FROM Professional p JOIN FETCH p.user u
@@ -26,15 +29,19 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 			  AND u.active = true AND u.emailVerified = true
 			  AND (:type IS NULL OR p.type = :type)
 			  AND (:specialtyId IS NULL OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id = :specialtyId))
+			  AND (:minPrice IS NULL OR p.consultationPrice >= :minPrice)
+			  AND (:maxPrice IS NULL OR p.consultationPrice <= :maxPrice)
 			""", countQuery = """
 			SELECT COUNT(p) FROM Professional p JOIN p.user u
 			WHERE p.verificationStatus = br.com.nutrimente.api.user.VerificationStatus.APPROVED
 			  AND u.active = true AND u.emailVerified = true
 			  AND (:type IS NULL OR p.type = :type)
 			  AND (:specialtyId IS NULL OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id = :specialtyId))
+			  AND (:minPrice IS NULL OR p.consultationPrice >= :minPrice)
+			  AND (:maxPrice IS NULL OR p.consultationPrice <= :maxPrice)
 			""")
 	Page<Professional> findPublic(@Param("type") ProfessionalType type, @Param("specialtyId") Integer specialtyId,
-			Pageable pageable);
+			@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice, Pageable pageable);
 
 	@Query("""
 			SELECT p FROM Professional p JOIN FETCH p.user u

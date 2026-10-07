@@ -16,10 +16,15 @@ import br.com.nutrimente.api.IntegrationTest;
 /** Avaliações: só de consulta realizada, uma vez, só pelo paciente; nota média recalculada. */
 class ReviewIntegrationTest extends IntegrationTest {
 
-	/** Leva a consulta para o passado e a marca como realizada (pelo caminho normal: o profissional conclui) */
-	private void completed(Pro pro, Integer appointmentId) throws Exception {
-		jdbc.update("UPDATE appointments SET starts_at = DATEADD(hour, -2, SYSUTCDATETIME()),"
-				+ " ends_at = DATEADD(minute, -70, SYSUTCDATETIME()) WHERE id = ?", appointmentId);
+	/**
+	 * Leva a consulta "hoursAgo" horas para o passado e a marca como realizada
+	 * (pelo caminho normal: o profissional conclui). Cada consulta usa um
+	 * "hoursAgo" diferente: o banco não aceita duas no mesmo horário.
+	 */
+	private void completed(Pro pro, Integer appointmentId, int hoursAgo) throws Exception {
+		jdbc.update("UPDATE appointments SET starts_at = DATEADD(hour, -?, SYSUTCDATETIME()),"
+				+ " ends_at = DATEADD(minute, 50, DATEADD(hour, -?, SYSUTCDATETIME())) WHERE id = ?",
+				hoursAgo, hoursAgo, appointmentId);
 		postAs("/api/appointments/" + appointmentId + "/complete", pro.token(), null).andExpect(status().isOk());
 	}
 
@@ -40,7 +45,7 @@ class ReviewIntegrationTest extends IntegrationTest {
 				.andExpect(jsonPath("$.code").value("NOT_COMPLETED"));
 		getAs("/api/appointments/" + first, patient).andExpect(jsonPath("$.canReview").value(false));
 
-		completed(pro, first);
+		completed(pro, first, 26);
 		getAs("/api/appointments?scope=PAST", patient)
 				.andExpect(jsonPath("$[?(@.id == %d)].canReview".formatted(first)).value(hasItem(true)));
 
@@ -71,7 +76,7 @@ class ReviewIntegrationTest extends IntegrationTest {
 
 		// Segunda consulta, nota 3: média 4,00
 		Integer second = JsonPath.read(book(patient, pro.id(), slotAfter(pro.id(), Duration.ofHours(30))), "$.id");
-		completed(pro, second);
+		completed(pro, second, 3);
 		postAs("/api/appointments/" + second + "/review", patient, "{\"rating\": 3}").andExpect(status().isCreated());
 		getAs("/api/professionals/" + pro.id(), null)
 				.andExpect(jsonPath("$.ratingAverage").value(4.0))

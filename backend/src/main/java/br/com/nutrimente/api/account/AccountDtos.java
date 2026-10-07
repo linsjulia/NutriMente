@@ -36,6 +36,7 @@ public final class AccountDtos {
 			String name,
 			String email,
 			Role role,
+			String photoUrl,
 			String cpfMasked,
 			LocalDate birthDate,
 			String telephone,
@@ -44,7 +45,7 @@ public final class AccountDtos {
 			ProfessionalProfile professional) {
 
 		static MeResponse of(User user, Professional professional) {
-			return new MeResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(),
+			return new MeResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.getPhotoUrl(),
 					maskCpf(user.getCpf()), user.getBirthDate(), user.getTelephone(), user.getGender(),
 					user.getCreatedAt(), professional == null ? null : ProfessionalProfile.of(professional));
 		}

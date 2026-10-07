@@ -80,10 +80,10 @@ public final class AppointmentDtos {
 	public record RescheduleRequest(@NotNull(message = "Escolha o novo horário") Instant startsAt) {
 	}
 
-	public record Person(Long id, String name) {
+	public record Person(Long id, String name, String photoUrl) {
 	}
 
-	public record ProfessionalSummary(Long id, String name, ProfessionalType type) {
+	public record ProfessionalSummary(Long id, String name, String photoUrl, ProfessionalType type) {
 	}
 
 	/**

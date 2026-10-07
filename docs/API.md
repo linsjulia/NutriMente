@@ -83,6 +83,7 @@ Resposta:
     {
       "id": 42,
       "name": "Carla Souza",
+      "photoUrl": "/doctor/pfp3.png",
       "type": "NUTRICIONISTA",
       "document": "3-12345",
       "bio": "Nutrição comportamental para adultos.",
@@ -102,6 +103,7 @@ Resposta:
 ```
 
 - `consultationPrice` pode ser `null`: mostre "Valor a combinar".
+- 🆕 `photoUrl`: caminho da foto (por enquanto, arquivos de `public/`, ex.: `/doctor/pfp.png`), pronto para `<Image src={p.photoUrl} ... />`. Pode ser `null`: mostre as iniciais ou um avatar padrão. Também vem em `GET /api/me` e nas consultas (`patient.photoUrl`, `professional.photoUrl`).
 - `document` é o número do conselho; mostre com o prefixo `COUNCIL[type]` (`CRN` ou `CRP`, em `app/lib/types.ts`).
 - Tipos TypeScript prontos: `Page<PublicProfessional>` em `app/lib/types.ts`.
 
@@ -250,8 +252,8 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
   "notes": "Primeira consulta",
   "cancellationReason": null,
   "rescheduledFromId": null,
-  "patient": { "id": 15, "name": "Ana Paciente" },
-  "professional": { "id": 42, "name": "Carla Souza", "type": "NUTRICIONISTA" },
+  "patient": { "id": 15, "name": "Ana Paciente", "photoUrl": null },
+  "professional": { "id": 42, "name": "Carla Souza", "photoUrl": "/doctor/pfp3.png", "type": "NUTRICIONISTA" },
   "canCancel": true,
   "canReschedule": true,
   "canConfirm": false,

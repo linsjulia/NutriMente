@@ -81,6 +81,19 @@ class ProfessionalSearchIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
+	@DisplayName("foto de perfil: aparece na busca, no perfil público e em 'minha conta'")
+	void photoUrl() throws Exception {
+		String admin = createAdminAndLogin();
+		Long id = approvedNutritionist(admin, "100.00");
+		getAs("/api/professionals/" + id, null).andExpect(jsonPath("$.photoUrl").doesNotExist());
+
+		jdbc.update("UPDATE users SET photo_url = '/doctor/pfp.png' WHERE id = ?", id);
+		getAs("/api/professionals/" + id, null).andExpect(jsonPath("$.photoUrl").value("/doctor/pfp.png"));
+		getAs("/api/professionals?type=NUTRICIONISTA&size=50", null)
+				.andExpect(jsonPath("$.items[?(@.id == %d)].photoUrl".formatted(id)).value(hasItem("/doctor/pfp.png")));
+	}
+
+	@Test
 	@DisplayName("parâmetros inválidos: 400 com o campo certo")
 	void invalidParameters() throws Exception {
 		getAs("/api/professionals?minPrice=300&maxPrice=100", null)

@@ -310,7 +310,7 @@ Cancelar, remarcar e confirmar mandam e-mail para a outra pessoa. Na remarcaçã
 
 ---
 
-## 🆕 Avaliações (Etapa 4)
+## Avaliações (Etapa 4)
 
 ### `POST /api/appointments/{id}/review`: avaliar uma consulta (PATIENT)
 
@@ -359,6 +359,120 @@ Sugestão de tela: no perfil, a nota média em estrelas (`ratingAverage` / `rati
 
 ---
 
+## 🆕 Plano de ação (Etapa 4)
+
+O profissional monta um plano para o paciente: **metas**, **rotina alimentar** e **checklist de hábitos**. O paciente marca o checklist todo dia e os dois acompanham o progresso.
+
+| Quem | Pode |
+|---|---|
+| Profissional | Criar (só para paciente com consulta marcada ou realizada com ele), editar, pausar/concluir |
+| Paciente | Marcar o checklist (hoje e até 6 dias atrás) |
+| Os dois | Marcar metas como cumpridas, registrar progresso (peso, humor, observações) |
+
+Quem não participa do plano recebe **404**. "Hoje" é o dia no fuso do Brasil (a resposta traz `today`).
+
+### `GET /api/me/patients`: meus pacientes (PROFESSIONAL)
+
+Para o profissional escolher o paciente ao criar um plano.
+
+```json
+[ { "id": 15, "name": "Ana Souza", "photoUrl": "/patient/paciente2.png", "lastAppointmentAt": "2026-10-09T19:00:00Z" } ]
+```
+
+### `POST /api/plans`: criar (PROFESSIONAL) · `PUT /api/plans/{id}`: editar
+
+O plano inteiro num envio só (um formulário):
+
+```json
+{
+  "patientId": 15,
+  "title": "Reeducação alimentar",
+  "description": "Foco em hidratação e regularidade.",
+  "startDate": "2026-10-20",
+  "endDate": "2026-12-20",
+  "goals": [
+    { "description": "Perder 3 kg", "targetValue": 3, "unit": "kg", "dueDate": "2026-12-20" },
+    { "description": "Caminhar 3 vezes por semana" }
+  ],
+  "meals": [
+    { "mealType": "CAFE_DA_MANHA", "mealTime": "07:30", "description": "Pão integral com ovo e uma fruta" },
+    { "mealType": "ALMOCO", "mealTime": "12:30", "description": "Arroz, feijão, salada e frango" }
+  ],
+  "checklist": [
+    { "description": "Beber 2 litros de água", "frequency": "DAILY" },
+    { "description": "Planejar as refeições da semana", "frequency": "WEEKLY" },
+    { "description": "Fazer exame de sangue", "frequency": "ONCE" }
+  ]
+}
+```
+
+- `mealType`: `CAFE_DA_MANHA`, `LANCHE_MANHA`, `ALMOCO`, `LANCHE_TARDE`, `JANTAR`, `CEIA`. `dayOfWeek` (0 = domingo ... 6) é opcional; sem ele, vale todo dia.
+- `frequency`: `DAILY` (padrão), `WEEKLY` ou `ONCE`.
+- **Na edição (PUT)** mande o plano inteiro (sem `patientId`). Metas e itens do checklist **com `id`** são mantidos e atualizados; **sem `id`**, criados; os que **não vierem** saem do plano. Itens do checklist retirados só são desativados: as marcações antigas não se perdem.
+- Erros: 403 `NOT_YOUR_PATIENT` (`errors.patientId`); 400 com `errors.title`, `errors.endDate` ("A data de término precisa ser depois do início") etc.
+- O paciente recebe um e-mail "Novo plano de ação".
+
+Resposta (**201** na criação): o plano completo, abaixo.
+
+### `GET /api/plans`: meus planos · `GET /api/plans/{id}`: plano completo
+
+A lista traz só o `summary` de cada plano (paciente: os planos que recebeu; profissional: os que criou). O plano completo:
+
+```json
+{
+  "summary": {
+    "id": 3, "title": "Reeducação alimentar", "status": "ACTIVE",
+    "startDate": "2026-10-20", "endDate": "2026-12-20",
+    "patient": { "id": 15, "name": "Ana Souza", "photoUrl": "/patient/paciente2.png" },
+    "professional": { "id": 42, "name": "Camila Rocha", "photoUrl": "/doctor/nutricionista3.jpg", "type": "NUTRICIONISTA" },
+    "goalsCompleted": 1, "goalsTotal": 2,
+    "checklistDoneToday": 2, "checklistTotalToday": 3,
+    "adherence7d": 71,
+    "updatedAt": "2026-10-22T13:10:00Z"
+  },
+  "description": "Foco em hidratação e regularidade.",
+  "today": "2026-10-22",
+  "goals": [
+    { "id": 7, "description": "Perder 3 kg", "targetValue": 3, "unit": "kg", "dueDate": "2026-12-20", "completed": false, "completedAt": null }
+  ],
+  "meals": [
+    { "id": 11, "mealType": "CAFE_DA_MANHA", "mealLabel": "Café da manhã", "mealTime": "07:30:00", "dayOfWeek": null, "description": "Pão integral com ovo e uma fruta" }
+  ],
+  "checklist": [
+    { "id": 21, "description": "Beber 2 litros de água", "frequency": "DAILY", "doneToday": true,
+      "history": [ { "date": "2026-10-16", "completed": true }, { "date": "2026-10-17", "completed": false } ] }
+  ],
+  "progress": [
+    { "id": 5, "recordDate": "2026-10-22", "weightKg": 70.5, "moodScore": 4, "notes": "Me sentindo bem", "recordedBy": "Ana Souza" }
+  ],
+  "canEdit": false,
+  "canCheck": true
+}
+```
+
+- **O `summary` já traz os números para a tela:** metas cumpridas (`goalsCompleted`/`goalsTotal`), checklist feito hoje (`checklistDoneToday`/`checklistTotalToday`) e a **adesão dos últimos 7 dias** (`adherence7d`, em %, só dos itens diários; `null` se não houver).
+- `doneToday`: diário = marcado hoje; semanal = marcado nesta semana (segunda a domingo); único = marcado alguma vez.
+- `history`: os **7 últimos dias** de cada item, do mais antigo até hoje, prontos para desenhar os quadradinhos.
+- `meals` já vêm **na ordem do dia** e com `mealLabel` em português.
+- `progress`: do mais recente para o mais antigo. `moodScore`: 1 (muito mal) a 5 (muito bem).
+- `canEdit`: o profissional dono pode editar. `canCheck`: o paciente pode marcar (plano `ACTIVE`).
+
+### Ações (todas devolvem o plano completo atualizado)
+
+| Rota | Quem | Corpo | Erros |
+|---|---|---|---|
+| `PUT /api/plans/{id}/checklist/{itemId}/{data}` | paciente | `{ "completed": true }` (ou `false` para desmarcar); `{data}` no formato `AAAA-MM-DD` | 400 `errors.date` (futuro ou mais de 6 dias atrás), 409 `PLAN_NOT_ACTIVE` |
+| `PUT /api/plans/{id}/goals/{goalId}` | os dois | `{ "completed": true }` | 404 |
+| `POST /api/plans/{id}/progress` | os dois | `{ "recordDate": "2026-10-22", "weightKg": 70.5, "moodScore": 4, "notes": "..." }` (data opcional = hoje; ao menos um dos outros campos) | 400 (`errors.moodScore`: "Escolha de 1 a 5") |
+| `PATCH /api/plans/{id}/status` | profissional | `{ "status": "PAUSED" }` (`ACTIVE`, `PAUSED`, `COMPLETED`, `CANCELLED`) | 403 |
+
+### Sugestão de telas
+
+- **Painel do paciente:** card "Meu plano" com a barra de progresso (`checklistDoneToday` de `checklistTotalToday`) e a adesão da semana → página do plano com o checklist de hoje (cada caixinha chama o PUT), as metas, a rotina alimentar por refeição e o botão "Registrar progresso".
+- **Painel do profissional:** "Meus pacientes" (`/api/me/patients`) → "Criar plano" (formulário com listas de metas, refeições e checklist) → acompanhar a adesão e os registros de progresso de cada paciente.
+
+---
+
 ## Outras rotas já existentes
 
 Cadastro, login, confirmação de e-mail, minha conta, perfil do profissional e área do admin já estão em uso pelas telas atuais. A lista completa fica em [backend/README.md](../backend/README.md#rotas). Os exemplos de uso estão nas Server Actions em `app/actions/`.
@@ -367,4 +481,4 @@ Cadastro, login, confirmação de e-mail, minha conta, perfil do profissional e 
 
 | Entrega | Rotas | Previsão |
 |---|---|---|
-| Acompanhamento (Etapa 4) | plano de ação, notificações | até 26/10 |
+| Acompanhamento (Etapa 4) | notificações | até 26/10 |

@@ -45,6 +45,11 @@ public class Patient {
 		createdAt = Clock.now();
 	}
 
+	/** Mesmo id do usuário (users.id) */
+	public Long getId() {
+		return id;
+	}
+
 	public User getUser() {
 		return user;
 	}

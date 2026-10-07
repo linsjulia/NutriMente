@@ -25,7 +25,8 @@ public record AppProperties(
 		@Valid @NotNull Mail mail,
 		@Valid @NotNull Logs logs,
 		@Valid @NotNull Admin admin,
-		@Valid @DefaultValue RateLimit rateLimit) {
+		@Valid @DefaultValue RateLimit rateLimit,
+		@Valid @DefaultValue Appointments appointments) {
 
 	public record Jwt(
 			@NotBlank @Size(min = 32, message = "JWT_SECRET precisa ter pelo menos 32 caracteres") String secret,
@@ -41,6 +42,25 @@ public record AppProperties(
 
 	/** Máximo de requisições por minuto, por IP, nas rotas de autenticação */
 	public record RateLimit(@DefaultValue("30") @Positive int authRequestsPerMinute) {
+	}
+
+	/**
+	 * Regras da agenda (todas com valor padrão; mude no application.properties):
+	 * - duration: duração de cada consulta (50 min)
+	 * - slotInterval: de quanto em quanto tempo começa uma consulta (a cada 1 h,
+	 *   o que deixa 10 min de intervalo entre uma e outra)
+	 * - minNotice: antecedência mínima para agendar (2 h)
+	 * - patientCancelLimit: até quanto tempo antes o PACIENTE pode cancelar ou remarcar (24 h)
+	 * - bookingWindowDays: até quantos dias à frente dá para agendar (60)
+	 * - timezone: fuso dos horários de atendimento (o banco guarda tudo em UTC)
+	 */
+	public record Appointments(
+			@DefaultValue("50m") @NotNull Duration duration,
+			@DefaultValue("60m") @NotNull Duration slotInterval,
+			@DefaultValue("2h") @NotNull Duration minNotice,
+			@DefaultValue("24h") @NotNull Duration patientCancelLimit,
+			@DefaultValue("60") @Positive int bookingWindowDays,
+			@DefaultValue("America/Sao_Paulo") @NotBlank String timezone) {
 	}
 
 	/** Se e-mail/senha ficarem vazios, nenhum admin é criado */

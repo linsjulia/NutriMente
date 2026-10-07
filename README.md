@@ -309,6 +309,13 @@ git push -u origin feature/nome-da-funcionalidade
 
 Depois abra um **Pull Request** no GitHub para a equipe revisar antes de juntar na `main`.
 
+**Testes automáticos (CI):** em cada Pull Request, o GitHub Actions roda sozinho o TypeScript, o lint e todos os testes (banco, serviço de logs, API Java e site no navegador), usando o mesmo `docker compose` do passo 4. O resultado aparece no próprio PR:
+
+- ✅ verde: pode revisar e juntar;
+- ❌ vermelho: clique em **Details** para ver qual teste falhou. Se for um teste do site, o relatório fica em **Summary → Artifacts → playwright-resultados**.
+
+Antes de abrir o PR, atualize sua branch com a `main` (`git pull origin main`) para resolver eventuais conflitos na sua própria branch. A configuração fica em [.github/workflows/ci.yml](.github/workflows/ci.yml).
+
 ---
 
 # 🎨 Design & Desenvolvimento

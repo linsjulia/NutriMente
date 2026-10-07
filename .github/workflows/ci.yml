@@ -114,21 +114,13 @@ jobs:
       - name: Instalar dependências do site
         run: npm ci
 
-      # Às vezes o download dos pacotes trava nos servidores do GitHub: limite
-      # de 10 min por tentativa e uma segunda tentativa automática, em vez de
-      # ficar parado até o tempo máximo do job (45 min)
-      - name: Instalar o navegador dos testes (Chromium)
-        timeout-minutes: 20
-        run: |
-          for tentativa in 1 2; do
-            timeout 600 npx playwright install --with-deps chromium && exit 0
-            echo "Tentativa $tentativa falhou ou travou; tentando de novo..."
-            sleep 10
-          done
-          exit 1
-
-      # O playwright.config.ts faz o build de produção e sobe o site sozinho
+      # O playwright.config.ts faz o build de produção e sobe o site sozinho.
+      # Usa o Google Chrome que JÁ VEM instalado nos servidores do GitHub
+      # (o mesmo jeito que rodamos na nossa máquina). Antes baixávamos o
+      # Chromium + pacotes do Linux, e esse download às vezes travava o CI.
       - name: Testes de ponta a ponta (site + API + banco + e-mail)
+        env:
+          PLAYWRIGHT_CHANNEL: chrome
         run: npm run test:e2e
 
       # Só quando algo falha: guarda o relatório e os logs para investigar

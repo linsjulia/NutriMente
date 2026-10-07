@@ -46,6 +46,13 @@ public class User {
 
 	private String telephone;
 
+	/**
+	 * Endereço da foto de perfil. Por enquanto, um caminho de arquivo do site
+	 * (ex.: "/doctor/pfp.png", em public/); o envio de foto pela tela vem depois.
+	 */
+	@Column(name = "photo_url")
+	private String photoUrl;
+
 	/** Somente os 11 dígitos */
 	private String cpf;
 
@@ -151,6 +158,7 @@ public class User {
 		this.email = "removido-" + id + "@nutrimente.invalid";
 		this.passwordHash = null;
 		this.telephone = null;
+		this.photoUrl = null;
 		this.cpf = null;
 		this.birthDate = null;
 		this.gender = null;
@@ -183,6 +191,10 @@ public class User {
 
 	public Long getId() {
 		return id;
+	}
+
+	public String getPhotoUrl() {
+		return photoUrl;
 	}
 
 	public String getName() {

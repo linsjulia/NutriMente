@@ -102,11 +102,13 @@ public class ProfessionalController {
 				.orElseThrow(() -> ApiException.notFound("Profissional não encontrado."));
 	}
 
-	public record PublicProfessional(Long id, String name, ProfessionalType type, String document, String bio,
+	public record PublicProfessional(Long id, String name, String photoUrl, ProfessionalType type, String document,
+			String bio,
 			BigDecimal consultationPrice, BigDecimal ratingAverage, int ratingCount, List<SpecialtyDto> specialties) {
 
 		static PublicProfessional of(Professional p) {
-			return new PublicProfessional(p.getId(), p.getUser().getName(), p.getType(), p.getDocument(), p.getBio(),
+			return new PublicProfessional(p.getId(), p.getUser().getName(), p.getUser().getPhotoUrl(), p.getType(),
+					p.getDocument(), p.getBio(),
 					p.getConsultationPrice(), p.getRatingAverage(), p.getRatingCount(),
 					p.getSpecialties().stream().map(SpecialtyDto::of).toList());
 		}

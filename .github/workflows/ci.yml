@@ -1,0 +1,135 @@
+# =============================================================
+# CI (Integração Contínua): roda TODOS os testes do projeto
+# automaticamente em cada Pull Request e em cada push na main.
+#
+# Se algo falhar, o PR aparece com um X vermelho e dá para ver o motivo
+# na aba "Actions" do GitHub. Assim ninguém precisa lembrar de rodar os
+# testes antes do merge, e a main não quebra sem ninguém perceber.
+#
+# São dois "jobs" (tarefas) que rodam em paralelo, cada um numa máquina
+# Linux nova e descartável do GitHub:
+#   1. qualidade -> TypeScript e lint (rápido, ~2 min)
+#   2. testes    -> sobe o docker compose (SQL Server, MongoDB, API Java,
+#                   serviço de logs, Mailpit) e roda as 4 suítes (~15 min)
+#
+# Repositório público = GitHub Actions grátis.
+# =============================================================
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # Botão "Run workflow" na aba Actions, para rodar na mão quando quiser
+  workflow_dispatch:
+
+# Se alguém enviar outro commit no mesmo PR, cancela a execução antiga
+# (não faz sentido testar uma versão que já foi substituída)
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  qualidade:
+    name: TypeScript e lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # Gera os tipos das rotas (PageProps, LayoutProps) que o Next cria no build
+      - name: Gerar tipos do Next
+        run: npx next typegen
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+  testes:
+    name: Testes (banco, logs, API Java e site)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            database/tests/package-lock.json
+            services/logs-service/package-lock.json
+
+      # No CI as senhas de exemplo bastam: a máquina é apagada no final
+      - name: Criar o .env a partir do exemplo
+        run: cp .env.example .env
+
+      # --wait: só continua quando todos os serviços ficarem "healthy"
+      - name: Subir o back-end (docker compose)
+        run: docker compose up -d --build --wait --wait-timeout 600
+
+      - name: Testes do banco (SQL Server + MongoDB)
+        working-directory: database/tests
+        run: |
+          npm ci
+          npm test
+
+      - name: Testes do serviço de logs (Node)
+        working-directory: services/logs-service
+        run: |
+          npm ci
+          npm test
+
+      # Cache das dependências do Maven entre execuções (deixa bem mais rápido)
+      - name: Cache do Maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: maven-${{ hashFiles('backend/pom.xml') }}
+          restore-keys: maven-
+
+      # Mesmo comando do backend/README.md: Maven dentro do Docker, na rede
+      # do compose, falando com o SQL Server pelo nome "sqlserver"
+      - name: Testes da API Java
+        run: >
+          docker run --rm --network nutrimente_default --env-file .env -e DB_HOST=sqlserver
+          -v "$HOME/.m2:/root/.m2" -v "$PWD/backend:/app" -w /app
+          maven:3.9-eclipse-temurin-25 mvn -B test
+
+      - name: Instalar dependências do site
+        run: npm ci
+
+      - name: Instalar o navegador dos testes (Chromium)
+        run: npx playwright install --with-deps chromium
+
+      # O playwright.config.ts faz o build de produção e sobe o site sozinho
+      - name: Testes de ponta a ponta (site + API + banco + e-mail)
+        run: npm run test:e2e
+
+      # Só quando algo falha: guarda o relatório e os logs para investigar
+      - name: Guardar resultados dos testes do site
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-resultados
+          path: test-results/
+          retention-days: 7
+
+      - name: Logs dos contêineres
+        if: failure()
+        run: docker compose logs --tail=200

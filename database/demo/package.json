@@ -5,7 +5,8 @@
   "description": "Cria dados de demonstração do NutriMente (profissionais, pacientes, consultas e avaliações)",
   "type": "module",
   "scripts": {
-    "seed": "node --env-file=../../.env seed-demo.mjs"
+    "seed": "node --env-file=../../.env seed-demo.mjs",
+    "jornada": "node --env-file=../../.env jornada.mjs"
   },
   "engines": {
     "node": ">=22"

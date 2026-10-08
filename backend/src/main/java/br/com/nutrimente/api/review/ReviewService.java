@@ -19,6 +19,9 @@ import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.logging.LogClient;
+import br.com.nutrimente.api.notification.Notification;
+import br.com.nutrimente.api.notification.NotificationLinks;
+import br.com.nutrimente.api.notification.NotificationService;
 import br.com.nutrimente.api.professional.ProfessionalController.PageResponse;
 import br.com.nutrimente.api.user.Professional;
 import br.com.nutrimente.api.user.ProfessionalRepository;
@@ -38,13 +41,15 @@ public class ReviewService {
 	private final AppointmentRepository appointments;
 	private final ProfessionalRepository professionals;
 	private final LogClient logClient;
+	private final NotificationService notifications;
 
 	public ReviewService(ReviewRepository reviews, AppointmentRepository appointments,
-			ProfessionalRepository professionals, LogClient logClient) {
+			ProfessionalRepository professionals, LogClient logClient, NotificationService notifications) {
 		this.reviews = reviews;
 		this.appointments = appointments;
 		this.professionals = professionals;
 		this.logClient = logClient;
+		this.notifications = notifications;
 	}
 
 	@Transactional
@@ -71,6 +76,11 @@ public class ReviewService {
 			throw alreadyReviewed(); // dois cliques ao mesmo tempo: o UNIQUE do banco segura
 		}
 		recalculateRating(appointment.getProfessional());
+		Long professionalId = appointment.getProfessional().getId();
+		notifications.notify(professionalId, Notification.Type.REVIEW, "Nova avaliação: %d de 5".formatted(rating),
+				review.getComment() == null ? "%s avaliou a consulta.".formatted(PublicReview.of(review).patientName())
+						: "%s: \"%s\"".formatted(PublicReview.of(review).patientName(), review.getComment()),
+				NotificationLinks.professional(professionalId));
 
 		Long reviewId = review.getId();
 		AfterCommit.run(() -> logClient.audit(patientId, "PATIENT", "CREATE", "reviews", reviewId, patientId));

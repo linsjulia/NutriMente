@@ -12,6 +12,9 @@ import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.notification.EmailService;
+import br.com.nutrimente.api.notification.Notification;
+import br.com.nutrimente.api.notification.NotificationLinks;
+import br.com.nutrimente.api.notification.NotificationService;
 import br.com.nutrimente.api.professional.ProfessionalController.PageResponse;
 import br.com.nutrimente.api.specialty.Specialty;
 import br.com.nutrimente.api.specialty.SpecialtyDto;
@@ -29,13 +32,15 @@ public class AdminService {
 	private final SpecialtyRepository specialties;
 	private final EmailService emailService;
 	private final LogClient logClient;
+	private final NotificationService notifications;
 
 	public AdminService(ProfessionalRepository professionals, SpecialtyRepository specialties,
-			EmailService emailService, LogClient logClient) {
+			EmailService emailService, LogClient logClient, NotificationService notifications) {
 		this.professionals = professionals;
 		this.specialties = specialties;
 		this.emailService = emailService;
 		this.logClient = logClient;
+		this.notifications = notifications;
 	}
 
 	@Transactional(readOnly = true)
@@ -58,6 +63,12 @@ public class AdminService {
 				.filter(p -> p.getUser().canLogin())
 				.orElseThrow(() -> ApiException.notFound("Profissional não encontrado."));
 		professional.review(decision);
+		boolean approved = decision == VerificationStatus.APPROVED;
+		notifications.notify(professional.getId(), Notification.Type.SYSTEM,
+				approved ? "Cadastro aprovado" : "Cadastro precisa de revisão",
+				approved ? "Seu registro foi verificado e seu perfil já aparece na busca."
+						: "Não conseguimos confirmar seu registro. Motivo: " + cleanReason,
+				NotificationLinks.dashboard());
 
 		User user = professional.getUser();
 		String email = user.getEmail();

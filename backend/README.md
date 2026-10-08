@@ -62,6 +62,8 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | PATCH | `/api/plans/{id}/status` | PROFESSIONAL | Ativar, pausar, concluir |
 | PUT | `/api/plans/{id}/checklist/{itemId}/{data}` | PATIENT | Marcar o checklist do dia |
 | PUT / POST | `/api/plans/{id}/goals/{goalId}` · `/api/plans/{id}/progress` | participantes | Meta cumprida / registrar progresso |
+| GET | `/api/notifications` · `/api/notifications/unread-count` | todos | Notificações do "sininho" / contador de não lidas |
+| POST | `/api/notifications/{id}/read` · `/api/notifications/read-all` | todos | Marcar como lida(s) |
 | PATCH | `/api/admin/professionals/{id}/verification` | ADMIN | `{"status": "APPROVED"}` ou `"REJECTED"` |
 | POST | `/api/admin/specialties` | ADMIN | Nova especialidade `{"name", "type"}` |
 | DELETE | `/api/admin/specialties/{id}` | ADMIN | Remove (sai também do perfil de quem a marcou) |
@@ -107,7 +109,7 @@ src/main/java/br/com/nutrimente/api/
 ├── review/        avaliações e nota média dos profissionais
 ├── plan/          plano de ação: metas, rotina alimentar, checklist e progresso
 ├── user/          entidades User, Patient, Professional e repositórios
-├── notification/  e-mails
+├── notification/  e-mails e notificações do site ("sininho")
 ├── logging/       envio de logs para o serviço Node.js
 ├── common/        erros, validações (@Cpf, @Adult, @StrongPassword)
 └── config/        segurança, JWT, propriedades, criação do admin

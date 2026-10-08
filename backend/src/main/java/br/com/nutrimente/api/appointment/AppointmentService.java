@@ -27,6 +27,9 @@ import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.config.AppProperties;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.notification.EmailService;
+import br.com.nutrimente.api.notification.Notification;
+import br.com.nutrimente.api.notification.NotificationLinks;
+import br.com.nutrimente.api.notification.NotificationService;
 import br.com.nutrimente.api.review.ReviewRepository;
 import br.com.nutrimente.api.user.Patient;
 import br.com.nutrimente.api.user.PatientRepository;
@@ -57,11 +60,12 @@ public class AppointmentService {
 	private final EmailService emailService;
 	private final LogClient logClient;
 	private final ReviewRepository reviews;
+	private final NotificationService notifications;
 	private final AppProperties.Appointments rules;
 
 	public AppointmentService(AppointmentRepository appointments, PatientRepository patients,
 			ProfessionalRepository professionals, ScheduleService schedule, EmailService emailService,
-			LogClient logClient, ReviewRepository reviews, AppProperties properties) {
+			LogClient logClient, ReviewRepository reviews, NotificationService notifications, AppProperties properties) {
 		this.appointments = appointments;
 		this.patients = patients;
 		this.professionals = professionals;
@@ -69,6 +73,7 @@ public class AppointmentService {
 		this.emailService = emailService;
 		this.logClient = logClient;
 		this.reviews = reviews;
+		this.notifications = notifications;
 		this.rules = properties.appointments();
 	}
 
@@ -99,11 +104,11 @@ public class AppointmentService {
 				videoUrlFor(modality), professional.getConsultationPrice(), Digits.trimToNull(request.notes()), null));
 
 		String when = describe(appointment);
-		notifyAfterCommit(appointment.getProfessional().getUser(), "Nova consulta agendada",
+		inform(appointment, appointment.getProfessional().getUser(), "Nova consulta agendada",
 				"%s agendou uma consulta com você para %s (%s).".formatted(patient.getUser().getName(), when,
 						modalityLabel(modality)),
 				"Você pode confirmar a consulta na sua área do NutriMente.");
-		notifyAfterCommit(patient.getUser(), "Consulta agendada",
+		inform(appointment, patient.getUser(), "Consulta agendada",
 				"Sua consulta com %s está marcada para %s (%s).".formatted(professional.getUser().getName(), when,
 						modalityLabel(modality)),
 				cancelPolicy());
@@ -155,7 +160,7 @@ public class AppointmentService {
 				: " Motivo: " + appointment.getCancellationReason();
 		User canceller = byPatient ? appointment.getPatient().getUser() : appointment.getProfessional().getUser();
 		User other = byPatient ? appointment.getProfessional().getUser() : appointment.getPatient().getUser();
-		notifyAfterCommit(other, "Consulta cancelada",
+		inform(appointment, other, "Consulta cancelada",
 				"%s cancelou a consulta de %s.%s".formatted(canceller.getName(), when, reasonText),
 				byPatient ? "O horário voltou a ficar livre na sua agenda."
 						: "Você pode agendar um novo horário pela busca de profissionais.");
@@ -193,11 +198,11 @@ public class AppointmentService {
 				original.getModality(), videoUrlFor(original.getModality()), original.getPrice(), original.getNotes(),
 				original.getId()));
 
-		notifyAfterCommit(created.getProfessional().getUser(), "Consulta remarcada",
+		inform(created, created.getProfessional().getUser(), "Consulta remarcada",
 				"%s remarcou a consulta de %s para %s.".formatted(created.getPatient().getUser().getName(),
 						describe(original), describe(created)),
 				"O horário antigo voltou a ficar livre na sua agenda.");
-		notifyAfterCommit(created.getPatient().getUser(), "Consulta remarcada",
+		inform(created, created.getPatient().getUser(), "Consulta remarcada",
 				"Sua consulta com %s agora é %s.".formatted(created.getProfessional().getUser().getName(),
 						describe(created)),
 				cancelPolicy());
@@ -215,7 +220,7 @@ public class AppointmentService {
 			throw invalidStatus("Só dá para confirmar consultas agendadas que ainda não aconteceram.");
 		}
 		appointment.confirm();
-		notifyAfterCommit(appointment.getPatient().getUser(), "Consulta confirmada",
+		inform(appointment, appointment.getPatient().getUser(), "Consulta confirmada",
 				"%s confirmou sua consulta de %s.".formatted(appointment.getProfessional().getUser().getName(),
 						describe(appointment)),
 				appointment.getVideoUrl() == null ? cancelPolicy()
@@ -335,7 +340,13 @@ public class AppointmentService {
 				.formatted(rules.patientCancelLimit().toHours());
 	}
 
-	private void notifyAfterCommit(User to, String subject, String intro, String footer) {
+	/**
+	 * Avisa alguém sobre a consulta de dois jeitos: notificação no site (gravada
+	 * agora, na mesma transação) e e-mail (enviado só depois do commit).
+	 */
+	private void inform(Appointment a, User to, String subject, String intro, String footer) {
+		notifications.notify(to.getId(), Notification.Type.APPOINTMENT, subject, intro,
+				NotificationLinks.appointment(a.getId()));
 		String email = to.getEmail();
 		String name = to.getName();
 		AfterCommit.run(() -> emailService.sendAppointmentNotice(email, name, subject, intro, footer));

@@ -171,6 +171,8 @@ Sobe os bancos e o serviço de logs com um único comando, sem instalar nada al�
 
 > 📘 **Primeira vez?** Siga o guia completo, com requisitos de computador, instalação de cada programa e solução de problemas: **[docs/INSTALACAO.md](docs/INSTALACAO.md)**. Abaixo está o resumo.
 >
+> 🎤 **Apresentação:** roteiro, contas da demonstração, checklist do dia e plano B em **[docs/APRESENTACAO.md](docs/APRESENTACAO.md)**.
+>
 > 🚀 **Colocar no ar?** Passo a passo de deploy num VPS da Hostinger, com domínio, HTTPS, e-mail e backups: **[docs/DEPLOY-HOSTINGER.md](docs/DEPLOY-HOSTINGER.md)**.
 
 ### 1. Pré-requisitos

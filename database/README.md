@@ -213,6 +213,8 @@ npm run seed    # leva ~1 minuto
 - Ele usa a própria API para cadastrar, aprovar e agendar (mesmas regras e senhas do uso real) e o banco direto só para confirmar e-mails, criar consultas **no passado** e avaliações.
 - No fim, limpa a caixa do Mailpit.
 
+**Jornada narrada (plano B da apresentação):** `npm run jornada` percorre busca → agendamento → confirmação → plano de ação → checklist → avaliação → segurança, falando com a API de verdade e mostrando cada passo no terminal. Ela altera os dados: depois, rode `npm run seed`. Ver [docs/APRESENTACAO.md](../docs/APRESENTACAO.md).
+
 ### Banco limpo para a apresentação
 
 Os testes automáticos criam contas de teste (`@teste.local`), e às vezes alguma sobra aparece na busca. Antes da apresentação, recrie o banco do zero e rode o script:

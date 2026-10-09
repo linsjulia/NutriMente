@@ -52,7 +52,7 @@ docker compose logs -f sqlserver   # procure por "Banco de dados criado com suce
 | `docker compose down -v` | Desliga e **apaga todos os dados**; na próxima subida o banco é recriado do zero |
 | `docker compose logs -f <serviço>` | Mostra os logs de um container |
 
-> ⚠️ Os scripts `.sql` e `.js` só rodam quando o banco **ainda não existe**. Se você alterar um script, rode `docker compose down -v` e suba de novo para ver a mudança (isso apaga os dados locais).
+> ⚠️ Os scripts `.sql` e `.js` só rodam quando o banco **ainda não existe**. Mudanças no banco depois disso são feitas por **migrações** (`sqlserver/migrations/`), que atualizam o banco existente sem apagar os dados: depois de um `git pull`, basta `docker compose up -d --build sqlserver api`. Veja [sqlserver/migrations/README.md](sqlserver/migrations/README.md).
 
 ### Conectando com um cliente visual
 
@@ -71,11 +71,12 @@ Use **Azure Data Studio**, **DBeaver** ou **SSMS** para o SQL Server e **MongoDB
 database/
 ├── sqlserver/
 │   ├── Dockerfile              # imagem do SQL Server com nossos scripts
-│   ├── entrypoint.sh           # liga o banco e roda os scripts na 1ª vez
-│   └── scripts/                # executados em ordem alfabética
-│       ├── 01-create-database.sql   # banco + usuário da aplicação
-│       ├── 02-create-tables.sql     # tabelas, regras e índices
-│       └── 03-seed.sql              # dados iniciais (especialidades)
+│   ├── entrypoint.sh           # liga o banco, roda os scripts na 1ª vez e as migrações pendentes
+│   ├── scripts/                # executados em ordem alfabética (só na 1ª vez)
+│   │   ├── 01-create-database.sql   # banco + usuário da aplicação
+│   │   ├── 02-create-tables.sql     # tabelas, regras e índices
+│   │   └── 03-seed.sql              # dados iniciais (especialidades)
+│   └── migrations/             # mudanças depois da 1ª versão (V002__..., V003__...)
 └── mongodb/
     └── init/
         └── 01-init-logs.js     # collections de log, validação e TTL

@@ -71,9 +71,15 @@ async function createPatientAndProfessional(query) {
 
 // -------------------------------------------------------------
 
-test("todas as 24 tabelas foram criadas", async () => {
+// 24 dos scripts iniciais + schema_migrations (controle) + appointment_records (V002)
+test("todas as 26 tabelas foram criadas", async () => {
   const { recordset } = await pool.query("SELECT COUNT(*) AS total FROM sys.tables");
-  assert.equal(recordset[0].total, 24);
+  assert.equal(recordset[0].total, 26);
+});
+
+test("migrações foram aplicadas e registradas em schema_migrations", async () => {
+  const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
+  assert.ok(recordset.some((r) => r.version === "V002__registro_da_consulta"));
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -264,4 +270,22 @@ test("gênero é opcional e aceita só as opções do formulário", () =>
       query("INSERT INTO users (name, email, role, gender) VALUES (N'D', 'g4@teste.local', 'PATIENT', 'X')"),
       /ck_users_gender/
     );
+  }));
+
+test("registro da consulta (V002): um por consulta e não some se a consulta for apagada", () =>
+  inTransaction(async (query) => {
+    const { patient, professional } = await createPatientAndProfessional(query);
+    const { recordset } = await query(`
+      INSERT INTO appointments (patient_id, professional_id, starts_at, ends_at, price, status)
+      OUTPUT inserted.id
+      VALUES (${patient}, ${professional}, '2030-05-01 10:00', '2030-05-01 10:50', 150, 'COMPLETED')`);
+    const appointment = recordset[0].id;
+    const record = () =>
+      query(`INSERT INTO appointment_records (appointment_id, professional_id, private_notes, patient_guidance)
+             VALUES (${appointment}, ${professional}, N'texto-cifrado', N'outro-texto-cifrado')`);
+
+    await record();
+    await assertFails(record(), /uq_appointment_records_appointment/);
+    // Prontuário é guarda obrigatória: o banco não deixa apagar a consulta por baixo dele
+    await assertFails(query(`DELETE FROM appointments WHERE id = ${appointment}`), /REFERENCE constraint/i);
   }));

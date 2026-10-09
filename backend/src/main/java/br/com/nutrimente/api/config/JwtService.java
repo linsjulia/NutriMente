@@ -58,6 +58,8 @@ public class JwtService {
 				.expiresAt(expiresAt)
 				.claim("role", user.getRole().name())
 				.claim("name", firstName(user.getName()))
+				// Versão da sessão: se a senha mudar, este token deixa de valer
+				.claim(SessionValidator.VERSION_CLAIM, user.getSessionVersion())
 				.build();
 		String token = encoder.encode(JwtEncoderParameters.from(JwsHeader.with(ALGORITHM).build(), claims))
 				.getTokenValue();

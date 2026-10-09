@@ -79,6 +79,10 @@ public class Appointment {
 	@Column(name = "rescheduled_from_id")
 	private Long rescheduledFromId;
 
+	/** Quando o lembrete da véspera saiu (V006); marcado pelo ReminderService */
+	@Column(name = "reminder_sent_at", insertable = false, updatable = false)
+	private LocalDateTime reminderSentAt;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
@@ -140,6 +144,10 @@ public class Appointment {
 	/** O profissional pode escrever o registro: a consulta já começou e não foi cancelada/remarcada */
 	public boolean acceptsRecord(Instant now) {
 		return status.acceptsRecord() && !now.isBefore(startsAt.toInstant(ZoneOffset.UTC));
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
 	}
 
 	public boolean hasParticipant(Long userId) {

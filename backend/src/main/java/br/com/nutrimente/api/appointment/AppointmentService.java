@@ -51,7 +51,7 @@ public class AppointmentService {
 	/** Quantas consultas no máximo por lista (próximas ou histórico) */
 	private static final int LIST_LIMIT = 100;
 
-	private static final DateTimeFormatter WHEN = DateTimeFormatter.ofPattern("EEEE, dd/MM 'às' HH:mm",
+	static final DateTimeFormatter WHEN = DateTimeFormatter.ofPattern("EEEE, dd/MM 'às' HH:mm",
 			ScheduleService.PT_BR);
 
 	private final AppointmentRepository appointments;
@@ -357,7 +357,7 @@ public class AppointmentService {
 		return WHEN.format(startsAt(a).atZone(schedule.zone()));
 	}
 
-	private static String modalityLabel(Modality modality) {
+	static String modalityLabel(Modality modality) {
 		return modality == Modality.ONLINE ? "online, por videochamada" : "presencial";
 	}
 

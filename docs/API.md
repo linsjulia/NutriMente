@@ -605,6 +605,8 @@ Avisos do "sininho" da área logada. Servem para **qualquer papel** (paciente, p
 |---|---|---|---|
 | Consulta agendada | profissional (e o paciente, como comprovante) | `APPOINTMENT` | `/appointments/{id}` |
 | Consulta confirmada / remarcada / cancelada | a outra pessoa | `APPOINTMENT` | `/appointments/{id}` |
+| 🆕 **Lembrete**: a consulta começa nas próximas 24 h (sai uma vez, automático, também por e-mail; não sai se a consulta foi agendada com menos de 24 h de antecedência) | paciente e profissional | `APPOINTMENT` | `/appointments/{id}` |
+| 🆕 Orientações da consulta registradas pelo profissional | paciente | `APPOINTMENT` | `/appointments/{id}` |
 | Plano de ação novo ou atualizado; observação do profissional no plano | paciente | `PLAN` | `/plans/{id}` |
 | Avaliação recebida | profissional | `REVIEW` | `/professionals/{id}` |
 | Cadastro aprovado ou recusado | profissional | `SYSTEM` | `/dashboard` |

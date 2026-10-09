@@ -84,7 +84,8 @@ Lista **paginada** só com profissionais **aprovados** pelo admin, sem dados pes
 
 Regras:
 - Com `minPrice` ou `maxPrice`, quem deixou o preço em branco ("valor a combinar") **não aparece**.
-- 🆕 `offersOnline`: o profissional declarou ter cadastro no **e-Psi** (psicólogos) ou no **e-Nutricionista** (nutricionistas), exigido pelos conselhos para atender online. Se `false`, ele **só atende presencial**: mostre um selo "Atende online" quando `true`, e na tela de agendamento ofereça só "Presencial" quando `false`.
+- 🆕 `offersInPerson`: o profissional informou o **consultório** e atende **presencialmente**. O perfil público mostra só `officeCity`/`officeState`; o endereço completo aparece na consulta presencial (`officeAddress`). Se `offersOnline` e `offersInPerson` forem os dois `false`, ainda não dá para agendar.
+- `offersOnline`: o profissional declarou ter cadastro no **e-Psi** (psicólogos) ou no **e-Nutricionista** (nutricionistas), exigido pelos conselhos para atender online. Se `false`, ele **só atende presencial**: mostre um selo "Atende online" quando `true`, e na tela de agendamento ofereça só "Presencial" quando `false`.
 - Nas ordenações por preço, "valor a combinar" vai para o **fim**.
 - Erros: `minPrice` maior que `maxPrice`, valor negativo ou não numérico, ou `sort` desconhecido → **400** com `errors.minPrice` / `errors.sort`.
 
@@ -106,7 +107,10 @@ Resposta:
       "specialties": [
         { "id": 3, "name": "Nutrição Comportamental", "type": "NUTRICIONISTA" }
       ],
-      "offersOnline": true
+      "offersOnline": true,
+      "offersInPerson": true,
+      "officeCity": "São Paulo",
+      "officeState": "SP"
     }
   ],
   "page": 0,
@@ -245,7 +249,7 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
 
 🆕 `screening` (triagem) é opcional: veja "Triagem antes da consulta" abaixo. Erros dentro dela voltam como `errors["screening.reason"]`.
 
-`modality` é opcional: `ONLINE` ou `PRESENCIAL`. Sem ela, vira `ONLINE` se o profissional atende online (`offersOnline`), senão `PRESENCIAL`. Pedir `ONLINE` a quem não atende online → **409 `ONLINE_NOT_AVAILABLE`**. `notes` também é opcional (até 1000 caracteres). Resposta **201** com a consulta (formato abaixo). A API manda e-mail para o paciente e para o profissional.
+`modality` é opcional: `ONLINE` ou `PRESENCIAL`. Sem ela, vira `ONLINE` se o profissional atende online (`offersOnline`), senão `PRESENCIAL`. Pedir `ONLINE` a quem não atende online → **409 `ONLINE_NOT_AVAILABLE`**; pedir `PRESENCIAL` a quem não informou o consultório → **409 `IN_PERSON_NOT_AVAILABLE`**. `notes` também é opcional (até 1000 caracteres). Resposta **201** com a consulta (formato abaixo). A API manda e-mail para o paciente e para o profissional.
 
 | Erro | Quando |
 |---|---|
@@ -277,9 +281,12 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
   "canComplete": false,
   "canReview": false,
   "canWriteRecord": false,
-  "canEditScreening": true
+  "canEditScreening": true,
+  "officeAddress": null
 }
 ```
+
+- 🆕 `officeAddress`: na consulta **presencial**, o endereço do consultório ("Av. Paulista, 1000, sala 81 - Bela Vista, São Paulo/SP"). `null` na online.
 
 - 🆕 `canEditScreening`: `true` para o **paciente** numa consulta agendada ou confirmada que ainda não começou. Mostre "Triagem" (preencher ou ajustar).
 
@@ -707,6 +714,39 @@ Na demonstração (`npm run seed`), as contas já têm notificações reais: a A
 - Campo ausente (`null`): não muda nada. O formulário atual continua funcionando sem ele.
 - `GET /api/me` devolve em `professional`: `telehealthRegistered` e `telehealthDeclaredAt` (quando declarou).
 - Desmarcar não cancela as consultas online já marcadas; só impede novas.
+
+---
+
+## 🆕 Consultório e documentos do profissional
+
+### Endereço do consultório (`PUT /api/me/professional-profile`)
+
+Três campos novos, que andam **juntos**: `officeAddress` (até 200), `officeCity` (até 100) e `officeState` (UF: `SP`, `RJ`...).
+
+- Os três **ausentes** (`null`): não muda nada. O formulário atual continua funcionando.
+- Os três **preenchidos**: salva. Faltou algum → **400** com `errors.officeAddress` / `errors.officeCity` / `errors.officeState`.
+- Os três **vazios** (`""`): apaga o endereço, e o profissional deixa de atender presencialmente.
+- `GET /api/me` devolve os três em `professional`.
+
+### Documentos (carteira do conselho, diploma, identidade)
+
+| Rota | Quem | O quê |
+|---|---|---|
+| `GET /api/me/documents` | PROFESSIONAL | Meus documentos (`status`: `PENDING`, `APPROVED`, `REJECTED`; `reviewNotes` = motivo da recusa) |
+| `POST /api/me/documents?documentType=REGISTRO_CONSELHO` | PROFESSIONAL | Enviar: **multipart/form-data**, campo `file`. PDF, JPG, PNG ou WebP, até 5 MB, no máximo 10 documentos. Tipos: `REGISTRO_CONSELHO`, `DIPLOMA`, `IDENTIDADE`, `OUTRO` |
+| `DELETE /api/me/documents/{id}` | PROFESSIONAL | Apagar (**409 `DOCUMENT_APPROVED`** se já aprovado) |
+| `GET /api/me/documents/{id}/file` | PROFESSIONAL | Abrir o meu arquivo |
+| `GET /api/admin/professionals/{id}/documents` | ADMIN | Documentos de um profissional |
+| `GET /api/admin/documents/{id}/file` | ADMIN | Abrir o arquivo (fica na auditoria) |
+| `PATCH /api/admin/documents/{id}` | ADMIN | `{ "status": "APPROVED" }` ou `{ "status": "REJECTED", "notes": "Arquivo ilegível" }` (motivo obrigatório ao recusar); o profissional é avisado |
+
+Os arquivos ficam **cifrados**, e excluir a conta apaga os documentos. Para abrir o arquivo na tela, use uma Route Handler com o token, como na foto do diário.
+
+### Admin: conferir o atendimento online
+
+`GET /api/admin/professionals` agora traz `telehealthRegistered`, `telehealthDeclaredAt` e `officeAddress`. O admin confere a declaração na plataforma do conselho (e-Psi / e-Nutricionista) e, se não encontrar o cadastro:
+
+`PATCH /api/admin/professionals/{id}/telehealth/revoke` com `{ "reason": "Cadastro não encontrado no e-Psi" }` (motivo obrigatório). O atendimento online é desligado (as consultas já marcadas continuam), e o profissional recebe notificação e e-mail. **409 `TELEHEALTH_NOT_DECLARED`** se ele não tinha declarado.
 
 ---
 

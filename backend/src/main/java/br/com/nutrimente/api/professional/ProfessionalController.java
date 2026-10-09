@@ -107,14 +107,19 @@ public class ProfessionalController {
 	public record PublicProfessional(Long id, String name, String photoUrl, ProfessionalType type, String document,
 			String bio,
 			BigDecimal consultationPrice, BigDecimal ratingAverage, int ratingCount, List<SpecialtyDto> specialties,
-			/** Atende por videochamada (declarou e-Psi / e-Nutricionista). false = só presencial */
-			boolean offersOnline) {
+			/** Atende por videochamada (declarou e-Psi / e-Nutricionista) */
+			boolean offersOnline,
+			/** Atende presencialmente (informou o consultório). O endereço completo só aparece na consulta */
+			boolean offersInPerson,
+			String officeCity,
+			String officeState) {
 
 		static PublicProfessional of(Professional p) {
 			return new PublicProfessional(p.getId(), p.getUser().getName(), p.getUser().getPhotoUrl(), p.getType(),
 					p.getDocument(), p.getBio(),
 					p.getConsultationPrice(), p.getRatingAverage(), p.getRatingCount(),
-					p.getSpecialties().stream().map(SpecialtyDto::of).toList(), p.offersOnline());
+					p.getSpecialties().stream().map(SpecialtyDto::of).toList(), p.offersOnline(), p.offersInPerson(),
+					p.getOfficeCity(), p.getOfficeState());
 		}
 	}
 

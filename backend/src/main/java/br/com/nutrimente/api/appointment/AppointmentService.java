@@ -103,13 +103,19 @@ public class AppointmentService {
 		LocalDateTime endsAt = startsAt.plus(rules.duration());
 		checkPatientFree(patientId, startsAt, endsAt);
 
-		// Online só com quem declarou o cadastro no conselho (e-Psi / e-Nutricionista).
+		// Online só com quem declarou o cadastro no conselho (e-Psi / e-Nutricionista);
+		// presencial só com quem informou o endereço do consultório.
 		// Sem modalidade no pedido: online se o profissional atende online, senão presencial.
 		Modality modality = request.modality() != null ? request.modality()
 				: professional.offersOnline() ? Modality.ONLINE : Modality.PRESENCIAL;
 		if (modality == Modality.ONLINE && !professional.offersOnline()) {
 			throw new ApiException(HttpStatus.CONFLICT, "ONLINE_NOT_AVAILABLE",
 					"Este profissional ainda não atende online. Escolha a consulta presencial.");
+		}
+		if (modality == Modality.PRESENCIAL && !professional.offersInPerson()) {
+			throw new ApiException(HttpStatus.CONFLICT, "IN_PERSON_NOT_AVAILABLE",
+					professional.offersOnline() ? "Este profissional ainda não atende presencialmente. Escolha a consulta online."
+							: "Este profissional ainda não informou como atende.");
 		}
 		Appointment appointment = save(new Appointment(patient, professional, startsAt, endsAt, modality,
 				videoUrlFor(modality), professional.getConsultationPrice(), Digits.trimToNull(request.notes()), null));
@@ -417,6 +423,7 @@ public class AppointmentService {
 				!viewerIsPatient && a.getStatus().isChangeable() && !beforeStart,
 				viewerIsPatient && a.getStatus() == AppointmentStatus.COMPLETED && !reviewed,
 				!viewerIsPatient && a.acceptsRecord(now),
-				viewerIsPatient && a.acceptsScreening(now));
+				viewerIsPatient && a.acceptsScreening(now),
+				a.getModality() == Modality.PRESENCIAL ? professional.fullOfficeAddress() : null);
 	}
 }

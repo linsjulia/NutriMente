@@ -34,6 +34,15 @@ const PASSWORD = "Demo1234";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 /** Fuso da agenda (o mesmo da API): consultas passadas às 10:00 daqui */
+// PDF mínimo (uma página em branco com um título), só para a demonstração dos documentos
+const DEMO_PDF = Buffer.from(
+  "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n" +
+  "3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 120]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n" +
+  "4 0 obj<</Length 58>>stream\nBT /F1 14 Tf 20 60 Td (Carteira CRP - demonstracao) Tj ET\nendstream endobj\n" +
+  "5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n",
+  "latin1",
+);
+
 const UTC_OFFSET_HOURS = -3; // America/Sao_Paulo (sem horário de verão desde 2019)
 
 // -------------------------------------------------------------
@@ -114,7 +123,7 @@ const PROFESSIONALS = [
     reviews: [[5, "Me senti acolhida desde a primeira sessão."]],
   },
   {
-    key: "beatriz", name: "Beatriz Lima", type: "PSICOLOGO", gender: "FEMALE", photo: "/doctor/psicologo3.jpg", price: 140,
+    key: "beatriz", name: "Beatriz Lima", type: "PSICOLOGO", gender: "FEMALE", photo: "/doctor/psicologo3.jpg", price: 140, office: null, // sem consultório: só online
     bio: "Atendimento à noite para quem trabalha durante o dia. Ansiedade, autoestima e relacionamento com o corpo.",
     specialties: ["Ansiedade", "Autoestima e Imagem Corporal"],
     windows: weekdays([1, 2, 3, 4], [["18:00", "22:00"]]),
@@ -126,6 +135,18 @@ const PROFESSIONALS = [
 ];
 
 /** Fica PENDENTE: aparece na fila de aprovação do admin */
+// Consultórios (consulta presencial). A Beatriz atende só online (office: null);
+// o Lucas, só presencial (online: false)
+const OFFICES = {
+  camila: { officeAddress: "Av. Paulista, 1000, sala 81 - Bela Vista", officeCity: "São Paulo", officeState: "SP" },
+  rafael: { officeAddress: "Rua da Bahia, 500, sala 302 - Centro", officeCity: "Belo Horizonte", officeState: "MG" },
+  larissa: { officeAddress: "Rua XV de Novembro, 200 - Centro", officeCity: "Curitiba", officeState: "PR" },
+  helena: { officeAddress: "Av. Atlântica, 1500, sala 12 - Copacabana", officeCity: "Rio de Janeiro", officeState: "RJ" },
+  mariana: { officeAddress: "Rua Augusta, 900, sala 45 - Consolação", officeCity: "São Paulo", officeState: "SP" },
+  lucas: { officeAddress: "Rua dos Andradas, 1200, sala 7 - Centro", officeCity: "Porto Alegre", officeState: "RS" },
+  juliana: { officeAddress: "SCS Quadra 2, Bloco C, sala 110 - Asa Sul", officeCity: "Brasília", officeState: "DF" },
+};
+
 const PENDING = {
   key: "andre", name: "André Nogueira", type: "PSICOLOGO", gender: "MALE",
   bio: "Psicólogo recém-chegado à plataforma, com foco em ansiedade em universitários.",
@@ -325,6 +346,8 @@ async function createProfessionals(db, specialtyIdByName) {
           consultationPrice: p.price,
           // Cadastro no e-Psi / e-Nutricionista: sem ele, só consulta presencial
           telehealthRegistered: p.online ?? true,
+          // Consultório: sem ele, só consulta online
+          ...(p.office === null ? {} : OFFICES[p.key] ?? {}),
           specialtyIds: p.specialties.map((name) => {
             const sid = specialtyIdByName[`${p.type}:${name}`];
             if (!sid) throw new Error(`Especialidade "${name}" não encontrada (rodou o seed do banco?)`);
@@ -335,6 +358,14 @@ async function createProfessionals(db, specialtyIdByName) {
       await api("PUT", "/api/me/availability", { token, body: { windows: p.windows } });
       created[p.key] = { ...p, email, id, token };
     } else {
+      // Pendente: envia a carteira do conselho (PDF) para o admin conferir
+      const token = await login(email);
+      const form = new FormData();
+      form.append("file", new Blob([DEMO_PDF], { type: "application/pdf" }), "carteira-crp.pdf");
+      const r = await fetch(`${API}/api/me/documents?documentType=REGISTRO_CONSELHO`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form,
+      });
+      if (!r.ok) throw new Error(`documento do ${p.name}: ${r.status} ${await r.text()}`);
       created[p.key] = { ...p, email, id };
     }
     log(`profissional ${p.name}${p.price ? "" : " (pendente)"}`);

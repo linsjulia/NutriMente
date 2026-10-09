@@ -20,6 +20,8 @@ import br.com.nutrimente.api.appointment.AppointmentStatus;
 import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
+import br.com.nutrimente.api.common.EncryptedFileStorage;
+import br.com.nutrimente.api.common.FileType;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.meal.MealLog.MealType;
 import br.com.nutrimente.api.professional.ProfessionalController.PageResponse;
@@ -35,7 +37,7 @@ import br.com.nutrimente.api.user.PatientRepository;
  * - o PROFISSIONAL que atende o paciente (AppointmentStatus.LINKING) lê o
  *   diário e as fotos; para os outros, ele "não existe" (404). A leitura
  *   do diário vai para a auditoria;
- * - textos cifrados (RecordCipher); fotos cifradas em arquivo (PhotoStorage).
+ * - textos cifrados (RecordCipher); fotos cifradas em arquivo (EncryptedFileStorage).
  *   Arquivos só são apagados DEPOIS do commit: se a transação falhar, a
  *   foto antiga continua lá.
  */
@@ -50,11 +52,11 @@ public class MealLogService {
 	private final PatientRepository patients;
 	private final AppointmentRepository appointments;
 	private final RecordCipher cipher;
-	private final PhotoStorage photos;
+	private final EncryptedFileStorage photos;
 	private final LogClient logClient;
 
 	public MealLogService(MealLogRepository meals, PatientRepository patients, AppointmentRepository appointments,
-			RecordCipher cipher, PhotoStorage photos, LogClient logClient) {
+			RecordCipher cipher, EncryptedFileStorage photos, LogClient logClient) {
 		this.meals = meals;
 		this.patients = patients;
 		this.appointments = appointments;
@@ -112,7 +114,7 @@ public class MealLogService {
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
-		String contentType = ImageType.detect(bytes)
+		String contentType = FileType.image(bytes)
 				.orElseThrow(() -> photoError("Envie uma foto em JPG, PNG ou WebP"));
 		String old = meal.getPhotoFile();
 		String saved = photos.save(bytes);

@@ -25,6 +25,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.jayway.jsonpath.JsonPath;
 
 import br.com.nutrimente.api.IntegrationTest;
+import br.com.nutrimente.api.common.OrphanFileCleaner;
 import br.com.nutrimente.api.config.AppProperties;
 
 /** Diário alimentar: o paciente registra (com foto cifrada); só o profissional que o atende lê */
@@ -141,7 +142,7 @@ class MealLogIntegrationTest extends IntegrationTest {
 	}
 
 	@Autowired
-	private OrphanPhotoCleaner cleaner;
+	private OrphanFileCleaner cleaner;
 
 	@Test
 	@DisplayName("fotos órfãs (sem refeição) são apagadas; as que estão em uso ficam")

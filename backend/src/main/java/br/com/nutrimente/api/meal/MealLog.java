@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 /**
  * Uma refeição do diário alimentar (tabela meal_logs, migração V008).
  * Descrição e anotações ficam CRIPTOGRAFADAS aqui (o MealLogService cifra
- * e decifra). A foto fica num arquivo à parte (PhotoStorage); aqui só o nome.
+ * e decifra). A foto fica num arquivo à parte (EncryptedFileStorage); aqui só o nome.
  */
 @Entity
 @Table(name = "meal_logs")

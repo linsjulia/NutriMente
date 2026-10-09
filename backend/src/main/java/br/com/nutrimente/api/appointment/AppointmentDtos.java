@@ -134,6 +134,8 @@ public final class AppointmentDtos {
 			/** Profissional, consulta já começou e não foi cancelada: mostrar "Registro da consulta" */
 			boolean canWriteRecord,
 			/** Paciente, consulta agendada/confirmada que ainda não começou: mostrar "Triagem" */
-			boolean canEditScreening) {
+			boolean canEditScreening,
+			/** Consulta presencial: endereço do consultório ("Rua A, 10 - Centro, São Paulo/SP"); online: null */
+			String officeAddress) {
 	}
 }

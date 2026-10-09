@@ -1,6 +1,7 @@
 package br.com.nutrimente.api.account;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.common.validation.Names;
 import br.com.nutrimente.api.config.JwtService;
+import br.com.nutrimente.api.document.DocumentService;
 import br.com.nutrimente.api.intake.PatientIntakeRepository;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.meal.MealLogService;
@@ -42,10 +44,13 @@ public class AccountService {
 	private final JwtService jwtService;
 	private final PatientIntakeRepository intakes;
 	private final MealLogService mealLogs;
+	private final DocumentService documents;
 
 	public AccountService(UserRepository users, ProfessionalRepository professionals,
 			SpecialtyRepository specialties, PasswordEncoder passwordEncoder, LogClient logClient,
-			JwtService jwtService, PatientIntakeRepository intakes, MealLogService mealLogs) {
+			JwtService jwtService, PatientIntakeRepository intakes, MealLogService mealLogs,
+			DocumentService documents) {
+		this.documents = documents;
 		this.jwtService = jwtService;
 		this.mealLogs = mealLogs;
 		this.intakes = intakes;
@@ -83,6 +88,7 @@ public class AccountService {
 		if (request.telehealthRegistered() != null) {
 			professional.declareTelehealth(request.telehealthRegistered());
 		}
+		updateOffice(professional, request);
 		audit(user, "UPDATE", "professionals");
 		return meResponse(user, professional);
 	}
@@ -124,6 +130,10 @@ public class AccountService {
 			mealLogs.deleteAllOf(userId);
 			intakes.findById(userId).ifPresent(intakes::delete);
 		}
+		// Documentos do profissional (identidade, diploma...) também não ficam guardados
+		if (user.getRole() == Role.PROFESSIONAL) {
+			documents.deleteAllOf(userId);
+		}
 		user.anonymize();
 		audit(user, "ANONYMIZE", "users");
 	}
@@ -150,6 +160,37 @@ public class AccountService {
 					Map.of("specialtyIds", "Escolha especialidades da lista da sua profissão"));
 		}
 		return new HashSet<>(found);
+	}
+
+	/**
+	 * Endereço do consultório: só muda se algum dos três campos vier no JSON.
+	 * Vazios = apagar. Preenchidos = os três obrigatórios (endereço pela metade não serve).
+	 */
+	private static void updateOffice(Professional professional, UpdateProfessionalProfileRequest request) {
+		if (request.officeAddress() == null && request.officeCity() == null && request.officeState() == null) {
+			return;
+		}
+		String address = Digits.trimToNull(request.officeAddress());
+		String city = Digits.trimToNull(request.officeCity());
+		String state = Digits.trimToNull(request.officeState());
+		if (address == null && city == null && state == null) {
+			professional.updateOffice(null, null, null);
+			return;
+		}
+		Map<String, String> missing = new LinkedHashMap<>();
+		if (address == null) {
+			missing.put("officeAddress", "Informe o endereço do consultório");
+		}
+		if (city == null) {
+			missing.put("officeCity", "Informe a cidade");
+		}
+		if (state == null) {
+			missing.put("officeState", "Escolha a UF");
+		}
+		if (!missing.isEmpty()) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Revise os campos destacados.", missing);
+		}
+		professional.updateOffice(address, Names.normalize(city), state);
 	}
 
 	/** intakeCompleted só faz sentido para pacientes (null para os outros papéis) */

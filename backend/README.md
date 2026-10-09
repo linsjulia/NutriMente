@@ -67,6 +67,10 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | PUT/DELETE | `/api/me/meals/{id}` e `/api/me/meals/{id}/photo` | PATIENT | Editar/apagar refeição; enviar/tirar foto (multipart) |
 | GET | `/api/meals/{id}/photo` | PATIENT, PROFESSIONAL | Foto da refeição (dono ou profissional que atende) |
 | GET | `/api/patients/{id}/meals` | PROFESSIONAL | Diário de um paciente que atendo |
+| GET/POST/DELETE | `/api/me/documents` (+ `/{id}/file`) | PROFESSIONAL | Documentos do conselho, diploma, identidade (multipart) |
+| GET | `/api/admin/professionals/{id}/documents`, `/api/admin/documents/{id}/file` | ADMIN | Conferir documentos |
+| PATCH | `/api/admin/documents/{id}` | ADMIN | Aprovar/recusar documento |
+| PATCH | `/api/admin/professionals/{id}/telehealth/revoke` | ADMIN | Revogar o atendimento online (com motivo) |
 | GET | `/api/me/patients` | PROFESSIONAL | Pacientes que atendo |
 | POST / PUT | `/api/plans` · `/api/plans/{id}` | PROFESSIONAL | Criar / editar plano de ação (metas, refeições, checklist) |
 | GET | `/api/plans` · `/api/plans/{id}` | participantes | Meus planos / plano completo com progresso |
@@ -122,6 +126,7 @@ src/main/java/br/com/nutrimente/api/
 ├── intake/        questionário inicial do paciente (onboarding)
 ├── screening/     triagem antes da consulta
 ├── meal/          diário alimentar (refeições e fotos cifradas)
+├── document/      documentos do profissional (conferidos pelo admin)
 ├── plan/          plano de ação: metas, rotina alimentar, checklist e progresso
 ├── user/          entidades User, Patient, Professional e repositórios
 ├── notification/  e-mails e notificações do site ("sininho")

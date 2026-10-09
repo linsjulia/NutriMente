@@ -81,6 +81,42 @@ public class AdminService {
 		return ProfessionalForReview.of(professional);
 	}
 
+	/**
+	 * O profissional DECLARA que tem cadastro no e-Psi / e-Nutricionista
+	 * (V003); o admin confere na plataforma do conselho. Se não encontrar,
+	 * revoga: o profissional deixa de receber consultas online novas (as já
+	 * marcadas continuam) e recebe o motivo por notificação e e-mail. Ele
+	 * pode declarar de novo depois de regularizar.
+	 */
+	@Transactional
+	public ProfessionalForReview revokeTelehealth(Long adminId, Long professionalId, String reason) {
+		String cleanReason = reason == null ? "" : reason.strip();
+		if (cleanReason.isEmpty()) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Informe o motivo.",
+					Map.of("reason", "Informe o motivo"));
+		}
+		Professional professional = professionals.findById(professionalId)
+				.filter(p -> p.getUser().canLogin())
+				.orElseThrow(() -> ApiException.notFound("Profissional não encontrado."));
+		if (!professional.offersOnline()) {
+			throw new ApiException(HttpStatus.CONFLICT, "TELEHEALTH_NOT_DECLARED",
+					"Este profissional não declarou cadastro para atender online.");
+		}
+		professional.declareTelehealth(false);
+		String intro = "Desativamos o seu atendimento online: não conseguimos confirmar seu cadastro no %s. Motivo: %s"
+				.formatted(professional.getType() == ProfessionalType.PSICOLOGO ? "e-Psi" : "e-Nutricionista", cleanReason);
+		notifications.notify(professionalId, Notification.Type.SYSTEM, "Atendimento online desativado", intro,
+				NotificationLinks.dashboard());
+		String email = professional.getUser().getEmail();
+		String name = professional.getUser().getName();
+		AfterCommit.run(() -> {
+			emailService.sendAccountNotice(email, name, "Atendimento online desativado", intro,
+					"As consultas online já marcadas continuam valendo. Depois de regularizar, marque de novo no seu perfil.");
+			logClient.audit(adminId, "ADMIN", "UPDATE", "professionals.telehealth", professionalId, professionalId);
+		});
+		return ProfessionalForReview.of(professional);
+	}
+
 	@Transactional
 	public SpecialtyDto createSpecialty(Long adminId, String name, ProfessionalType type) {
 		// "  nutrição   funcional " -> "nutrição funcional": evita duplicatas por espaços

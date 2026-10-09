@@ -76,6 +76,17 @@ public class Professional {
 	@Column(name = "telehealth_declared_at")
 	private LocalDateTime telehealthDeclaredAt;
 
+	/** Endereço do consultório (V009). Sem ele, não atende presencialmente */
+	@Column(name = "office_address")
+	private String officeAddress;
+
+	@Column(name = "office_city")
+	private String officeCity;
+
+	/** UF, ex.: "SP" */
+	@Column(name = "office_state")
+	private String officeState;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
@@ -134,6 +145,35 @@ public class Professional {
 		return telehealthDeclaredAt;
 	}
 
+	/** Endereço do consultório: os três juntos, ou os três null (não atende presencialmente) */
+	public void updateOffice(String address, String city, String state) {
+		this.officeAddress = address;
+		this.officeCity = city;
+		this.officeState = state;
+	}
+
+	/** Pode receber consulta PRESENCIAL (informou onde atende) */
+	public boolean offersInPerson() {
+		return officeAddress != null;
+	}
+
+	public String getOfficeAddress() {
+		return officeAddress;
+	}
+
+	public String getOfficeCity() {
+		return officeCity;
+	}
+
+	public String getOfficeState() {
+		return officeState;
+	}
+
+	/** "Rua A, 10 - Centro, São Paulo/SP", ou null */
+	public String fullOfficeAddress() {
+		return officeAddress == null ? null : "%s, %s/%s".formatted(officeAddress, officeCity, officeState);
+	}
+
 	/** Nota média e quantidade de avaliações (recalculadas a cada avaliação nova) */
 	public void updateRating(BigDecimal average, int count) {
 		this.ratingAverage = average;
@@ -157,6 +197,7 @@ public class Professional {
 		this.bio = null;
 		this.specialties.clear();
 		this.document = "REMOVIDO-" + id;
+		updateOffice(null, null, null);
 		this.verificationStatus = VerificationStatus.REJECTED;
 	}
 

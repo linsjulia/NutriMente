@@ -81,7 +81,7 @@ test("todas as 28 tabelas foram criadas", async () => {
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -119,11 +119,15 @@ test("e-mail não pode repetir", () =>
     );
   }));
 
-test("CPF precisa ter 11 dígitos numéricos, mas pode ficar vazio", () =>
+// Desde a V007 o CPF é gravado cifrado pela API; a unicidade fica no cpf_hash
+// (HMAC do CPF). Os 11 dígitos são validados na API (@Cpf).
+test("CPF não repete (pelo cpf_hash), mas pode ficar vazio", () =>
   inTransaction(async (query) => {
+    const hash = "b".repeat(64);
+    await query(`INSERT INTO users (name, email, role, cpf, cpf_hash) VALUES (N'A', 'cpf1@teste.local', 'PATIENT', 'v1:x', '${hash}')`);
     await assertFails(
-      query("INSERT INTO users (name, email, role, cpf) VALUES (N'A', 'cpf@teste.local', 'PATIENT', '123.456.789')"),
-      /ck_users_cpf/
+      query(`INSERT INTO users (name, email, role, cpf, cpf_hash) VALUES (N'B', 'cpf2@teste.local', 'PATIENT', 'v1:y', '${hash}')`),
+      /uq_users_cpf_hash|duplicate key/i
     );
     // Vários usuários sem CPF são permitidos (índice único filtrado)
     await query(`INSERT INTO users (name, email, role) VALUES

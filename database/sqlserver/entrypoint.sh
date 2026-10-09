@@ -64,6 +64,26 @@ else
     echo "[nutrimente] Banco NutriMente já existe, pulando criação."
 fi
 
+# O servidor responder não quer dizer que o BANCO esteja pronto: ao ligar,
+# o SQL Server passa por uma "recuperação" (reaplica o que estava em
+# andamento quando o container parou). Até ela terminar, entrar no banco
+# falha com "Cannot open database". Sem esta espera, o set -e encerrava o
+# script e o container reiniciava. Tentamos ENTRAR no banco de verdade
+# (-d NutriMente) a cada 2 segundos, por até 5 minutos.
+echo "[nutrimente] Aguardando o banco NutriMente aceitar conexões..."
+DB_READY=no
+for i in {1..150}; do
+    if $SQLCMD -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -C -b -d NutriMente -Q "SELECT 1" -o /dev/null 2>/dev/null; then
+        DB_READY=yes
+        break
+    fi
+    sleep 2
+done
+if [ "$DB_READY" != "yes" ]; then
+    echo "[nutrimente] ERRO: o banco NutriMente não aceitou conexões em 5 minutos."
+    exit 1
+fi
+
 # ---------------- Migrações ----------------
 # Atalho: sqlcmd como administrador, já dentro do banco NutriMente
 run_sql() {

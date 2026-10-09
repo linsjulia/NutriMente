@@ -33,3 +33,4 @@ O usuário da aplicação já tem leitura e escrita em tabelas novas (`db_datare
 | Versão | O que faz |
 |---|---|
 | `V002` | Registro da consulta (prontuário): tabela `appointment_records` |
+| `V003` | Cadastro para atender online (e-Psi / e-Nutricionista): colunas `telehealth_*` em `professionals` |

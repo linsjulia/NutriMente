@@ -79,7 +79,8 @@ test("todas as 26 tabelas foram criadas", async () => {
 
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
-  assert.ok(recordset.some((r) => r.version === "V002__registro_da_consulta"));
+  const versions = recordset.map((r) => r.version);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -288,4 +289,13 @@ test("registro da consulta (V002): um por consulta e não some se a consulta for
     await assertFails(record(), /uq_appointment_records_appointment/);
     // Prontuário é guarda obrigatória: o banco não deixa apagar a consulta por baixo dele
     await assertFails(query(`DELETE FROM appointments WHERE id = ${appointment}`), /REFERENCE constraint/i);
+  }));
+
+test("cadastro para atender online (V003): começa desligado", () =>
+  inTransaction(async (query) => {
+    const { professional } = await createPatientAndProfessional(query);
+    const { recordset } = await query(
+      `SELECT telehealth_registered, telehealth_declared_at FROM professionals WHERE user_id = ${professional}`);
+    assert.equal(recordset[0].telehealth_registered, false);
+    assert.equal(recordset[0].telehealth_declared_at, null);
   }));

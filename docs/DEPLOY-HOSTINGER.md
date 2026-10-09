@@ -1,6 +1,6 @@
-# 🚀 Deploy na Hostinger (passo a passo)
+# 🚀 Deploy (passo a passo)
 
-Como colocar o NutriMente no ar, com domínio próprio e HTTPS, num **VPS da Hostinger**.
+Como colocar o NutriMente no ar em **https://nutrimente.tech**, com HTTPS, num **servidor VPS**: na **DigitalOcean** (créditos do GitHub Student Pack, o caminho escolhido) ou na **Hostinger**. Os passos são os mesmos; só a criação do servidor (passo 1) e o e-mail (passo 5) mudam.
 
 Tempo estimado: **1 a 2 horas** na primeira vez. Boa parte disso é esperar o DNS propagar e o Docker baixar as imagens.
 
@@ -10,19 +10,20 @@ Tempo estimado: **1 a 2 horas** na primeira vez. Boa parte disso é esperar o DN
 
 O NutriMente roda **SQL Server, MongoDB, API Java, serviço Node e o site Next.js**. Por isso:
 
-| Plano da Hostinger | Serve? | Por quê |
+| Servidor | Serve? | Por quê |
 |---|---|---|
-| Hospedagem compartilhada (Premium, Business, Cloud) | ❌ **Não** | Não roda Docker, Java nem SQL Server |
-| **VPS KVM 1** (4 GB de RAM) | ⚠️ No limite | Só o SQL Server pede 2 GB. Funciona para demonstração, mas fica lento |
-| **VPS KVM 2** (8 GB de RAM) | ✅ **Recomendado** | Folga para tudo, inclusive para compilar no próprio servidor |
+| Hospedagem compartilhada da Hostinger (Premium, Business, **Cloud Startup**) | ❌ **Não** | Não roda Docker, Java nem SQL Server |
+| **DigitalOcean, Droplet de 8 GB** (US$ 48/mês) | ✅ **Escolhido** | Pago com os **US$ 200 de crédito do GitHub Student Pack** (cobre ~4 meses). Para esticar o crédito: Droplet de 4 GB (US$ 24/mês) + swap, mais lento |
+| Hostinger **VPS KVM 1** (4 GB de RAM) | ⚠️ No limite | Só o SQL Server pede 2 GB. Funciona para demonstração, mas fica lento |
+| Hostinger **VPS KVM 2** (8 GB de RAM) | ✅ Alternativa paga | Folga para tudo, inclusive para compilar no próprio servidor |
 
 Você também vai precisar de:
 
-- **Um domínio** (ex.: `nutrimente.com.br`). Pode ser registrado na própria Hostinger; é mais simples para o DNS e o e-mail.
-- **Uma caixa de e-mail** no domínio (ex.: `nao-responda@nutrimente.com.br`). É por ela que saem os e-mails de confirmação e de nova senha. Alguns planos de VPS/domínio da Hostinger incluem e-mail; se não, é um adicional barato.
+- **O domínio:** `nutrimente.tech` (registrado no **get.tech**, pelo Student Pack).
+- **Envio de e-mail** com o domínio (`nao-responda@nutrimente.tech`): é por ele que saem os e-mails de confirmação e de nova senha. Usamos o **Brevo** (grátis até 300 por dia), porque a DigitalOcean bloqueia as portas de e-mail comuns (ver passo 5).
 - Acesso ao repositório no GitHub.
 
-> 💡 Nos exemplos abaixo, troque `nutrimente.com.br` pelo seu domínio e `203.0.113.10` pelo IP do seu VPS.
+> 💡 Nos exemplos abaixo, troque `203.0.113.10` pelo IP do seu servidor.
 
 ### Como fica no servidor
 
@@ -41,7 +42,22 @@ Só o **Caddy** fica exposto na internet (portas 80 e 443). Bancos, API e servi�
 
 ---
 
-## 1. Criar o VPS
+## 1. Criar o servidor
+
+### 1.A DigitalOcean (Student Pack), o caminho escolhido
+
+1. Ative o crédito em https://education.github.com/pack → **DigitalOcean** → crie a conta pelo link do pacote (o crédito só vale assim).
+2. **Create → Droplets**:
+   - **Região:** New York ou Toronto (não há região no Brasil; a diferença de velocidade é pequena).
+   - **Imagem:** Marketplace → **Docker on Ubuntu 24.04** (já vem com Docker; senão, Ubuntu 24.04 e o passo 3.2).
+   - **Tamanho:** Basic → Regular → **8 GB / 4 vCPU** (ou 4 GB, ver tabela acima).
+   - **Autenticação:** **SSH Key** (gere no seu PC com `ssh-keygen -t ed25519` e cole o conteúdo de `~/.ssh/id_ed25519.pub`).
+   - **Backups:** opcional (+20%). O `deploy/backup.sh` (passo 10) já faz backups diários.
+   - **Hostname:** `nutrimente`.
+3. Anote o **IP** (ipv4) do Droplet.
+4. Em **Networking → Firewalls**, crie um firewall com entrada **só** nas portas 22, 80 e 443 (TCP) e 443 (UDP), e aplique no Droplet.
+
+### 1.B Hostinger (alternativa paga)
 
 1. No **hPanel**, vá em **VPS** e contrate o plano.
 2. Na configuração inicial:
@@ -51,9 +67,9 @@ Só o **Caddy** fica exposto na internet (portas 80 e 443). Bancos, API e servi�
    - **Chave SSH:** recomendado. Se você não tem uma, gere no seu PC com `ssh-keygen -t ed25519` e cole o conteúdo de `~/.ssh/id_ed25519.pub`.
 3. Anote o **IP do VPS**, que aparece na visão geral.
 
-## 2. Apontar o domínio para o VPS (DNS)
+## 2. Apontar o domínio para o servidor (DNS)
 
-No hPanel, vá em **Domínios → seu domínio → DNS / Nameservers** e deixe assim:
+O `nutrimente.tech` é gerenciado no **get.tech** (painel em https://controlpanel.tech, com o login do registro): **Manage Domain → DNS Management**. (Na Hostinger: **Domínios → seu domínio → DNS / Nameservers**.) Deixe assim:
 
 | Tipo | Nome | Aponta para | TTL |
 |---|---|---|---|
@@ -66,7 +82,7 @@ No hPanel, vá em **Domínios → seu domínio → DNS / Nameservers** e deixe a
 A propagação leva de minutos a algumas horas. Para conferir, no seu PC:
 
 ```bash
-nslookup nutrimente.com.br
+nslookup nutrimente.tech
 ```
 
 Quando responder com o IP do VPS, pode seguir. **O HTTPS só funciona depois disso.**
@@ -153,9 +169,20 @@ cd /opt/nutrimente
 git config core.sshCommand "ssh -i ~/.ssh/github_deploy"
 ```
 
-## 5. Criar a caixa de e-mail
+## 5. Envio de e-mail
 
-1. No hPanel, vá em **E-mails → seu domínio → Criar conta de e-mail**: `nao-responda@nutrimente.com.br`, com uma senha forte.
+### 5.A Brevo (padrão; obrigatório na DigitalOcean)
+
+A DigitalOcean **bloqueia as portas 25, 465 e 587** (envio de e-mail) em contas novas. O Brevo aceita a porta **2525**, que não é bloqueada:
+
+1. Crie a conta grátis em https://www.brevo.com.
+2. **Senders, Domains & Dedicated IPs → Domains → Add a domain**: `nutrimente.tech`. O Brevo mostra registros **TXT** (código de verificação, **DKIM** e **DMARC**): crie cada um no DNS do get.tech (passo 2) e clique em **Verify**. Sem isso, os e-mails caem no spam.
+3. **Senders → Add a sender**: `NutriMente <nao-responda@nutrimente.tech>`.
+4. **SMTP & API → SMTP**: copie o **login** e gere uma **SMTP key**. Eles vão no `.env` (passo 6) como `MAIL_USERNAME` e `MAIL_PASSWORD`; o resto (`smtp-relay.brevo.com`, porta 2525, STARTTLS) já vem no modelo.
+
+### 5.B E-mail da Hostinger (só se o servidor liberar a porta 465)
+
+1. No hPanel, vá em **E-mails → seu domínio → Criar conta de e-mail**: `nao-responda@nutrimente.tech`, com uma senha forte.
 2. Os dados de envio (SMTP) da Hostinger são:
 
 | Campo | Valor |
@@ -169,12 +196,16 @@ Se o domínio está na Hostinger, os registros **SPF** e **DKIM** já vêm confi
 
 ## 6. Configurar o `.env` de produção
 
+O jeito mais fácil: o script gera **todas** as senhas e chaves fortes e só deixa o e-mail para você:
+
 ```bash
-cp .env.production.example .env
-nano .env
+bash deploy/gerar-env.sh nutrimente.tech seu-email@exemplo.com
+nano .env      # preencha MAIL_USERNAME e MAIL_PASSWORD (passo 5)
 ```
 
-Preencha **todos** os valores marcados com `TROQUE`. Gere cada senha ou chave com:
+Ele mostra na tela a **senha do admin** e a **`RECORDS_ENCRYPTION_KEY`**: **guarde as duas fora do servidor** (gerenciador de senhas) antes de continuar. O script não sobrescreve um `.env` que já existe.
+
+**Ou à mão:** `cp .env.production.example .env && nano .env` e preencha **todos** os valores marcados com `TROQUE`. Gere cada senha ou chave com:
 
 ```bash
 openssl rand -hex 24
@@ -182,13 +213,14 @@ openssl rand -hex 24
 
 | Variável | O que colocar |
 |---|---|
-| `DOMAIN` | Só o domínio, sem `https://` e sem `www`: `nutrimente.com.br` |
+| `DOMAIN` | Só o domínio, sem `https://` e sem `www`: `nutrimente.tech` |
 | `MSSQL_SA_PASSWORD`, `NUTRIMENTE_DB_PASSWORD` | Uma chave gerada **+ `Aa1!` no final** (o SQL Server exige maiúscula, minúscula, número e símbolo) |
 | `MONGO_ROOT_PASSWORD`, `MONGO_APP_PASSWORD`, `LOGS_API_KEY` | Uma chave gerada cada |
 | `JWT_SECRET` | `openssl rand -hex 32` (64 caracteres) |
 | `RECORDS_ENCRYPTION_KEY` | `openssl rand -hex 32`. Criptografa prontuário, questionário, triagem e CPF/telefone/nascimento. **Guarde uma cópia fora do servidor**: sem ela, os registros do backup não podem ser lidos |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | O primeiro administrador. Senha com letras e números, 8+ caracteres |
-| `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | Os dados da caixa criada no passo 5 |
+| `MAIL_USERNAME`, `MAIL_PASSWORD` | Login e SMTP key do Brevo (passo 5.A) ou a caixa da Hostinger (5.B) |
+| `MAIL_FROM` | `NutriMente <nao-responda@nutrimente.tech>` (o remetente verificado no Brevo) |
 
 - No `nano`, salve com `Ctrl+O`, `Enter` e saia com `Ctrl+X`.
 - Proteja o arquivo: `chmod 600 .env`
@@ -226,8 +258,8 @@ docker compose logs --tail=50 api      # troque "api" pelo serviço
 
 ## 8. Conferir se está no ar
 
-1. Abra **https://nutrimente.com.br**. Deve aparecer o cadeado. O certificado é emitido sozinho na primeira visita e pode levar 1 minuto.
-2. **http://** e **www** devem redirecionar para `https://nutrimente.com.br`.
+1. Abra **https://nutrimente.tech**. Deve aparecer o cadeado. O certificado é emitido sozinho na primeira visita e pode levar 1 minuto.
+2. **http://** e **www** devem redirecionar para `https://nutrimente.tech`.
 3. Faça um cadastro de paciente com um e-mail seu: o e-mail de confirmação deve chegar (olhe o spam na primeira vez).
 4. Entre com o `ADMIN_EMAIL`. Depois, em **Minha conta**, troque a senha do admin.
 5. Confira que os bancos **não** estão expostos. No seu PC, isto deve dar erro ou tempo esgotado:

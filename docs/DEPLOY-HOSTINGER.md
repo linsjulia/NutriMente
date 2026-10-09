@@ -1,6 +1,6 @@
 # 🚀 Deploy (passo a passo)
 
-Como colocar o NutriMente no ar em **https://nutrimente.tech**, com HTTPS, num **servidor VPS**: na **DigitalOcean** (créditos do GitHub Student Pack, o caminho escolhido) ou na **Hostinger**. Os passos são os mesmos; só a criação do servidor (passo 1) e o e-mail (passo 5) mudam.
+Como colocar o NutriMente no ar em **https://nutrimente.tech**, com HTTPS, num **servidor (máquina virtual)**: no **Microsoft Azure** (crédito do Azure for Students, o caminho escolhido) ou num **VPS da Hostinger**. Os passos são os mesmos; só a criação do servidor (passo 1) e o e-mail (passo 5) mudam.
 
 Tempo estimado: **1 a 2 horas** na primeira vez. Boa parte disso é esperar o DNS propagar e o Docker baixar as imagens.
 
@@ -13,14 +13,16 @@ O NutriMente roda **SQL Server, MongoDB, API Java, serviço Node e o site Next.j
 | Servidor | Serve? | Por quê |
 |---|---|---|
 | Hospedagem compartilhada da Hostinger (Premium, Business, **Cloud Startup**) | ❌ **Não** | Não roda Docker, Java nem SQL Server |
-| **DigitalOcean, Droplet de 8 GB** (US$ 48/mês) | ✅ **Escolhido** | Pago com os **US$ 200 de crédito do GitHub Student Pack** (cobre ~4 meses). Para esticar o crédito: Droplet de 4 GB (US$ 24/mês) + swap, mais lento |
+| **Azure, máquina B2ms (8 GB)** | ✅ **Escolhido** | Paga com os **US$ 100 do Azure for Students** (sem cartão; vale 12 meses e renova enquanto for estudante). Ligada o mês inteiro, consome o crédito em 1 a 2 meses: **desligue quando não estiver usando** (passo 1.A) |
+| Azure, máquina B2s (4 GB) + swap | ⚠️ Mais barata | Dura o dobro do crédito, mas fica lenta (o SQL Server sozinho pede 2 GB) |
+| Azure, máquinas grátis (B1s, B2ats v2) | ❌ Não | Só 1 GB de memória |
 | Hostinger **VPS KVM 1** (4 GB de RAM) | ⚠️ No limite | Só o SQL Server pede 2 GB. Funciona para demonstração, mas fica lento |
 | Hostinger **VPS KVM 2** (8 GB de RAM) | ✅ Alternativa paga | Folga para tudo, inclusive para compilar no próprio servidor |
 
 Você também vai precisar de:
 
-- **O domínio:** `nutrimente.tech` (registrado no **get.tech**, pelo Student Pack).
-- **Envio de e-mail** com o domínio (`nao-responda@nutrimente.tech`): é por ele que saem os e-mails de confirmação e de nova senha. Usamos o **Brevo** (grátis até 300 por dia), porque a DigitalOcean bloqueia as portas de e-mail comuns (ver passo 5).
+- **O domínio:** `nutrimente.tech` (registrado no **get.tech**, pelo GitHub Student Pack).
+- **Envio de e-mail** com o domínio (`nao-responda@nutrimente.tech`): é por ele que saem os e-mails de confirmação e de nova senha. Usamos o **Brevo** (grátis até 300 por dia), porque o Azure bloqueia a porta 25 (ver passo 5).
 - Acesso ao repositório no GitHub.
 
 > 💡 Nos exemplos abaixo, troque `203.0.113.10` pelo IP do seu servidor.
@@ -44,18 +46,21 @@ Só o **Caddy** fica exposto na internet (portas 80 e 443). Bancos, API e servi�
 
 ## 1. Criar o servidor
 
-### 1.A DigitalOcean (Student Pack), o caminho escolhido
+### 1.A Microsoft Azure (Azure for Students), o caminho escolhido
 
-1. Ative o crédito em https://education.github.com/pack → **DigitalOcean** → crie a conta pelo link do pacote (o crédito só vale assim).
-2. **Create → Droplets**:
-   - **Região:** New York ou Toronto (não há região no Brasil; a diferença de velocidade é pequena).
-   - **Imagem:** Marketplace → **Docker on Ubuntu 24.04** (já vem com Docker; senão, Ubuntu 24.04 e o passo 3.2).
-   - **Tamanho:** Basic → Regular → **8 GB / 4 vCPU** (ou 4 GB, ver tabela acima).
-   - **Autenticação:** **SSH Key** (gere no seu PC com `ssh-keygen -t ed25519` e cole o conteúdo de `~/.ssh/id_ed25519.pub`).
-   - **Backups:** opcional (+20%). O `deploy/backup.sh` (passo 10) já faz backups diários.
-   - **Hostname:** `nutrimente`.
-3. Anote o **IP** (ipv4) do Droplet.
-4. Em **Networking → Firewalls**, crie um firewall com entrada **só** nas portas 22, 80 e 443 (TCP) e 443 (UDP), e aplique no Droplet.
+1. Ative o crédito em https://azure.microsoft.com/free/students (entre com o e-mail da faculdade; **não pede cartão**).
+2. No portal (https://portal.azure.com): **Máquinas virtuais → Criar → Máquina virtual do Azure**:
+   - **Assinatura:** Azure for Students. **Grupo de recursos:** crie `nutrimente`.
+   - **Nome:** `nutrimente`. **Região:** **(South America) Brazil South** (mais perto do público) ou **East US** (mais barata). O preço por hora aparece na própria tela: compare antes de criar.
+   - **Imagem:** **Ubuntu Server 24.04 LTS - x64 Gen2** (o SQL Server **não roda** em processador ARM: nada de imagens "Arm64").
+   - **Tamanho:** **Standard_B2ms** (2 vCPU, 8 GiB). Mais barata: Standard_B2s (4 GiB), ver tabela.
+   - **Autenticação:** **Chave pública SSH**, usuário `azureuser`; deixe o Azure gerar o par e **baixe a chave `.pem`** (só aparece uma vez).
+   - **Portas de entrada públicas:** marque **SSH (22), HTTP (80) e HTTPS (443)**.
+   - Aba **Discos:** SSD Standard, 64 GiB.
+   - Aba **Rede:** IP público novo, **SKU Standard, estático** (o IP não muda ao desligar).
+3. Depois de criada, anote o **Endereço IP público** na visão geral da máquina.
+4. **Para economizar o crédito:** quando não estiver usando, clique em **Parar** (o status vira "Parado (desalocado)": só o disco e o IP são cobrados, centavos por dia). Em **Desligamento automático**, dá para agendar o desligamento todo dia. Antes de uma apresentação, **Iniciar** e esperar uns 3 minutos até o site responder.
+5. No passo 3, entre com `ssh -i caminho/da/chave.pem azureuser@IP` e use `sudo` antes dos comandos (ou `sudo -i` para virar root). O Docker não vem instalado: siga o passo 3.2.
 
 ### 1.B Hostinger (alternativa paga)
 
@@ -97,7 +102,9 @@ No terminal do seu PC (PowerShell, Git Bash ou Terminal do Mac):
 ssh root@203.0.113.10
 ```
 
-Também dá para usar o **Terminal do navegador** no hPanel (VPS → Visão geral → "Terminal").
+**No Azure:** `ssh -i caminho/da/chave.pem azureuser@203.0.113.10` e, já dentro, `sudo -i` para virar root (os comandos abaixo supõem root). No Windows, se o SSH reclamar das permissões do `.pem`, guarde a chave na pasta `.ssh` do seu usuário.
+
+Na Hostinger, também dá para usar o **Terminal do navegador** no hPanel (VPS → Visão geral → "Terminal").
 
 ### 3.2 Atualizar o sistema e instalar o Docker
 
@@ -131,7 +138,7 @@ ufw status
 
 > ⚠️ **Por que os bancos estão seguros mesmo assim:** o Docker passa por cima do `ufw` nas portas que publica. Por isso o `docker-compose.prod.yml` **não publica** as portas dos bancos, da API nem dos logs (`ports: !reset []`). Nunca acrescente `ports:` nesses serviços em produção.
 >
-> Se o hPanel tiver um **Firewall do VPS** ativo, libere nele as mesmas portas (22, 80, 443).
+> No **Azure**, o firewall de fora é o **grupo de segurança de rede** da máquina (VM → Rede): deixe entrada só nas portas 22, 80 e 443. Na Hostinger, se o hPanel tiver um **Firewall do VPS** ativo, libere nele as mesmas portas.
 
 ### 3.4 Memória extra (swap)
 
@@ -171,9 +178,9 @@ git config core.sshCommand "ssh -i ~/.ssh/github_deploy"
 
 ## 5. Envio de e-mail
 
-### 5.A Brevo (padrão; obrigatório na DigitalOcean)
+### 5.A Brevo (padrão; obrigatório no Azure)
 
-A DigitalOcean **bloqueia as portas 25, 465 e 587** (envio de e-mail) em contas novas. O Brevo aceita a porta **2525**, que não é bloqueada:
+O Azure **bloqueia a porta 25** nas assinaturas de estudante e não desbloqueia nem a pedido. Usamos o Brevo na porta **2525**, que nenhum provedor bloqueia (a 587 também funciona no Azure):
 
 1. Crie a conta grátis em https://www.brevo.com.
 2. **Senders, Domains & Dedicated IPs → Domains → Add a domain**: `nutrimente.tech`. O Brevo mostra registros **TXT** (código de verificação, **DKIM** e **DMARC**): crie cada um no DNS do get.tech (passo 2) e clique em **Verify**. Sem isso, os e-mails caem no spam.

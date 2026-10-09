@@ -45,6 +45,7 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | GET | `/api/me` | todos | Meus dados (CPF volta mascarado) |
 | PUT | `/api/me` | todos | Editar nome, celular e gênero |
 | PUT | `/api/me/password` | todos | Trocar a senha |
+| GET | `/api/me/export` | todos | Baixar todos os meus dados em JSON (LGPD) |
 | DELETE | `/api/me` | PATIENT, PROFESSIONAL | Excluir a conta (pede a senha; os dados pessoais são anonimizados) |
 | PUT | `/api/me/professional-profile` | PROFESSIONAL | Editar bio, valor da consulta e especialidades (`specialtyIds`, até 5, da própria profissão) |
 | GET | `/api/admin/professionals?status=PENDING` | ADMIN | Fila de verificação |

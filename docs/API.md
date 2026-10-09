@@ -53,7 +53,8 @@ Todo erro volta no mesmo formato. O `api()` já entrega isso em `result.error`:
 |---|---|---|
 | 400 | `VALIDATION_ERROR` | Algum campo ou parâmetro inválido. **`errors` diz qual**: mostre embaixo do campo |
 | 400 | `INVALID_REQUEST` | Corpo da requisição em formato errado |
-| 401 | (sem corpo) / `SESSION_INVALID` | Sem token, token vencido, ou a conta foi excluída: mande para o login |
+| 401 | `UNAUTHORIZED` | Chegou sem token: mande para o login |
+| 401 | `SESSION_INVALID` | 🆕 O token não vale mais: venceu, **a senha foi trocada** (em qualquer aparelho) ou a conta foi excluída. Apague o cookie e mande para o login (o `getMe()` já faz isso) |
 | 401 | `INVALID_CREDENTIALS` | Login com e-mail ou senha errados |
 | 403 | `FORBIDDEN` | Logado, mas o papel não permite (ex.: paciente em rota de admin) |
 | 404 | `NOT_FOUND` | Não existe, ou não é público |
@@ -615,6 +616,26 @@ Devolve um arquivo JSON com **tudo o que o NutriMente guarda sobre a pessoa** (L
 - Toda exportação vai para a auditoria.
 
 **Como baixar no front.** Um link `<a href>` não serve, porque a rota exige o token. No navegador, use `fetch` com o token e salve o resultado. Pelo BFF, uma Route Handler pode repassar o corpo e o cabeçalho `Content-Disposition`. Sugestão de tela: em "Minha conta", um botão "Baixar meus dados" ao lado de "Excluir conta".
+
+---
+
+## 🆕 Trocar a senha encerra as outras sessões
+
+`PUT /api/me/password` agora **encerra todas as sessões abertas** da pessoa, em todos os aparelhos. É o que se espera quando alguém troca a senha porque desconfia que ela vazou. A redefinição por e-mail ("esqueci a senha") faz o mesmo.
+
+A resposta mudou de **204 (vazio)** para **200**, com um token novo no mesmo formato do login:
+
+```json
+{ "accessToken": "eyJ...", "expiresAt": "2026-10-09T12:00:00Z", "user": { "id": 15, "name": "Ana Souza", "role": "PATIENT" } }
+```
+
+**Para o front (`changePassword` em `app/actions/account.ts`):** salve o token novo no lugar do antigo, senão a pessoa é deslogada na próxima página:
+
+```ts
+if (!result.ok) return fromApiError(result.error);
+await createSession(result.data.accessToken, result.data.expiresAt);
+return { ok: true, message: "Senha alterada. As outras sessões foram encerradas." };
+```
 
 ---
 

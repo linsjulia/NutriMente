@@ -109,9 +109,31 @@ class RolesAndAccountIntegrationTest extends IntegrationTest {
 		putAs("/api/me/password", token, "{\"currentPassword\": \"errada\", \"newPassword\": \"NovaSenha99\"}")
 				.andExpect(status().isBadRequest())
 				.andExpect(jsonPath("$.errors.currentPassword").exists());
-		putAs("/api/me/password", token, "{\"currentPassword\": \"%s\", \"newPassword\": \"NovaSenha99\"}".formatted(PASSWORD))
-				.andExpect(status().isNoContent());
-		login(email, "NovaSenha99");
+		// Outra sessão aberta (ex.: o celular) antes da troca
+		String otherDevice = login(email, PASSWORD);
+		String body = putAs("/api/me/password", token,
+				"{\"currentPassword\": \"%s\", \"newPassword\": \"NovaSenha99\"}".formatted(PASSWORD))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.accessToken").isNotEmpty())
+				.andExpect(jsonPath("$.user.email").doesNotExist())
+				.andReturn().getResponse().getContentAsString();
+		String newToken = com.jayway.jsonpath.JsonPath.read(body, "$.accessToken");
+
+		// Trocar a senha encerra TODAS as sessões antigas; o token novo vale
+		getAs("/api/me", token).andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("SESSION_INVALID"));
+		getAs("/api/me", otherDevice).andExpect(status().isUnauthorized());
+		getAs("/api/me", newToken).andExpect(status().isOk());
+		getAs("/api/me", login(email, "NovaSenha99")).andExpect(status().isOk());
+	}
+
+	@Test
+	@DisplayName("401 em JSON: sem token = UNAUTHORIZED; token adulterado = SESSION_INVALID")
+	void unauthorizedJson() throws Exception {
+		getAs("/api/me", null).andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+		getAs("/api/me", "abc.def.ghi").andExpect(status().isUnauthorized())
+				.andExpect(jsonPath("$.code").value("SESSION_INVALID"));
 	}
 
 	@Test

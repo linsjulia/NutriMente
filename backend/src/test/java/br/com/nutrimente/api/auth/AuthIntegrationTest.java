@@ -125,8 +125,11 @@ class AuthIntegrationTest extends IntegrationTest {
 				.andExpect(status().isAccepted());
 		String token = capturedResetToken(email);
 
+		String oldSession = login(email, PASSWORD);
 		postJson("/api/auth/reset-password", "{\"token\": \"%s\", \"password\": \"NovaSenha99\"}".formatted(token))
 				.andExpect(status().isOk());
+		// Redefinir a senha também derruba as sessões abertas (ex.: de quem descobriu a senha antiga)
+		getAs("/api/me", oldSession).andExpect(status().isUnauthorized());
 		postJson("/api/auth/login", "{\"email\": \"%s\", \"password\": \"%s\"}".formatted(email, PASSWORD))
 				.andExpect(status().isUnauthorized());
 		postJson("/api/auth/login", "{\"email\": \"%s\", \"password\": \"NovaSenha99\"}".formatted(email))

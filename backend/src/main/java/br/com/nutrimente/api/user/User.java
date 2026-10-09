@@ -69,6 +69,13 @@ public class User {
 	@Column(name = "is_active", nullable = false)
 	private boolean active = true;
 
+	/**
+	 * Versão da sessão (V004). Vai dentro do token; trocar a senha soma 1 e
+	 * derruba os tokens antigos (ver config/SessionValidator).
+	 */
+	@Column(name = "session_version", nullable = false)
+	private int sessionVersion;
+
 	@Column(name = "email_verified", nullable = false)
 	private boolean emailVerified;
 
@@ -115,6 +122,10 @@ public class User {
 	// ---------------- Regras de negócio ----------------
 
 	/** Conta excluída ou desativada não pode entrar */
+	public int getSessionVersion() {
+		return sessionVersion;
+	}
+
 	public boolean canLogin() {
 		return active && deletedAt == null && passwordHash != null;
 	}
@@ -138,8 +149,10 @@ public class User {
 		lastLoginAt = Clock.now();
 	}
 
+	/** Troca a senha e encerra todas as sessões abertas (em todos os aparelhos) */
 	public void changePassword(String newPasswordHash) {
 		this.passwordHash = newPasswordHash;
+		this.sessionVersion++;
 		this.failedLoginAttempts = 0;
 		this.lockedUntil = null;
 	}

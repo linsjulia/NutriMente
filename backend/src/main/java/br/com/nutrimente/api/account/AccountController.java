@@ -23,6 +23,7 @@ import br.com.nutrimente.api.account.AccountDtos.DeleteAccountRequest;
 import br.com.nutrimente.api.account.AccountDtos.MeResponse;
 import br.com.nutrimente.api.account.AccountDtos.UpdateProfessionalProfileRequest;
 import br.com.nutrimente.api.account.AccountDtos.UpdateProfileRequest;
+import br.com.nutrimente.api.auth.AuthDtos.LoginResponse;
 import br.com.nutrimente.api.config.CurrentUser;
 import jakarta.validation.Valid;
 
@@ -33,7 +34,7 @@ import jakarta.validation.Valid;
  * GET    /api/me                       meus dados
  * PUT    /api/me                       editar nome, celular e gênero
  * PUT    /api/me/professional-profile  editar bio e valor (só PROFESSIONAL)
- * PUT    /api/me/password              trocar a senha
+ * PUT    /api/me/password              trocar a senha (encerra as outras sessões; devolve token novo)
  * GET    /api/me/export                baixar todos os meus dados em JSON (LGPD)
  * DELETE /api/me                       excluir a conta (LGPD)
  * </pre>
@@ -82,10 +83,14 @@ public class AccountController {
 		return accountService.updateProfessionalProfile(CurrentUser.id(jwt), request);
 	}
 
+	/**
+	 * Trocar a senha encerra as outras sessões. A resposta traz um token NOVO
+	 * (mesmo formato do login): o front deve salvá-lo no lugar do antigo.
+	 */
 	@PutMapping("/password")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void changePassword(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody ChangePasswordRequest request) {
-		accountService.changePassword(CurrentUser.id(jwt), request.currentPassword(), request.newPassword());
+	public LoginResponse changePassword(@AuthenticationPrincipal Jwt jwt,
+			@Valid @RequestBody ChangePasswordRequest request) {
+		return accountService.changePassword(CurrentUser.id(jwt), request.currentPassword(), request.newPassword());
 	}
 
 	@DeleteMapping

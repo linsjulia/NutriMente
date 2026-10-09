@@ -12,10 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import br.com.nutrimente.api.account.AccountDtos.MeResponse;
 import br.com.nutrimente.api.account.AccountDtos.UpdateProfessionalProfileRequest;
 import br.com.nutrimente.api.account.AccountDtos.UpdateProfileRequest;
+import br.com.nutrimente.api.auth.AuthDtos.LoginResponse;
+import br.com.nutrimente.api.auth.AuthDtos.SessionUser;
 import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.common.validation.Names;
+import br.com.nutrimente.api.config.JwtService;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.specialty.Specialty;
 import br.com.nutrimente.api.specialty.SpecialtyRepository;
@@ -34,9 +37,12 @@ public class AccountService {
 	private final SpecialtyRepository specialties;
 	private final PasswordEncoder passwordEncoder;
 	private final LogClient logClient;
+	private final JwtService jwtService;
 
 	public AccountService(UserRepository users, ProfessionalRepository professionals,
-			SpecialtyRepository specialties, PasswordEncoder passwordEncoder, LogClient logClient) {
+			SpecialtyRepository specialties, PasswordEncoder passwordEncoder, LogClient logClient,
+			JwtService jwtService) {
+		this.jwtService = jwtService;
 		this.users = users;
 		this.professionals = professionals;
 		this.specialties = specialties;
@@ -76,7 +82,11 @@ public class AccountService {
 	}
 
 	@Transactional
-	public void changePassword(Long userId, String currentPassword, String newPassword) {
+	/**
+	 * Troca a senha e encerra TODAS as sessões abertas (outros aparelhos e um
+	 * eventual invasor). Devolve um token novo para quem trocou continuar logado.
+	 */
+	public LoginResponse changePassword(Long userId, String currentPassword, String newPassword) {
 		User user = activeUser(userId);
 		checkPassword(user, currentPassword, "currentPassword");
 		if (passwordEncoder.matches(newPassword, user.getPasswordHash())) {
@@ -85,6 +95,9 @@ public class AccountService {
 		}
 		user.changePassword(passwordEncoder.encode(newPassword));
 		audit(user, "UPDATE", "users.password");
+		JwtService.IssuedToken token = jwtService.issue(user);
+		return new LoginResponse(token.value(), token.expiresAt(),
+				new SessionUser(user.getId(), user.getName(), user.getRole()));
 	}
 
 	/**

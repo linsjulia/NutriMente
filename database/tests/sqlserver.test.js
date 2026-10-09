@@ -72,15 +72,16 @@ async function createPatientAndProfessional(query) {
 // -------------------------------------------------------------
 
 // 24 dos scripts iniciais + schema_migrations (controle) + appointment_records (V002)
-test("todas as 26 tabelas foram criadas", async () => {
+// + patient_intakes e appointment_screenings (V005)
+test("todas as 28 tabelas foram criadas", async () => {
   const { recordset } = await pool.query("SELECT COUNT(*) AS total FROM sys.tables");
-  assert.equal(recordset[0].total, 26);
+  assert.equal(recordset[0].total, 28);
 });
 
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -305,4 +306,32 @@ test("versão da sessão (V004): começa em 0", () =>
     await query("INSERT INTO users (name, email, role) VALUES (N'Sessao', 'sessao@teste.local', 'PATIENT')");
     const { recordset } = await query("SELECT session_version FROM users WHERE email = 'sessao@teste.local'");
     assert.equal(recordset[0].session_version, 0);
+  }));
+
+test("questionário inicial (V005): um por paciente e só com respostas válidas", () =>
+  inTransaction(async (query) => {
+    const { patient } = await createPatientAndProfessional(query);
+    const insert = (activity, sleep) =>
+      query(`INSERT INTO patient_intakes (patient_id, goals, meals_per_day, water_liters_per_day, activity_level, sleep_quality, stress_level)
+             VALUES (${patient}, 'EMAGRECER', 4, 1.5, '${activity}', ${sleep}, 3)`);
+    await assertFails(insert("ATLETA", 3), /ck_patient_intakes_activity/);
+    await assertFails(insert("LEVE", 9), /ck_patient_intakes_sleep/);
+    await insert("LEVE", 3);
+    await assertFails(insert("LEVE", 3), /PRIMARY KEY|duplicate key/i);
+  }));
+
+test("triagem (V005): uma por consulta e protege a consulta contra exclusão", () =>
+  inTransaction(async (query) => {
+    const { patient, professional } = await createPatientAndProfessional(query);
+    const { recordset } = await query(`
+      INSERT INTO appointments (patient_id, professional_id, starts_at, ends_at, price)
+      OUTPUT inserted.id
+      VALUES (${patient}, ${professional}, '2030-06-01 10:00', '2030-06-01 10:50', 150)`);
+    const appointment = recordset[0].id;
+    await assertFails(
+      query(`INSERT INTO appointment_screenings (appointment_id, reason, mood_score) VALUES (${appointment}, N'x', 7)`),
+      /ck_appointment_screenings_mood/
+    );
+    await query(`INSERT INTO appointment_screenings (appointment_id, reason, mood_score) VALUES (${appointment}, N'cifrado', 3)`);
+    await assertFails(query(`DELETE FROM appointments WHERE id = ${appointment}`), /REFERENCE constraint/i);
   }));

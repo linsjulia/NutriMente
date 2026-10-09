@@ -35,3 +35,4 @@ O usuário da aplicação já tem leitura e escrita em tabelas novas (`db_datare
 | `V002` | Registro da consulta (prontuário): tabela `appointment_records` |
 | `V003` | Cadastro para atender online (e-Psi / e-Nutricionista): colunas `telehealth_*` em `professionals` |
 | `V004` | Versão da sessão (`users.session_version`): trocar a senha encerra as sessões abertas |
+| `V005` | Questionário inicial (`patient_intakes`) e triagem antes da consulta (`appointment_screenings`) |

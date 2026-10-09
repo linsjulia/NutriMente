@@ -265,6 +265,7 @@ async function removePreviousDemo(db) {
   await db.query(`
     DELETE FROM reviews       WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo};
     DELETE FROM appointment_records WHERE appointment_id IN (SELECT id FROM appointments WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo});
+    DELETE FROM appointment_screenings WHERE appointment_id IN (SELECT id FROM appointments WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo});
     DELETE FROM refunds       WHERE payment_id IN (SELECT p.id FROM payments p JOIN appointments a ON a.id = p.appointment_id
                                                    WHERE a.patient_id IN ${inDemo} OR a.professional_id IN ${inDemo});
     DELETE FROM payments      WHERE appointment_id IN (SELECT id FROM appointments WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo});

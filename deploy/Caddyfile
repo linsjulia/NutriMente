@@ -19,9 +19,15 @@ www.{$DOMAIN} {
 	# Compacta as respostas (páginas carregam mais rápido)
 	encode zstd gzip
 
-	# Recusa envios gigantes (o maior formulário do site tem poucos KB)
+	# HSTS: o navegador passa a usar SEMPRE HTTPS neste domínio (por 1 ano),
+	# mesmo se alguém digitar http:// ou clicar num link antigo
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+	# Recusa envios gigantes. O maior envio é uma foto do diário alimentar ou
+	# um documento do profissional (até 5 MB na API) mais os outros campos do
+	# formulário: 6 MB dá a folga. Mudou o limite na API? Mude aqui também.
 	request_body {
-		max_size 5MB
+		max_size 6MB
 	}
 
 	reverse_proxy web:3000

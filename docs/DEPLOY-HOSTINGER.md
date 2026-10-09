@@ -311,6 +311,24 @@ Depois de reiniciar o VPS, tudo volta sozinho (`restart: unless-stopped`).
 | Servidor muito lento | Memória esgotada | `docker stats --no-stream`; considere o KVM 2 |
 | `service "mailpit" ... profiles` ou erro com `!reset`/`!override` | Docker Compose antigo | Atualize: `apt install docker-compose-plugin` (precisa da versão 2.24+) |
 
+## Ensaio local da produção (antes de contratar o servidor)
+
+Dá para subir a versão de produção (Caddy com HTTPS + site em contêiner + API e bancos sem portas abertas) no próprio PC, com o domínio `localhost`:
+
+```bash
+export DOMAIN=localhost MAIL_HOST=smtp.invalid MAIL_FROM="NutriMente <nao-responda@localhost>"
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+curl -k https://localhost/          # 200
+curl -I http://localhost/           # 308, redireciona para https
+curl http://localhost:8080          # não responde: a API não fica exposta (certo)
+```
+
+- O Caddy cria um certificado **local** para `localhost`; o navegador avisa que não é confiável (normal). **Antivírus que inspecionam HTTPS (ex.: Kaspersky) bloqueiam a página**: teste com `curl -k` ou desligue a inspeção de HTTPS para `localhost` no antivírus. No servidor real, o certificado é do Let's Encrypt e não há aviso.
+- Os e-mails não saem (`MAIL_HOST` falso): normal no ensaio.
+- **Para voltar ao desenvolvimento:** `docker rm -f nutrimente-caddy nutrimente-web` e `docker compose up -d --build`. Os dados continuam.
+
+Ensaio feito em 09/10: tudo "healthy", HTTPS 200, HTTP → HTTPS, API e bancos fechados, cabeçalhos de segurança (HSTS incluído) presentes.
+
 ## Checklist de segurança
 
 - [ ] `.env` com `chmod 600`, senhas geradas (nada de `TROQUE`)

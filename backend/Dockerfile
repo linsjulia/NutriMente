@@ -24,6 +24,9 @@ WORKDIR /app
 # wget nem curl; sem isso a API funcionava mas ficava sempre "unhealthy".
 RUN apt-get update     && apt-get install -y --no-install-recommends curl     && rm -rf /var/lib/apt/lists/*     && useradd --system --uid 1001 nutrimente
 COPY --from=build /app/target/api-*.jar app.jar
+# Pasta das fotos do diário alimentar (o docker compose monta um volume aqui).
+# Criada antes do USER para pertencer ao usuário da aplicação.
+RUN mkdir -p /app/uploads && chown nutrimente /app/uploads
 USER nutrimente
 EXPOSE 8080
 

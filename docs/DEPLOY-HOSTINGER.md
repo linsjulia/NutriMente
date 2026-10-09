@@ -253,7 +253,7 @@ Só os serviços que mudaram são recriados. O site fica fora do ar por alguns s
 
 ## 10. Backups
 
-O script `deploy/backup.sh` salva o SQL Server e o MongoDB em `/root/backups-nutrimente` e apaga os arquivos com mais de 14 dias.
+O script `deploy/backup.sh` salva o SQL Server, o MongoDB e as **fotos do diário alimentar** (volume `api-uploads`) em `/root/backups-nutrimente`, e apaga os arquivos com mais de 14 dias. As fotos e vários campos do banco são **cifrados**: guarde a `RECORDS_ENCRYPTION_KEY` (ou o `JWT_SECRET`, se ela estiver vazia) **fora do servidor**, junto com os backups.
 
 ```bash
 bash deploy/backup.sh

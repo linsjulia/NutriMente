@@ -439,6 +439,48 @@ As respostas de um paciente que o profissional **atende**, ou seja, com consulta
 
 ---
 
+## 🆕 Diário alimentar
+
+O paciente registra o que comeu, com foto opcional e anotações, e o profissional que o atende acompanha. Os textos são gravados **criptografados**, e as fotos ficam **cifradas** num volume da API. **Excluir a conta apaga o diário e as fotos.**
+
+### Paciente
+
+| Rota | O quê |
+|---|---|
+| `GET /api/me/meals?page=0&size=20` | Meu diário, **do mais recente para o mais antigo** (página no formato da busca: `items`, `totalItems`...) |
+| `POST /api/me/meals` | Registrar (resposta **201**) |
+| `PUT /api/me/meals/{id}` | Editar (mesmo corpo) |
+| `DELETE /api/me/meals/{id}` | Apagar (**204**; a foto vai junto) |
+| `PUT /api/me/meals/{id}/photo` | Enviar ou trocar a foto: **multipart/form-data**, campo `photo` |
+| `DELETE /api/me/meals/{id}/photo` | Tirar a foto |
+
+```json
+{ "eatenAt": "2026-10-08T15:40:00Z", "mealType": "ALMOCO", "description": "Arroz, feijão, frango e salada",
+  "notes": "Comi com calma", "hungerLevel": 4, "satisfactionLevel": 3 }
+```
+
+| Campo | Regra | Texto para a tela |
+|---|---|---|
+| `eatenAt` | obrigatório; não pode estar no futuro; até 60 dias atrás | Quando foi? |
+| `mealType` | `CAFE_DA_MANHA`, `LANCHE_DA_MANHA`, `ALMOCO`, `LANCHE_DA_TARDE`, `JANTAR`, `CEIA`, `OUTRO` | Café da manhã, Lanche da manhã, Almoço, Lanche da tarde, Jantar, Ceia, Outro |
+| `description` | obrigatório, até 2000 | O que você comeu? |
+| `notes` | opcional, até 2000 | Como você se sentiu? |
+| `hungerLevel`, `satisfactionLevel` | opcionais, 1 a 5 | Fome antes de comer / Saciedade depois |
+
+Resposta: os mesmos campos, mais `id`, `photoUrl` (`"/api/meals/87/photo"` ou `null`), `createdAt` e `updatedAt`.
+
+**Foto:** JPG, PNG ou WebP, **até 5 MB**. O tipo é conferido pelo conteúdo do arquivo, não pelo nome. Erros: **400 `INVALID_PHOTO`** com `errors.photo` ("Envie uma foto em JPG, PNG ou WebP" / "A foto pode ter até 5 MB").
+
+**Mostrar a foto:** `GET /api/meals/{id}/photo` exige o token. Por isso, `<img src>` direto na API não funciona. No Next, crie uma Route Handler (ex.: `app/api/meals/[id]/photo/route.ts`) que chama a API com o token da sessão e devolve o corpo e o `Content-Type`. Aí sim use `<img src="/api/meals/87/photo">`. Para enviar, monte um `FormData` com o arquivo do `<input type="file" accept="image/jpeg,image/png,image/webp">`.
+
+### Profissional
+
+`GET /api/patients/{id}/meals?page=0&size=20`: o diário de um paciente que ele **atende** (mesma regra do questionário). Para os outros: **404**. A leitura vai para a auditoria. As fotos abrem em `GET /api/meals/{id}/photo` (o profissional também pode).
+
+Sugestão de telas: o paciente vê uma linha do tempo por dia, com o botão "Registrar refeição"; o profissional, em "Meus pacientes", tem uma aba "Diário".
+
+---
+
 ## 🆕 Registro da consulta (prontuário)
 
 O que o profissional anota sobre cada atendimento. Os conselhos exigem esse registro (CFP 01/2009 para psicólogos, CFN 594/2017 para nutricionistas), guardado por pelo menos 5 anos. Ele tem duas partes:

@@ -27,7 +27,8 @@ public record AppProperties(
 		@Valid @NotNull Admin admin,
 		@Valid @DefaultValue RateLimit rateLimit,
 		@Valid @DefaultValue Appointments appointments,
-		@DefaultValue Records records) {
+		@DefaultValue Records records,
+		@DefaultValue Uploads uploads) {
 
 	public record Jwt(
 			@NotBlank @Size(min = 32, message = "JWT_SECRET precisa ter pelo menos 32 caracteres") String secret,
@@ -66,6 +67,10 @@ public record AppProperties(
 			@DefaultValue("America/Sao_Paulo") @NotBlank String timezone,
 			@DefaultValue("24h") @NotNull Duration reminderBefore,
 			@DefaultValue("true") boolean remindersEnabled) {
+	}
+
+	/** Pasta das fotos do diário alimentar (gravadas cifradas, com nome aleatório) */
+	public record Uploads(@DefaultValue("./uploads") String dir) {
 	}
 
 	/** Chave do registro da consulta. Vazia = derivada do JWT_SECRET (ver RecordCipher) */

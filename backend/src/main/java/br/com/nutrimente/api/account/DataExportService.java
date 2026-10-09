@@ -103,6 +103,9 @@ public class DataExportService {
 		out.put("triagens", decrypted(rows("""
 				SELECT s.* FROM appointment_screenings s JOIN appointments a ON a.id = s.appointment_id
 				WHERE a.patient_id = :id ORDER BY s.appointment_id""", id), "reason", "symptoms"));
+		// Diário alimentar: textos decifrados; as fotos ficam de fora (photo_file diz se havia foto)
+		out.put("diarioAlimentar", decrypted(
+				rows("SELECT * FROM meal_logs WHERE patient_id = :id ORDER BY eaten_at", id), "description", "notes"));
 		out.put("avaliacoes",
 				rows("SELECT * FROM reviews WHERE patient_id = :id OR professional_id = :id ORDER BY id", id));
 

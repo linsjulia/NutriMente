@@ -24,6 +24,7 @@
 // PASSADO e avaliações (ainda sem rota na API).
 // =============================================================
 
+import { readFile } from "node:fs/promises";
 import sql from "mssql";
 
 const API = process.env.API_URL ?? "http://localhost:8080";
@@ -476,6 +477,27 @@ async function createUpcoming(professionals, patients) {
     },
   });
 
+  // Diário alimentar da Ana: ontem inteiro, com foto no café da manhã
+  // (o profissional vê em GET /api/patients/{id}/meals)
+  const anaToken = await tokenOf("ana");
+  const at = (daysAgo, time) => `${localDate(daysAgo)}T${time}:00-03:00`;
+  const meals = [
+    { eatenAt: at(1, "07:30"), mealType: "CAFE_DA_MANHA", description: "Pão integral com ovo mexido e uma maçã", hungerLevel: 3, satisfactionLevel: 4, photo: true },
+    { eatenAt: at(1, "12:40"), mealType: "ALMOCO", description: "Arroz, feijão, frango grelhado e salada de folhas", notes: "Comi no restaurante do trabalho, com calma.", hungerLevel: 4, satisfactionLevel: 4 },
+    { eatenAt: at(1, "16:00"), mealType: "LANCHE_DA_TARDE", description: "Iogurte sem lactose com aveia", hungerLevel: 3, satisfactionLevel: 3 },
+    { eatenAt: at(1, "21:30"), mealType: "JANTAR", description: "Sanduíche e um pedaço de chocolate", notes: "Cheguei tarde e com muita fome. Belisquei antes do jantar.", hungerLevel: 5, satisfactionLevel: 2 },
+  ];
+  for (const { photo, ...meal } of meals) {
+    const created = await api("POST", "/api/me/meals", { token: anaToken, body: meal });
+    if (photo) {
+      const form = new FormData();
+      const image = await readFile(new URL("../../public/icons/apple.png", import.meta.url));
+      form.append("photo", new Blob([image], { type: "image/png" }), "cafe-da-manha.png");
+      const r = await fetch(`${API}/api/me/meals/${created.id}/photo`, { method: "PUT", headers: { Authorization: `Bearer ${anaToken}` }, body: form });
+      if (!r.ok) throw new Error(`foto do diário: ${r.status} ${await r.text()}`);
+    }
+  }
+
   // Paciente de demonstração: uma confirmada (com link de vídeo) e uma agendada
   const anaCamila = await book("ana", "camila", 48, "ONLINE", "Retorno: quero ajustar o plano para a rotina de trabalho.", {
     reason: "Retorno para ajustar o plano à rotina de trabalho.",
@@ -655,7 +677,7 @@ async function main() {
   console.log(`
 Pronto! Contas para a apresentação (senha de todas: ${PASSWORD})
 
-  Paciente      ana@${DOMAIN}       questionário inicial, consultas (com triagem), histórico e 2 planos de ação (checklist de hoje em aberto)
+  Paciente      ana@${DOMAIN}       questionário inicial, diário alimentar, consultas (com triagem), histórico e 2 planos de ação (checklist de hoje em aberto)
   Profissional  camila@${DOMAIN}    nutricionista com agenda movimentada
   Psicóloga     mariana@${DOMAIN}
   Admin         ${ADMIN_EMAIL}  (senha do .env) -> "${PENDING.name}" aguardando aprovação

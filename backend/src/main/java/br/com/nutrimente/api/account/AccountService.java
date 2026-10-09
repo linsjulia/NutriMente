@@ -21,6 +21,7 @@ import br.com.nutrimente.api.common.validation.Names;
 import br.com.nutrimente.api.config.JwtService;
 import br.com.nutrimente.api.intake.PatientIntakeRepository;
 import br.com.nutrimente.api.logging.LogClient;
+import br.com.nutrimente.api.meal.MealLogService;
 import br.com.nutrimente.api.specialty.Specialty;
 import br.com.nutrimente.api.specialty.SpecialtyRepository;
 import br.com.nutrimente.api.user.Professional;
@@ -40,11 +41,13 @@ public class AccountService {
 	private final LogClient logClient;
 	private final JwtService jwtService;
 	private final PatientIntakeRepository intakes;
+	private final MealLogService mealLogs;
 
 	public AccountService(UserRepository users, ProfessionalRepository professionals,
 			SpecialtyRepository specialties, PasswordEncoder passwordEncoder, LogClient logClient,
-			JwtService jwtService, PatientIntakeRepository intakes) {
+			JwtService jwtService, PatientIntakeRepository intakes, MealLogService mealLogs) {
 		this.jwtService = jwtService;
+		this.mealLogs = mealLogs;
 		this.intakes = intakes;
 		this.users = users;
 		this.professionals = professionals;
@@ -115,6 +118,12 @@ public class AccountService {
 		}
 		checkPassword(user, password, "password");
 		professionals.findById(userId).ifPresent(professional -> professional.anonymize());
+		// Dados de saúde que são só do paciente (sem obrigação de guarda) são APAGADOS.
+		// Prontuário e triagem ficam: fazem parte do histórico clínico (CFP/CFN).
+		if (user.getRole() == Role.PATIENT) {
+			mealLogs.deleteAllOf(userId);
+			intakes.findById(userId).ifPresent(intakes::delete);
+		}
 		user.anonymize();
 		audit(user, "ANONYMIZE", "users");
 	}

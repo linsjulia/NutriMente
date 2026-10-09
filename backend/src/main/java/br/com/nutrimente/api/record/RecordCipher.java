@@ -119,6 +119,36 @@ public class RecordCipher {
 		}
 	}
 
+	/**
+	 * Bytes (ex.: uma foto) -> iv + dados cifrados + etiqueta. Mesmo algoritmo
+	 * do texto, sem o Base64: arquivos ficam no disco, não numa coluna de texto.
+	 */
+	public byte[] encryptBytes(byte[] plain) {
+		try {
+			byte[] iv = new byte[IV_BYTES];
+			random.nextBytes(iv);
+			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+			cipher.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(TAG_BITS, iv));
+			byte[] encrypted = cipher.doFinal(plain);
+			byte[] out = new byte[IV_BYTES + encrypted.length];
+			System.arraycopy(iv, 0, out, 0, IV_BYTES);
+			System.arraycopy(encrypted, 0, out, IV_BYTES, encrypted.length);
+			return out;
+		} catch (GeneralSecurityException e) {
+			throw new IllegalStateException("Falha ao criptografar o arquivo", e);
+		}
+	}
+
+	public byte[] decryptBytes(byte[] stored) {
+		try {
+			Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+			cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(TAG_BITS, stored, 0, IV_BYTES));
+			return cipher.doFinal(stored, IV_BYTES, stored.length - IV_BYTES);
+		} catch (GeneralSecurityException e) {
+			throw new IllegalStateException("Não foi possível ler o arquivo (chave diferente?)", e);
+		}
+	}
+
 	/** "v1:..." -> texto. Falha se a chave estiver errada ou o texto tiver sido alterado */
 	public String decrypt(String stored) {
 		if (stored == null) {

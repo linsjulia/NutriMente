@@ -63,6 +63,10 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 | PUT | `/api/appointments/{id}/screening` | PATIENT | Preencher/ajustar a triagem (até o início) |
 | GET/PUT | `/api/me/intake` | PATIENT | Questionário inicial (responder, editar, ler) |
 | GET | `/api/patients/{id}/intake` | PROFESSIONAL | Questionário de um paciente que atendo |
+| GET/POST | `/api/me/meals` | PATIENT | Diário alimentar: listar e registrar refeições |
+| PUT/DELETE | `/api/me/meals/{id}` e `/api/me/meals/{id}/photo` | PATIENT | Editar/apagar refeição; enviar/tirar foto (multipart) |
+| GET | `/api/meals/{id}/photo` | PATIENT, PROFESSIONAL | Foto da refeição (dono ou profissional que atende) |
+| GET | `/api/patients/{id}/meals` | PROFESSIONAL | Diário de um paciente que atendo |
 | GET | `/api/me/patients` | PROFESSIONAL | Pacientes que atendo |
 | POST / PUT | `/api/plans` · `/api/plans/{id}` | PROFESSIONAL | Criar / editar plano de ação (metas, refeições, checklist) |
 | GET | `/api/plans` · `/api/plans/{id}` | participantes | Meus planos / plano completo com progresso |
@@ -117,6 +121,7 @@ src/main/java/br/com/nutrimente/api/
 ├── record/        registro da consulta (prontuário), criptografado no banco
 ├── intake/        questionário inicial do paciente (onboarding)
 ├── screening/     triagem antes da consulta
+├── meal/          diário alimentar (refeições e fotos cifradas)
 ├── plan/          plano de ação: metas, rotina alimentar, checklist e progresso
 ├── user/          entidades User, Patient, Professional e repositórios
 ├── notification/  e-mails e notificações do site ("sininho")

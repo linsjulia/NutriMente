@@ -68,7 +68,6 @@ services:
       API_URL: http://api:8080
       # Mesma chave da API: o site confere o token de login com ela
       JWT_SECRET: ${JWT_SECRET}
-      RECORDS_ENCRYPTION_KEY: ${RECORDS_ENCRYPTION_KEY:-}
     depends_on:
       api:
         condition: service_healthy

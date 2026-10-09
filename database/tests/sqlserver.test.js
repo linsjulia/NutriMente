@@ -81,7 +81,7 @@ test("todas as 29 tabelas foram criadas", async () => {
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar", "V009__documentos_e_endereco"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -366,4 +366,26 @@ test("diário alimentar (V008): só tipos e notas válidos, e some com o pacient
     await query(`DELETE FROM patients WHERE user_id = ${patient}`);
     const { recordset } = await query(`SELECT COUNT(*) AS total FROM meal_logs WHERE patient_id = ${patient}`);
     assert.equal(recordset[0].total, 0);
+  }));
+
+test("endereço do consultório (V009): UF válida e tudo ou nada", () =>
+  inTransaction(async (query) => {
+    const { professional } = await createPatientAndProfessional(query);
+    const set = (address, city, state) =>
+      query(`UPDATE professionals SET office_address = ${address}, office_city = ${city}, office_state = ${state}
+             WHERE user_id = ${professional}`);
+    await assertFails(set("N'Rua A, 10'", "N'São Paulo'", "'XX'"), /ck_professionals_office_state/);
+    await assertFails(set("N'Rua A, 10'", "NULL", "'SP'"), /ck_professionals_office_complete/);
+    await set("N'Rua A, 10'", "N'São Paulo'", "'SP'");
+    await set("NULL", "NULL", "NULL");
+  }));
+
+test("documentos do profissional (V009): só tipos de arquivo aceitos", () =>
+  inTransaction(async (query) => {
+    const { professional } = await createPatientAndProfessional(query);
+    const insert = (type) =>
+      query(`INSERT INTO professional_documents (professional_id, document_type, file_url, content_type)
+             VALUES (${professional}, 'REGISTRO_CONSELHO', 'x.bin', '${type}')`);
+    await assertFails(insert("application/zip"), /ck_prof_docs_content_type/);
+    await insert("application/pdf");
   }));

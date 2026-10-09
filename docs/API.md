@@ -591,6 +591,33 @@ Na demonstração (`npm run seed`), as contas já têm notificações reais: a A
 
 ---
 
+## 🆕 Baixar meus dados (LGPD)
+
+### `GET /api/me/export` (qualquer pessoa logada)
+
+Devolve um arquivo JSON com **tudo o que o NutriMente guarda sobre a pessoa** (LGPD, art. 18: direito de acesso e de portabilidade). A resposta vem com `Content-Disposition: attachment; filename="nutrimente-meus-dados-2026-10-09.json"`.
+
+```json
+{
+  "aviso": "Dados que o NutriMente guarda sobre você (LGPD, art. 18). Datas em UTC.",
+  "geradoEm": "2026-10-09T03:40:13Z",
+  "conta": { "id": 15, "name": "Ana Souza", "email": "...", "cpf": "...", "birth_date": "1995-04-12", "...": "..." },
+  "consentimentos": [ ... ],
+  "consultas": [ { "id": 87, "starts_at": "2026-10-20T13:00:00Z", "professional_name": "Camila Rocha", "...": "..." } ],
+  "registrosDasConsultas": [ { "appointment_id": 87, "patient_guidance": "Jantar até as 20h.", "...": "..." } ],
+  "planosDeAcao": [ ... ], "metas": [ ... ], "checklist": [ ... ], "marcacoesDoChecklist": [ ... ], "progresso": [ ... ],
+  "notificacoes": [ ... ], "avaliacoes": [ ... ], "...": "..."
+}
+```
+
+- Os campos internos usam os **nomes das colunas do banco** (`starts_at`, `patient_id`...): é uma cópia fiel do que está guardado.
+- Ficam de fora: hash da senha, tokens de e-mail e, para o paciente, as **anotações privadas** do prontuário (mesma regra da tela). O profissional recebe tudo o que escreveu.
+- Toda exportação vai para a auditoria.
+
+**Como baixar no front.** Um link `<a href>` não serve, porque a rota exige o token. No navegador, use `fetch` com o token e salve o resultado. Pelo BFF, uma Route Handler pode repassar o corpo e o cabeçalho `Content-Disposition`. Sugestão de tela: em "Minha conta", um botão "Baixar meus dados" ao lado de "Excluir conta".
+
+---
+
 ## Outras rotas já existentes
 
 Cadastro, login, confirmação de e-mail, minha conta, perfil do profissional e área do admin já estão em uso pelas telas atuais. A lista completa fica em [backend/README.md](../backend/README.md#rotas). Os exemplos de uso estão nas Server Actions em `app/actions/`.

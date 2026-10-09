@@ -227,12 +227,13 @@ public abstract class IntegrationTest {
 	protected record Pro(String token, Long id, String email) {
 	}
 
-	/** Profissional aprovado, com preço e agenda aberta todos os dias */
+	/** Profissional aprovado, com preço, atendimento online e agenda aberta todos os dias */
 	protected Pro readyProfessional(String admin) throws Exception {
 		String email = uniqueEmail();
 		String token = registerVerifiedProfessional(email, "NUTRICIONISTA", randomDocument());
 		Long id = jdbc.queryForObject("SELECT id FROM users WHERE email = ?", Long.class, email);
-		putAs("/api/me/professional-profile", token, "{\"consultationPrice\": 150.00}").andExpect(status().isOk());
+		putAs("/api/me/professional-profile", token, "{\"consultationPrice\": 150.00, \"telehealthRegistered\": true}")
+				.andExpect(status().isOk());
 		putAs("/api/me/availability", token, ALL_DAY).andExpect(status().isOk());
 		patchAs("/api/admin/professionals/" + id + "/verification", admin, "{\"status\": \"APPROVED\"}")
 				.andExpect(status().isOk());

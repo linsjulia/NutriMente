@@ -29,6 +29,7 @@ import br.com.nutrimente.api.user.ProfessionalType;
  * <pre>
  * GET /api/professionals?type=PSICOLOGO&page=0&size=12
  * GET /api/professionals?specialty=3          só quem marcou a especialidade 3
+ * GET /api/professionals?online=true         só quem atende online
  * GET /api/professionals?minPrice=100&maxPrice=200&sort=PRICE_ASC
  *     faixa de preço (em reais) e ordenação: RELEVANCE (padrão: melhor
  *     avaliados primeiro), PRICE_ASC, PRICE_DESC ou NAME
@@ -54,13 +55,14 @@ public class ProfessionalController {
 			@RequestParam(required = false) Integer specialty,
 			@RequestParam(required = false) BigDecimal minPrice,
 			@RequestParam(required = false) BigDecimal maxPrice,
+			@RequestParam(defaultValue = "false") boolean online,
 			@RequestParam(defaultValue = "RELEVANCE") SortOption sort,
 			@RequestParam(defaultValue = "0") int page,
 			@RequestParam(defaultValue = "12") int size) {
 		validatePriceRange(minPrice, maxPrice);
 		// Limites: ninguém pede a página -1 ou 10 mil itens de uma vez
 		PageRequest pageable = PageRequest.of(Math.max(page, 0), Math.clamp(size, 1, MAX_PAGE_SIZE), sort.toSort());
-		return PageResponse.of(professionals.findPublic(type, specialty, minPrice, maxPrice, pageable)
+		return PageResponse.of(professionals.findPublic(type, specialty, minPrice, maxPrice, online, pageable)
 				.map(PublicProfessional::of));
 	}
 
@@ -104,13 +106,15 @@ public class ProfessionalController {
 
 	public record PublicProfessional(Long id, String name, String photoUrl, ProfessionalType type, String document,
 			String bio,
-			BigDecimal consultationPrice, BigDecimal ratingAverage, int ratingCount, List<SpecialtyDto> specialties) {
+			BigDecimal consultationPrice, BigDecimal ratingAverage, int ratingCount, List<SpecialtyDto> specialties,
+			/** Atende por videochamada (declarou e-Psi / e-Nutricionista). false = só presencial */
+			boolean offersOnline) {
 
 		static PublicProfessional of(Professional p) {
 			return new PublicProfessional(p.getId(), p.getUser().getName(), p.getUser().getPhotoUrl(), p.getType(),
 					p.getDocument(), p.getBio(),
 					p.getConsultationPrice(), p.getRatingAverage(), p.getRatingCount(),
-					p.getSpecialties().stream().map(SpecialtyDto::of).toList());
+					p.getSpecialties().stream().map(SpecialtyDto::of).toList(), p.offersOnline());
 		}
 	}
 

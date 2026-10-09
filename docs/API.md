@@ -76,12 +76,14 @@ Lista **paginada** só com profissionais **aprovados** pelo admin, sem dados pes
 | `specialty` | número | `specialty=3` | Só quem marcou essa especialidade (ids em `GET /api/specialties`) |
 | 🆕 `minPrice` | número (reais) | `minPrice=100` | Valor mínimo da consulta |
 | 🆕 `maxPrice` | número (reais) | `maxPrice=200` | Valor máximo da consulta |
+| 🆕 `online` | `true` | `online=true` | Só quem **atende online** (`offersOnline`) |
 | 🆕 `sort` | `RELEVANCE` \| `PRICE_ASC` \| `PRICE_DESC` \| `NAME` | `sort=PRICE_ASC` | Ordenação. Padrão: `RELEVANCE` (melhor avaliados primeiro) |
 | `page` | número | `page=0` | Página, começando em 0 |
 | `size` | número (1 a 50) | `size=12` | Itens por página (padrão 12) |
 
 Regras:
 - Com `minPrice` ou `maxPrice`, quem deixou o preço em branco ("valor a combinar") **não aparece**.
+- 🆕 `offersOnline`: o profissional declarou ter cadastro no **e-Psi** (psicólogos) ou no **e-Nutricionista** (nutricionistas), exigido pelos conselhos para atender online. Se `false`, ele **só atende presencial**: mostre um selo "Atende online" quando `true`, e na tela de agendamento ofereça só "Presencial" quando `false`.
 - Nas ordenações por preço, "valor a combinar" vai para o **fim**.
 - Erros: `minPrice` maior que `maxPrice`, valor negativo ou não numérico, ou `sort` desconhecido → **400** com `errors.minPrice` / `errors.sort`.
 
@@ -102,7 +104,8 @@ Resposta:
       "ratingCount": 12,
       "specialties": [
         { "id": 3, "name": "Nutrição Comportamental", "type": "NUTRICIONISTA" }
-      ]
+      ],
+      "offersOnline": true
     }
   ],
   "page": 0,
@@ -238,7 +241,7 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
 { "professionalId": 42, "startsAt": "2026-10-20T12:00:00Z", "modality": "ONLINE", "notes": "Primeira consulta" }
 ```
 
-`modality` é opcional (padrão `ONLINE`; ou `PRESENCIAL`) e `notes` também (até 1000 caracteres). Resposta **201** com a consulta (formato abaixo). A API manda e-mail para o paciente e para o profissional.
+`modality` é opcional: `ONLINE` ou `PRESENCIAL`. Sem ela, vira `ONLINE` se o profissional atende online (`offersOnline`), senão `PRESENCIAL`. Pedir `ONLINE` a quem não atende online → **409 `ONLINE_NOT_AVAILABLE`**. `notes` também é opcional (até 1000 caracteres). Resposta **201** com a consulta (formato abaixo). A API manda e-mail para o paciente e para o profissional.
 
 | Erro | Quando |
 |---|---|
@@ -570,6 +573,21 @@ Paginada (`page`, `size` até 50, padrão 20), **mais recentes primeiro**:
 Sugestão de tela: sino no cabeçalho com o contador; ao abrir, a lista (ícone por `type`); clicar numa notificação marca como lida e leva ao `linkUrl`; botão "Marcar todas como lidas".
 
 Na demonstração (`npm run seed`), as contas já têm notificações reais: a Ana tem "Consulta confirmada" e "Novo plano de ação"; a Camila, "Nova consulta agendada".
+
+---
+
+## 🆕 Atendimento online no perfil do profissional
+
+`PUT /api/me/professional-profile` (PROFESSIONAL) aceita um campo novo, `telehealthRegistered`:
+
+```json
+{ "bio": "...", "consultationPrice": 150.00, "specialtyIds": [3], "telehealthRegistered": true }
+```
+
+- `true` = "Tenho cadastro no e-Psi / e-Nutricionista e atendo online". Sugestão: uma caixa de seleção com esse texto e um link explicando o cadastro do conselho (psicólogos: e-Psi, CFP 11/2018; nutricionistas: e-Nutricionista, CFN 666/2020).
+- Campo ausente (`null`): não muda nada. O formulário atual continua funcionando sem ele.
+- `GET /api/me` devolve em `professional`: `telehealthRegistered` e `telehealthDeclaredAt` (quando declarou).
+- Desmarcar não cancela as consultas online já marcadas; só impede novas.
 
 ---
 

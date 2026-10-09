@@ -22,6 +22,7 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 	 * (o EXISTS olha a tabela de ligação professional_specialties).
 	 * minPrice/maxPrice = faixa de preço da consulta (null = sem limite).
 	 * Com faixa de preço, quem deixou "valor a combinar" (preço vazio) não aparece.
+	 * onlineOnly = true -> só quem atende online (declarou e-Psi / e-Nutricionista).
 	 */
 	@Query(value = """
 			SELECT p FROM Professional p JOIN FETCH p.user u
@@ -31,6 +32,7 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 			  AND (:specialtyId IS NULL OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id = :specialtyId))
 			  AND (:minPrice IS NULL OR p.consultationPrice >= :minPrice)
 			  AND (:maxPrice IS NULL OR p.consultationPrice <= :maxPrice)
+			  AND (:onlineOnly = false OR p.telehealthRegistered = true)
 			""", countQuery = """
 			SELECT COUNT(p) FROM Professional p JOIN p.user u
 			WHERE p.verificationStatus = br.com.nutrimente.api.user.VerificationStatus.APPROVED
@@ -39,9 +41,11 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 			  AND (:specialtyId IS NULL OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id = :specialtyId))
 			  AND (:minPrice IS NULL OR p.consultationPrice >= :minPrice)
 			  AND (:maxPrice IS NULL OR p.consultationPrice <= :maxPrice)
+			  AND (:onlineOnly = false OR p.telehealthRegistered = true)
 			""")
 	Page<Professional> findPublic(@Param("type") ProfessionalType type, @Param("specialtyId") Integer specialtyId,
-			@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice, Pageable pageable);
+			@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice,
+			@Param("onlineOnly") boolean onlineOnly, Pageable pageable);
 
 	@Query("""
 			SELECT p FROM Professional p JOIN FETCH p.user u

@@ -65,6 +65,17 @@ public class Professional {
 	@Column(name = "rating_count", nullable = false)
 	private int ratingCount;
 
+	/**
+	 * Declarou ter cadastro no e-Psi (CFP 11/2018) ou no e-Nutricionista
+	 * (CFN 666/2020), exigido para atender online. Sem isso, só presencial.
+	 */
+	@Column(name = "telehealth_registered", nullable = false)
+	private boolean telehealthRegistered;
+
+	/** Quando declarou (registro de quando o profissional afirmou ter o cadastro) */
+	@Column(name = "telehealth_declared_at")
+	private LocalDateTime telehealthDeclaredAt;
+
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
@@ -99,6 +110,28 @@ public class Professional {
 	public void updateProfile(String bio, BigDecimal consultationPrice) {
 		this.bio = bio;
 		this.consultationPrice = consultationPrice;
+	}
+
+	/**
+	 * Liga ou desliga o atendimento online. A data só muda quando passa de
+	 * "não" para "sim": salvar o perfil de novo não apaga quando ele declarou.
+	 */
+	public void declareTelehealth(boolean registered) {
+		if (registered && !telehealthRegistered) {
+			telehealthDeclaredAt = Clock.now();
+		} else if (!registered) {
+			telehealthDeclaredAt = null;
+		}
+		telehealthRegistered = registered;
+	}
+
+	/** Pode receber consulta ONLINE */
+	public boolean offersOnline() {
+		return telehealthRegistered;
+	}
+
+	public LocalDateTime getTelehealthDeclaredAt() {
+		return telehealthDeclaredAt;
 	}
 
 	/** Nota média e quantidade de avaliações (recalculadas a cada avaliação nova) */

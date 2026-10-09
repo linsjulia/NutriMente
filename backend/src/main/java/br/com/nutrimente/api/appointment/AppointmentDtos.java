@@ -67,7 +67,10 @@ public final class AppointmentDtos {
 
 			@NotNull(message = "Escolha um horário") Instant startsAt,
 
-			/** ONLINE (padrão, com link de videochamada) ou PRESENCIAL */
+			/**
+			 * ONLINE (com link de videochamada) ou PRESENCIAL. Vazio: ONLINE se o
+			 * profissional atende online (offersOnline), senão PRESENCIAL
+			 */
 			Modality modality,
 
 			@Size(max = 1000, message = "A observação pode ter até 1000 caracteres") String notes) {

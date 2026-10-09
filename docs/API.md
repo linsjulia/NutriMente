@@ -84,7 +84,8 @@ Lista **paginada** só com profissionais **aprovados** pelo admin, sem dados pes
 
 Regras:
 - Com `minPrice` ou `maxPrice`, quem deixou o preço em branco ("valor a combinar") **não aparece**.
-- 🆕 `offersOnline`: o profissional declarou ter cadastro no **e-Psi** (psicólogos) ou no **e-Nutricionista** (nutricionistas), exigido pelos conselhos para atender online. Se `false`, ele **só atende presencial**: mostre um selo "Atende online" quando `true`, e na tela de agendamento ofereça só "Presencial" quando `false`.
+- 🆕 `offersInPerson`: o profissional informou o **consultório** e atende **presencialmente**. O perfil público mostra só `officeCity`/`officeState`; o endereço completo aparece na consulta presencial (`officeAddress`). Se `offersOnline` e `offersInPerson` forem os dois `false`, ainda não dá para agendar.
+- `offersOnline`: o profissional declarou ter cadastro no **e-Psi** (psicólogos) ou no **e-Nutricionista** (nutricionistas), exigido pelos conselhos para atender online. Se `false`, ele **só atende presencial**: mostre um selo "Atende online" quando `true`, e na tela de agendamento ofereça só "Presencial" quando `false`.
 - Nas ordenações por preço, "valor a combinar" vai para o **fim**.
 - Erros: `minPrice` maior que `maxPrice`, valor negativo ou não numérico, ou `sort` desconhecido → **400** com `errors.minPrice` / `errors.sort`.
 
@@ -106,7 +107,10 @@ Resposta:
       "specialties": [
         { "id": 3, "name": "Nutrição Comportamental", "type": "NUTRICIONISTA" }
       ],
-      "offersOnline": true
+      "offersOnline": true,
+      "offersInPerson": true,
+      "officeCity": "São Paulo",
+      "officeState": "SP"
     }
   ],
   "page": 0,
@@ -239,10 +243,13 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
 ### `POST /api/appointments`: agendar (PATIENT)
 
 ```json
-{ "professionalId": 42, "startsAt": "2026-10-20T12:00:00Z", "modality": "ONLINE", "notes": "Primeira consulta" }
+{ "professionalId": 42, "startsAt": "2026-10-20T12:00:00Z", "modality": "ONLINE", "notes": "Primeira consulta",
+  "screening": { "reason": "Quero parar de beliscar à noite", "symptoms": "Ansiedade no fim do dia", "moodScore": 3 } }
 ```
 
-`modality` é opcional: `ONLINE` ou `PRESENCIAL`. Sem ela, vira `ONLINE` se o profissional atende online (`offersOnline`), senão `PRESENCIAL`. Pedir `ONLINE` a quem não atende online → **409 `ONLINE_NOT_AVAILABLE`**. `notes` também é opcional (até 1000 caracteres). Resposta **201** com a consulta (formato abaixo). A API manda e-mail para o paciente e para o profissional.
+🆕 `screening` (triagem) é opcional: veja "Triagem antes da consulta" abaixo. Erros dentro dela voltam como `errors["screening.reason"]`.
+
+`modality` é opcional: `ONLINE` ou `PRESENCIAL`. Sem ela, vira `ONLINE` se o profissional atende online (`offersOnline`), senão `PRESENCIAL`. Pedir `ONLINE` a quem não atende online → **409 `ONLINE_NOT_AVAILABLE`**; pedir `PRESENCIAL` a quem não informou o consultório → **409 `IN_PERSON_NOT_AVAILABLE`**. `notes` também é opcional (até 1000 caracteres). Resposta **201** com a consulta (formato abaixo). A API manda e-mail para o paciente e para o profissional.
 
 | Erro | Quando |
 |---|---|
@@ -273,9 +280,15 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
   "canConfirm": false,
   "canComplete": false,
   "canReview": false,
-  "canWriteRecord": false
+  "canWriteRecord": false,
+  "canEditScreening": true,
+  "officeAddress": null
 }
 ```
+
+- 🆕 `officeAddress`: na consulta **presencial**, o endereço do consultório ("Av. Paulista, 1000, sala 81 - Bela Vista, São Paulo/SP"). `null` na online.
+
+- 🆕 `canEditScreening`: `true` para o **paciente** numa consulta agendada ou confirmada que ainda não começou. Mostre "Triagem" (preencher ou ajustar).
 
 - 🆕 `canWriteRecord`: `true` para o **profissional** a partir do horário de início, se a consulta não foi cancelada nem remarcada. Mostre "Registro da consulta" (ver "Registro da consulta" abaixo).
 - `canReview`: `true` para o **paciente** numa consulta `COMPLETED` que ainda não avaliou. Mostre "Avaliar" (ver "Avaliações" abaixo).
@@ -362,6 +375,116 @@ Paginada (`page`, `size` até 50, padrão 10), **das mais recentes para as mais 
 - **404** se o profissional não existe ou não está aprovado.
 
 Sugestão de tela: no perfil, a nota média em estrelas (`ratingAverage` / `ratingCount`) e a lista de avaliações. No histórico do paciente, o botão "Avaliar" (quando `canReview`) abre as estrelas e o comentário.
+
+---
+
+## 🆕 Triagem antes da consulta
+
+O paciente conta o **motivo** e os **sintomas atuais** antes da consulta, e o profissional lê para se preparar. Pode ser enviada junto do agendamento (`screening` no `POST /api/appointments`) ou depois, até o início. Os textos são gravados **criptografados**, e a leitura pelo profissional vai para a auditoria. **Ao remarcar, a triagem vai junto** para a consulta nova.
+
+### `GET /api/appointments/{id}/screening` (paciente ou profissional da consulta)
+
+```json
+{ "appointmentId": 87, "reason": "Quero parar de beliscar à noite", "symptoms": "Ansiedade no fim do dia",
+  "moodScore": 3, "updatedAt": "2026-10-18T22:10:00Z", "canEdit": true }
+```
+
+Sem triagem: `reason`, `symptoms`, `moodScore` e `updatedAt` vêm `null` (não é erro). `canEdit` é igual a `canEditScreening` da consulta.
+
+### `PUT /api/appointments/{id}/screening` (PATIENT da consulta)
+
+```json
+{ "reason": "Quero parar de beliscar à noite", "symptoms": "Ansiedade no fim do dia", "moodScore": 3 }
+```
+
+- `reason` é **obrigatório** (até 1000). `symptoms` vai até 2000, e `moodScore` vai de 1 (muito mal) a 5 (muito bem); os dois são opcionais.
+- **409 `SCREENING_CLOSED`**: a consulta já começou, foi cancelada ou foi remarcada (ajuste a da consulta nova). **403**: profissional.
+
+Sugestão de tela: no passo de confirmação do agendamento, um bloco opcional "Conte para o profissional" (motivo, sintomas e cinco carinhas para o humor). Na consulta do profissional, um quadro "Triagem do paciente".
+
+---
+
+## 🆕 Questionário inicial do paciente
+
+Respondido **uma vez, depois do cadastro** (e editável depois). Ajuda o profissional a conhecer o paciente antes da primeira consulta. O `GET /api/me` do paciente traz **`intakeCompleted`** (`true`/`false`; `null` para profissional e admin). Sugestão: depois do primeiro login, se `intakeCompleted` for `false`, mostrar o questionário, com a opção "Responder depois".
+
+### `PUT /api/me/intake` (PATIENT): responder ou editar
+
+```json
+{
+  "goals": ["RELACAO_COM_A_COMIDA", "ANSIEDADE"],
+  "mealsPerDay": 3,
+  "waterLitersPerDay": 1.5,
+  "activityLevel": "LEVE",
+  "sleepQuality": 2,
+  "stressLevel": 4,
+  "dietaryRestrictions": "Intolerância à lactose",
+  "healthConditions": "Hipotireoidismo",
+  "expectations": "Comer melhor sem dieta restritiva"
+}
+```
+
+| Campo | Regra | Opções e textos para a tela |
+|---|---|---|
+| `goals` | 1 a 4 | `EMAGRECER` (Emagrecer com saúde), `GANHAR_MASSA` (Ganhar massa muscular), `ALIMENTACAO_SAUDAVEL` (Comer de forma mais equilibrada), `RELACAO_COM_A_COMIDA` (Melhorar minha relação com a comida), `ANSIEDADE` (Lidar com ansiedade e estresse), `SONO` (Dormir melhor), `ENERGIA` (Ter mais energia), `AUTOESTIMA` (Autoestima e imagem corporal) |
+| `mealsPerDay` | 1 a 10 | Quantas refeições você faz por dia? |
+| `waterLitersPerDay` | 0 a 10, uma casa decimal | Quantos litros de água por dia? |
+| `activityLevel` | obrigatório | `SEDENTARIO`, `LEVE` (1–2x por semana), `MODERADO` (3–4x), `INTENSO` (5x ou mais) |
+| `sleepQuality` | 1 a 5 | Como está seu sono? (1 = muito ruim) |
+| `stressLevel` | 1 a 5 | Qual seu nível de estresse? (1 = muito baixo) |
+| `dietaryRestrictions`, `healthConditions`, `expectations` | opcionais, até 2000 | Restrições alimentares; doenças e medicamentos; o que espera do acompanhamento |
+
+Resposta: as mesmas respostas, mais `createdAt` e `updatedAt`. Erros de validação: **400** com a mensagem pronta em `errors.<campo>`. Os textos livres são gravados **criptografados**.
+
+### `GET /api/me/intake` (PATIENT)
+
+Minhas respostas. **404 `INTAKE_NOT_ANSWERED`** se ainda não respondeu.
+
+### `GET /api/patients/{id}/intake` (PROFESSIONAL)
+
+As respostas de um paciente que o profissional **atende**, ou seja, com consulta agendada, confirmada ou realizada (mesma regra de "Meus pacientes"). Para os outros: **404**. A leitura vai para a auditoria. Sugestão: em "Meus pacientes" e na consulta, um botão "Questionário inicial".
+
+---
+
+## 🆕 Diário alimentar
+
+O paciente registra o que comeu, com foto opcional e anotações, e o profissional que o atende acompanha. Os textos são gravados **criptografados**, e as fotos ficam **cifradas** num volume da API. **Excluir a conta apaga o diário e as fotos.**
+
+### Paciente
+
+| Rota | O quê |
+|---|---|
+| `GET /api/me/meals?page=0&size=20` | Meu diário, **do mais recente para o mais antigo** (página no formato da busca: `items`, `totalItems`...) |
+| `POST /api/me/meals` | Registrar (resposta **201**) |
+| `PUT /api/me/meals/{id}` | Editar (mesmo corpo) |
+| `DELETE /api/me/meals/{id}` | Apagar (**204**; a foto vai junto) |
+| `PUT /api/me/meals/{id}/photo` | Enviar ou trocar a foto: **multipart/form-data**, campo `photo` |
+| `DELETE /api/me/meals/{id}/photo` | Tirar a foto |
+
+```json
+{ "eatenAt": "2026-10-08T15:40:00Z", "mealType": "ALMOCO", "description": "Arroz, feijão, frango e salada",
+  "notes": "Comi com calma", "hungerLevel": 4, "satisfactionLevel": 3 }
+```
+
+| Campo | Regra | Texto para a tela |
+|---|---|---|
+| `eatenAt` | obrigatório; não pode estar no futuro; até 60 dias atrás | Quando foi? |
+| `mealType` | `CAFE_DA_MANHA`, `LANCHE_DA_MANHA`, `ALMOCO`, `LANCHE_DA_TARDE`, `JANTAR`, `CEIA`, `OUTRO` | Café da manhã, Lanche da manhã, Almoço, Lanche da tarde, Jantar, Ceia, Outro |
+| `description` | obrigatório, até 2000 | O que você comeu? |
+| `notes` | opcional, até 2000 | Como você se sentiu? |
+| `hungerLevel`, `satisfactionLevel` | opcionais, 1 a 5 | Fome antes de comer / Saciedade depois |
+
+Resposta: os mesmos campos, mais `id`, `photoUrl` (`"/api/meals/87/photo"` ou `null`), `createdAt` e `updatedAt`.
+
+**Foto:** JPG, PNG ou WebP, **até 5 MB**. O tipo é conferido pelo conteúdo do arquivo, não pelo nome. Erros: **400 `INVALID_PHOTO`** com `errors.photo` ("Envie uma foto em JPG, PNG ou WebP" / "A foto pode ter até 5 MB").
+
+**Mostrar a foto:** `GET /api/meals/{id}/photo` exige o token. Por isso, `<img src>` direto na API não funciona. No Next, crie uma Route Handler (ex.: `app/api/meals/[id]/photo/route.ts`) que chama a API com o token da sessão e devolve o corpo e o `Content-Type`. Aí sim use `<img src="/api/meals/87/photo">`. Para enviar, monte um `FormData` com o arquivo do `<input type="file" accept="image/jpeg,image/png,image/webp">`.
+
+### Profissional
+
+`GET /api/patients/{id}/meals?page=0&size=20`: o diário de um paciente que ele **atende** (mesma regra do questionário). Para os outros: **404**. A leitura vai para a auditoria. As fotos abrem em `GET /api/meals/{id}/photo` (o profissional também pode).
+
+Sugestão de telas: o paciente vê uma linha do tempo por dia, com o botão "Registrar refeição"; o profissional, em "Meus pacientes", tem uma aba "Diário".
 
 ---
 
@@ -531,6 +654,8 @@ Avisos do "sininho" da área logada. Servem para **qualquer papel** (paciente, p
 |---|---|---|---|
 | Consulta agendada | profissional (e o paciente, como comprovante) | `APPOINTMENT` | `/appointments/{id}` |
 | Consulta confirmada / remarcada / cancelada | a outra pessoa | `APPOINTMENT` | `/appointments/{id}` |
+| 🆕 **Lembrete**: a consulta começa nas próximas 24 h (sai uma vez, automático, também por e-mail; não sai se a consulta foi agendada com menos de 24 h de antecedência) | paciente e profissional | `APPOINTMENT` | `/appointments/{id}` |
+| 🆕 Orientações da consulta registradas pelo profissional | paciente | `APPOINTMENT` | `/appointments/{id}` |
 | Plano de ação novo ou atualizado; observação do profissional no plano | paciente | `PLAN` | `/plans/{id}` |
 | Avaliação recebida | profissional | `REVIEW` | `/professionals/{id}` |
 | Cadastro aprovado ou recusado | profissional | `SYSTEM` | `/dashboard` |
@@ -589,6 +714,39 @@ Na demonstração (`npm run seed`), as contas já têm notificações reais: a A
 - Campo ausente (`null`): não muda nada. O formulário atual continua funcionando sem ele.
 - `GET /api/me` devolve em `professional`: `telehealthRegistered` e `telehealthDeclaredAt` (quando declarou).
 - Desmarcar não cancela as consultas online já marcadas; só impede novas.
+
+---
+
+## 🆕 Consultório e documentos do profissional
+
+### Endereço do consultório (`PUT /api/me/professional-profile`)
+
+Três campos novos, que andam **juntos**: `officeAddress` (até 200), `officeCity` (até 100) e `officeState` (UF: `SP`, `RJ`...).
+
+- Os três **ausentes** (`null`): não muda nada. O formulário atual continua funcionando.
+- Os três **preenchidos**: salva. Faltou algum → **400** com `errors.officeAddress` / `errors.officeCity` / `errors.officeState`.
+- Os três **vazios** (`""`): apaga o endereço, e o profissional deixa de atender presencialmente.
+- `GET /api/me` devolve os três em `professional`.
+
+### Documentos (carteira do conselho, diploma, identidade)
+
+| Rota | Quem | O quê |
+|---|---|---|
+| `GET /api/me/documents` | PROFESSIONAL | Meus documentos (`status`: `PENDING`, `APPROVED`, `REJECTED`; `reviewNotes` = motivo da recusa) |
+| `POST /api/me/documents?documentType=REGISTRO_CONSELHO` | PROFESSIONAL | Enviar: **multipart/form-data**, campo `file`. PDF, JPG, PNG ou WebP, até 5 MB, no máximo 10 documentos. Tipos: `REGISTRO_CONSELHO`, `DIPLOMA`, `IDENTIDADE`, `OUTRO` |
+| `DELETE /api/me/documents/{id}` | PROFESSIONAL | Apagar (**409 `DOCUMENT_APPROVED`** se já aprovado) |
+| `GET /api/me/documents/{id}/file` | PROFESSIONAL | Abrir o meu arquivo |
+| `GET /api/admin/professionals/{id}/documents` | ADMIN | Documentos de um profissional |
+| `GET /api/admin/documents/{id}/file` | ADMIN | Abrir o arquivo (fica na auditoria) |
+| `PATCH /api/admin/documents/{id}` | ADMIN | `{ "status": "APPROVED" }` ou `{ "status": "REJECTED", "notes": "Arquivo ilegível" }` (motivo obrigatório ao recusar); o profissional é avisado |
+
+Os arquivos ficam **cifrados**, e excluir a conta apaga os documentos. Para abrir o arquivo na tela, use uma Route Handler com o token, como na foto do diário.
+
+### Admin: conferir o atendimento online
+
+`GET /api/admin/professionals` agora traz `telehealthRegistered`, `telehealthDeclaredAt` e `officeAddress`. O admin confere a declaração na plataforma do conselho (e-Psi / e-Nutricionista) e, se não encontrar o cadastro:
+
+`PATCH /api/admin/professionals/{id}/telehealth/revoke` com `{ "reason": "Cadastro não encontrado no e-Psi" }` (motivo obrigatório). O atendimento online é desligado (as consultas já marcadas continuam), e o profissional recebe notificação e e-mail. **409 `TELEHEALTH_NOT_DECLARED`** se ele não tinha declarado.
 
 ---
 

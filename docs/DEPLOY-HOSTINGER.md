@@ -186,7 +186,7 @@ openssl rand -hex 24
 | `MSSQL_SA_PASSWORD`, `NUTRIMENTE_DB_PASSWORD` | Uma chave gerada **+ `Aa1!` no final** (o SQL Server exige maiúscula, minúscula, número e símbolo) |
 | `MONGO_ROOT_PASSWORD`, `MONGO_APP_PASSWORD`, `LOGS_API_KEY` | Uma chave gerada cada |
 | `JWT_SECRET` | `openssl rand -hex 32` (64 caracteres) |
-| `RECORDS_ENCRYPTION_KEY` | `openssl rand -hex 32`. Criptografa o registro da consulta. **Guarde uma cópia fora do servidor**: sem ela, os registros do backup não podem ser lidos |
+| `RECORDS_ENCRYPTION_KEY` | `openssl rand -hex 32`. Criptografa prontuário, questionário, triagem e CPF/telefone/nascimento. **Guarde uma cópia fora do servidor**: sem ela, os registros do backup não podem ser lidos |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | O primeiro administrador. Senha com letras e números, 8+ caracteres |
 | `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | Os dados da caixa criada no passo 5 |
 
@@ -253,7 +253,7 @@ Só os serviços que mudaram são recriados. O site fica fora do ar por alguns s
 
 ## 10. Backups
 
-O script `deploy/backup.sh` salva o SQL Server e o MongoDB em `/root/backups-nutrimente` e apaga os arquivos com mais de 14 dias.
+O script `deploy/backup.sh` salva o SQL Server, o MongoDB e as **fotos do diário alimentar** (volume `api-uploads`) em `/root/backups-nutrimente`, e apaga os arquivos com mais de 14 dias. As fotos e vários campos do banco são **cifrados**: guarde a `RECORDS_ENCRYPTION_KEY` (ou o `JWT_SECRET`, se ela estiver vazia) **fora do servidor**, junto com os backups.
 
 ```bash
 bash deploy/backup.sh

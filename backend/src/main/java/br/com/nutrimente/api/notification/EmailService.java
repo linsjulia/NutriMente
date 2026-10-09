@@ -70,6 +70,13 @@ public class EmailService {
 		send(to, subject + " | NutriMente", name, intro, "Ver minhas consultas", link, footer);
 	}
 
+	/** Aviso geral sobre a conta (ex.: atendimento online desativado, documento analisado) */
+	@Async
+	public void sendAccountNotice(String to, String name, String subject, String intro, String footer) {
+		String link = properties.frontendUrl() + "/dashboard";
+		send(to, subject + " | NutriMente", name, intro, "Abrir o NutriMente", link, footer);
+	}
+
 	/** Aviso de plano de ação (novo plano), com link para a área logada */
 	@Async
 	public void sendPlanNotice(String to, String name, String subject, String intro) {

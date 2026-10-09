@@ -80,6 +80,8 @@ public abstract class IntegrationTest {
 			jdbc.update("DELETE FROM action_plans WHERE patient_id = ? OR professional_id = ?", id, id);
 			jdbc.update("DELETE r FROM appointment_records r JOIN appointments a ON a.id = r.appointment_id"
 					+ " WHERE a.patient_id = ? OR a.professional_id = ?", id, id);
+			jdbc.update("DELETE s FROM appointment_screenings s JOIN appointments a ON a.id = s.appointment_id"
+					+ " WHERE a.patient_id = ? OR a.professional_id = ?", id, id);
 			jdbc.update("DELETE FROM appointments WHERE patient_id = ? OR professional_id = ?", id, id);
 			jdbc.update("DELETE FROM users WHERE id = ?", id);
 		});
@@ -227,12 +229,14 @@ public abstract class IntegrationTest {
 	protected record Pro(String token, Long id, String email) {
 	}
 
-	/** Profissional aprovado, com preço, atendimento online e agenda aberta todos os dias */
+	/** Profissional aprovado, com preço, atendimento online e presencial e agenda aberta todos os dias */
 	protected Pro readyProfessional(String admin) throws Exception {
 		String email = uniqueEmail();
 		String token = registerVerifiedProfessional(email, "NUTRICIONISTA", randomDocument());
 		Long id = jdbc.queryForObject("SELECT id FROM users WHERE email = ?", Long.class, email);
-		putAs("/api/me/professional-profile", token, "{\"consultationPrice\": 150.00, \"telehealthRegistered\": true}")
+		putAs("/api/me/professional-profile", token, """
+				{"consultationPrice": 150.00, "telehealthRegistered": true,
+				 "officeAddress": "Rua das Flores, 100 - Centro", "officeCity": "São Paulo", "officeState": "SP"}""")
 				.andExpect(status().isOk());
 		putAs("/api/me/availability", token, ALL_DAY).andExpect(status().isOk());
 		patchAs("/api/admin/professionals/" + id + "/verification", admin, "{\"status\": \"APPROVED\"}")

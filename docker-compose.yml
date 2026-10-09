@@ -106,10 +106,14 @@ services:
       LOGS_API_KEY: ${LOGS_API_KEY}
       JWT_SECRET: ${JWT_SECRET}
       RECORDS_ENCRYPTION_KEY: ${RECORDS_ENCRYPTION_KEY:-}
+      UPLOADS_DIR: /app/uploads
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       AUTH_RATE_LIMIT_PER_MINUTE: ${AUTH_RATE_LIMIT_PER_MINUTE:-30}
+    volumes:
+      # Fotos do diário alimentar (cifradas). Faça backup junto com o banco!
+      - api-uploads:/app/uploads
     ports:
       - "${API_PORT:-8080}:8080"
     # Só liga depois que o banco (com as tabelas) e o serviço de logs estiverem prontos
@@ -124,5 +128,6 @@ services:
 
 # Declaração dos volumes persistentes usados acima
 volumes:
+  api-uploads:
   sqlserver-data:
   mongodb-data:

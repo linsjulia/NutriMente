@@ -21,6 +21,7 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /** JSON de entrada e saída da área "Minha conta". */
@@ -44,12 +45,15 @@ public final class AccountDtos {
 			String telephone,
 			Gender gender,
 			LocalDateTime createdAt,
-			ProfessionalProfile professional) {
+			ProfessionalProfile professional,
+			/** Paciente já respondeu o questionário inicial? (null para profissional e admin) */
+			Boolean intakeCompleted) {
 
-		static MeResponse of(User user, Professional professional) {
+		static MeResponse of(User user, Professional professional, Boolean intakeCompleted) {
 			return new MeResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.getPhotoUrl(),
 					maskCpf(user.getCpf()), user.getBirthDate(), user.getTelephone(), user.getGender(),
-					user.getCreatedAt(), professional == null ? null : ProfessionalProfile.of(professional));
+					user.getCreatedAt(), professional == null ? null : ProfessionalProfile.of(professional),
+					intakeCompleted);
 		}
 
 		private static String maskCpf(String cpf) {
@@ -69,13 +73,18 @@ public final class AccountDtos {
 			List<SpecialtyDto> specialties,
 			/** Declarou cadastro no e-Psi / e-Nutricionista: atende online */
 			boolean telehealthRegistered,
-			Instant telehealthDeclaredAt) {
+			Instant telehealthDeclaredAt,
+			/** Endereço do consultório (null = não atende presencialmente) */
+			String officeAddress,
+			String officeCity,
+			String officeState) {
 
 		static ProfessionalProfile of(Professional p) {
 			return new ProfessionalProfile(p.getType(), p.getDocument(), p.getBio(), p.getConsultationPrice(),
 					p.getVerificationStatus(), p.getSpecialties().stream().map(SpecialtyDto::of).toList(),
 					p.offersOnline(), p.getTelehealthDeclaredAt() == null ? null
-							: p.getTelehealthDeclaredAt().toInstant(ZoneOffset.UTC));
+							: p.getTelehealthDeclaredAt().toInstant(ZoneOffset.UTC),
+					p.getOfficeAddress(), p.getOfficeCity(), p.getOfficeState());
 		}
 	}
 
@@ -98,6 +107,8 @@ public final class AccountDtos {
 	 * specialtyIds: lista com os ids escolhidos ([] = nenhuma).
 	 * telehealthRegistered: true = "tenho cadastro no e-Psi / e-Nutricionista".
 	 * Se specialtyIds ou telehealthRegistered não vierem no JSON (null), não mudam.
+	 * Endereço do consultório: officeAddress + officeCity + officeState juntos.
+	 * Os três ausentes (null) = não muda; os três vazios ("") = apagar o endereço.
 	 */
 	public record UpdateProfessionalProfileRequest(
 			@Size(max = 500, message = "A bio pode ter até 500 caracteres")
@@ -111,7 +122,14 @@ public final class AccountDtos {
 			@Size(max = MAX_SPECIALTIES, message = "Escolha no máximo " + MAX_SPECIALTIES + " especialidades")
 			List<Integer> specialtyIds,
 
-			Boolean telehealthRegistered) {
+			Boolean telehealthRegistered,
+
+			@Size(max = 200, message = "O endereço pode ter até 200 caracteres") String officeAddress,
+
+			@Size(max = 100, message = "A cidade pode ter até 100 caracteres") String officeCity,
+
+			@Pattern(regexp = "^$|^(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)$",
+					message = "Escolha a UF") String officeState) {
 
 		/** Limite para o perfil continuar objetivo para o paciente */
 		public static final int MAX_SPECIALTIES = 5;

@@ -36,6 +36,11 @@ docker exec nutrimente-mongodb mongodump --quiet --archive --gzip \
   --authenticationDatabase admin --db "$(env_value MONGO_LOGS_DB)" \
   > "$BACKUP_DIR/logs_$STAMP.archive.gz"
 
+# Fotos do diário alimentar (volume api-uploads). Já estão cifradas: sem a
+# RECORDS_ENCRYPTION_KEY (ou o JWT_SECRET), o backup delas não abre.
+echo "Fotos do diário..."
+docker exec nutrimente-api tar czf - -C /app/uploads . > "$BACKUP_DIR/fotos_$STAMP.tar.gz"
+
 find "$BACKUP_DIR" -type f -mtime +"$KEEP_DAYS" -delete
 
 echo "Pronto: $BACKUP_DIR"

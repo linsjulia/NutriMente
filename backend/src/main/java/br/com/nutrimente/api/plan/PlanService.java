@@ -9,11 +9,11 @@ import java.time.ZoneOffset;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -75,8 +75,7 @@ public class PlanService {
 	static final int CHECK_WINDOW_DAYS = 7;
 
 	/** Consultas que ligam paciente e profissional: agendada, confirmada ou realizada */
-	private static final EnumSet<AppointmentStatus> LINKING = EnumSet.of(AppointmentStatus.SCHEDULED,
-			AppointmentStatus.CONFIRMED, AppointmentStatus.COMPLETED);
+	private static final Set<AppointmentStatus> LINKING = AppointmentStatus.LINKING;
 
 	private final ActionPlanRepository plans;
 	private final PatientRepository patients;

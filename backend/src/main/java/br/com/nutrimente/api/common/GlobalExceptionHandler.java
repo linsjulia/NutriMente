@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import br.com.nutrimente.api.logging.LogClient;
@@ -103,6 +104,13 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler({ AccessDeniedException.class, AuthorizationDeniedException.class })
 	ProblemDetail handleForbidden(Exception ex) {
 		return problem(HttpStatus.FORBIDDEN, "FORBIDDEN", "Você não tem permissão para esta ação.", Map.of());
+	}
+
+	/** Foto maior que o limite (spring.servlet.multipart.max-file-size) */
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	ProblemDetail handleTooLarge(MaxUploadSizeExceededException ex) {
+		return problem(HttpStatus.BAD_REQUEST, "INVALID_PHOTO", "A foto pode ter até 5 MB.",
+				Map.of("photo", "A foto pode ter até 5 MB"));
 	}
 
 	@ExceptionHandler(NoResourceFoundException.class)

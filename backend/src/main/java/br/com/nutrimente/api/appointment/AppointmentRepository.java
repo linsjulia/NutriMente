@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -90,6 +91,30 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 			""")
 	boolean linked(@Param("patientId") Long patientId, @Param("professionalId") Long professionalId,
 			@Param("statuses") Collection<AppointmentStatus> statuses);
+
+	/**
+	 * Candidatas ao lembrete da véspera: agendadas ou confirmadas, sem lembrete
+	 * ainda, começando entre "from" e "to" (o índice filtrado ix_appointments_reminder
+	 * deixa essa busca leve).
+	 */
+	@Query("""
+			SELECT a FROM Appointment a
+			  JOIN FETCH a.patient pa JOIN FETCH pa.user
+			  JOIN FETCH a.professional pr JOIN FETCH pr.user
+			WHERE a.status IN :statuses AND a.reminderSentAt IS NULL
+			  AND a.startsAt > :from AND a.startsAt <= :to
+			ORDER BY a.startsAt
+			""")
+	List<Appointment> findDueForReminder(@Param("statuses") Collection<AppointmentStatus> statuses,
+			@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+	/**
+	 * "Reserva" o lembrete: só marca se ainda estiver vazio. Devolve 1 para
+	 * quem ganhou e 0 para quem chegou depois (evita lembrete em dobro).
+	 */
+	@Modifying(flushAutomatically = true, clearAutomatically = true)
+	@Query("UPDATE Appointment a SET a.reminderSentAt = :now WHERE a.id = :id AND a.reminderSentAt IS NULL")
+	int claimReminder(@Param("id") Long id, @Param("now") LocalDateTime now);
 
 	/** Consultas do profissional (mais recentes primeiro), para montar a lista "meus pacientes" */
 	@Query("""

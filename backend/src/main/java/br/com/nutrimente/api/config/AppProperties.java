@@ -27,7 +27,8 @@ public record AppProperties(
 		@Valid @NotNull Admin admin,
 		@Valid @DefaultValue RateLimit rateLimit,
 		@Valid @DefaultValue Appointments appointments,
-		@DefaultValue Records records) {
+		@DefaultValue Records records,
+		@DefaultValue Uploads uploads) {
 
 	public record Jwt(
 			@NotBlank @Size(min = 32, message = "JWT_SECRET precisa ter pelo menos 32 caracteres") String secret,
@@ -54,6 +55,8 @@ public record AppProperties(
 	 * - patientCancelLimit: até quanto tempo antes o PACIENTE pode cancelar ou remarcar (24 h)
 	 * - bookingWindowDays: até quantos dias à frente dá para agendar (60)
 	 * - timezone: fuso dos horários de atendimento (o banco guarda tudo em UTC)
+	 * - reminderBefore: com quanto tempo de antecedência sai o lembrete (24 h)
+	 * - remindersEnabled: liga o envio automático de lembretes (desligado nos testes)
 	 */
 	public record Appointments(
 			@DefaultValue("50m") @NotNull Duration duration,
@@ -61,7 +64,13 @@ public record AppProperties(
 			@DefaultValue("2h") @NotNull Duration minNotice,
 			@DefaultValue("24h") @NotNull Duration patientCancelLimit,
 			@DefaultValue("60") @Positive int bookingWindowDays,
-			@DefaultValue("America/Sao_Paulo") @NotBlank String timezone) {
+			@DefaultValue("America/Sao_Paulo") @NotBlank String timezone,
+			@DefaultValue("24h") @NotNull Duration reminderBefore,
+			@DefaultValue("true") boolean remindersEnabled) {
+	}
+
+	/** Pasta das fotos do diário alimentar (gravadas cifradas, com nome aleatório) */
+	public record Uploads(@DefaultValue("./uploads") String dir) {
 	}
 
 	/** Chave do registro da consulta. Vazia = derivada do JWT_SECRET (ver RecordCipher) */

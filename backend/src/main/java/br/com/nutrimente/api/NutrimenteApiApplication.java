@@ -6,6 +6,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Ponto de entrada da API.
@@ -26,6 +27,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 @EnableAsync // permite rodar tarefas em segundo plano (envio de e-mail e de logs)
+@EnableScheduling // permite tarefas agendadas (lembrete da véspera, a cada 10 min)
 public class NutrimenteApiApplication {
 
 	public static void main(String[] args) {

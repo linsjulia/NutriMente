@@ -72,15 +72,16 @@ async function createPatientAndProfessional(query) {
 // -------------------------------------------------------------
 
 // 24 dos scripts iniciais + schema_migrations (controle) + appointment_records (V002)
-test("todas as 26 tabelas foram criadas", async () => {
+// + patient_intakes e appointment_screenings (V005) + meal_logs (V008)
+test("todas as 29 tabelas foram criadas", async () => {
   const { recordset } = await pool.query("SELECT COUNT(*) AS total FROM sys.tables");
-  assert.equal(recordset[0].total, 26);
+  assert.equal(recordset[0].total, 29);
 });
 
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar", "V009__documentos_e_endereco"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -118,11 +119,15 @@ test("e-mail não pode repetir", () =>
     );
   }));
 
-test("CPF precisa ter 11 dígitos numéricos, mas pode ficar vazio", () =>
+// Desde a V007 o CPF é gravado cifrado pela API; a unicidade fica no cpf_hash
+// (HMAC do CPF). Os 11 dígitos são validados na API (@Cpf).
+test("CPF não repete (pelo cpf_hash), mas pode ficar vazio", () =>
   inTransaction(async (query) => {
+    const hash = "b".repeat(64);
+    await query(`INSERT INTO users (name, email, role, cpf, cpf_hash) VALUES (N'A', 'cpf1@teste.local', 'PATIENT', 'v1:x', '${hash}')`);
     await assertFails(
-      query("INSERT INTO users (name, email, role, cpf) VALUES (N'A', 'cpf@teste.local', 'PATIENT', '123.456.789')"),
-      /ck_users_cpf/
+      query(`INSERT INTO users (name, email, role, cpf, cpf_hash) VALUES (N'B', 'cpf2@teste.local', 'PATIENT', 'v1:y', '${hash}')`),
+      /uq_users_cpf_hash|duplicate key/i
     );
     // Vários usuários sem CPF são permitidos (índice único filtrado)
     await query(`INSERT INTO users (name, email, role) VALUES
@@ -305,4 +310,82 @@ test("versão da sessão (V004): começa em 0", () =>
     await query("INSERT INTO users (name, email, role) VALUES (N'Sessao', 'sessao@teste.local', 'PATIENT')");
     const { recordset } = await query("SELECT session_version FROM users WHERE email = 'sessao@teste.local'");
     assert.equal(recordset[0].session_version, 0);
+  }));
+
+test("questionário inicial (V005): um por paciente e só com respostas válidas", () =>
+  inTransaction(async (query) => {
+    const { patient } = await createPatientAndProfessional(query);
+    const insert = (activity, sleep) =>
+      query(`INSERT INTO patient_intakes (patient_id, goals, meals_per_day, water_liters_per_day, activity_level, sleep_quality, stress_level)
+             VALUES (${patient}, 'EMAGRECER', 4, 1.5, '${activity}', ${sleep}, 3)`);
+    await assertFails(insert("ATLETA", 3), /ck_patient_intakes_activity/);
+    await assertFails(insert("LEVE", 9), /ck_patient_intakes_sleep/);
+    await insert("LEVE", 3);
+    await assertFails(insert("LEVE", 3), /PRIMARY KEY|duplicate key/i);
+  }));
+
+test("triagem (V005): uma por consulta e protege a consulta contra exclusão", () =>
+  inTransaction(async (query) => {
+    const { patient, professional } = await createPatientAndProfessional(query);
+    const { recordset } = await query(`
+      INSERT INTO appointments (patient_id, professional_id, starts_at, ends_at, price)
+      OUTPUT inserted.id
+      VALUES (${patient}, ${professional}, '2030-06-01 10:00', '2030-06-01 10:50', 150)`);
+    const appointment = recordset[0].id;
+    await assertFails(
+      query(`INSERT INTO appointment_screenings (appointment_id, reason, mood_score) VALUES (${appointment}, N'x', 7)`),
+      /ck_appointment_screenings_mood/
+    );
+    await query(`INSERT INTO appointment_screenings (appointment_id, reason, mood_score) VALUES (${appointment}, N'cifrado', 3)`);
+    await assertFails(query(`DELETE FROM appointments WHERE id = ${appointment}`), /REFERENCE constraint/i);
+  }));
+
+test("lembrete (V006): coluna começa vazia e o índice filtrado existe", () =>
+  inTransaction(async (query) => {
+    const { patient, professional } = await createPatientAndProfessional(query);
+    const { recordset } = await query(`
+      INSERT INTO appointments (patient_id, professional_id, starts_at, ends_at, price)
+      OUTPUT inserted.reminder_sent_at
+      VALUES (${patient}, ${professional}, '2030-07-01 10:00', '2030-07-01 10:50', 150)`);
+    assert.equal(recordset[0].reminder_sent_at, null);
+    const index = await query("SELECT has_filter FROM sys.indexes WHERE name = 'ix_appointments_reminder'");
+    assert.equal(index.recordset[0]?.has_filter, true);
+  }));
+
+test("diário alimentar (V008): só tipos e notas válidos, e some com o paciente", () =>
+  inTransaction(async (query) => {
+    const { patient } = await createPatientAndProfessional(query);
+    const insert = (type, hunger, photoType = null) =>
+      query(`INSERT INTO meal_logs (patient_id, eaten_at, meal_type, description, hunger_level, photo_content_type)
+             VALUES (${patient}, '2030-08-01 12:00', '${type}', N'cifrado', ${hunger}, ${photoType ? `'${photoType}'` : "NULL"})`);
+    await assertFails(insert("BRUNCH", 3), /ck_meal_logs_type/);
+    await assertFails(insert("ALMOCO", 8), /ck_meal_logs_hunger/);
+    await assertFails(insert("ALMOCO", 3, "image/gif"), /ck_meal_logs_photo_type/);
+    await insert("ALMOCO", 3, "image/jpeg");
+    // Diário é do paciente: excluir o perfil apaga junto (CASCADE)
+    await query(`DELETE FROM patients WHERE user_id = ${patient}`);
+    const { recordset } = await query(`SELECT COUNT(*) AS total FROM meal_logs WHERE patient_id = ${patient}`);
+    assert.equal(recordset[0].total, 0);
+  }));
+
+test("endereço do consultório (V009): UF válida e tudo ou nada", () =>
+  inTransaction(async (query) => {
+    const { professional } = await createPatientAndProfessional(query);
+    const set = (address, city, state) =>
+      query(`UPDATE professionals SET office_address = ${address}, office_city = ${city}, office_state = ${state}
+             WHERE user_id = ${professional}`);
+    await assertFails(set("N'Rua A, 10'", "N'São Paulo'", "'XX'"), /ck_professionals_office_state/);
+    await assertFails(set("N'Rua A, 10'", "NULL", "'SP'"), /ck_professionals_office_complete/);
+    await set("N'Rua A, 10'", "N'São Paulo'", "'SP'");
+    await set("NULL", "NULL", "NULL");
+  }));
+
+test("documentos do profissional (V009): só tipos de arquivo aceitos", () =>
+  inTransaction(async (query) => {
+    const { professional } = await createPatientAndProfessional(query);
+    const insert = (type) =>
+      query(`INSERT INTO professional_documents (professional_id, document_type, file_url, content_type)
+             VALUES (${professional}, 'REGISTRO_CONSELHO', 'x.bin', '${type}')`);
+    await assertFails(insert("application/zip"), /ck_prof_docs_content_type/);
+    await insert("application/pdf");
   }));

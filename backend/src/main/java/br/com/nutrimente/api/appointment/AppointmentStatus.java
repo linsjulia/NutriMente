@@ -22,6 +22,13 @@ public enum AppointmentStatus {
 	 */
 	public static final Set<AppointmentStatus> OCCUPYING = EnumSet.of(SCHEDULED, CONFIRMED, IN_PROGRESS, COMPLETED);
 
+	/**
+	 * Consultas que LIGAM paciente e profissional (agendada, confirmada ou
+	 * realizada): com uma delas, o profissional pode criar plano de ação e
+	 * ver o questionário inicial do paciente.
+	 */
+	public static final Set<AppointmentStatus> LINKING = EnumSet.of(SCHEDULED, CONFIRMED, COMPLETED);
+
 	/** Situações em que a consulta ainda vai acontecer (aparecem em "próximas") */
 	public static final Set<AppointmentStatus> UPCOMING = EnumSet.of(SCHEDULED, CONFIRMED, IN_PROGRESS);
 

@@ -10,6 +10,7 @@ import br.com.nutrimente.api.user.ProfessionalType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -73,7 +74,24 @@ public final class AppointmentDtos {
 			 */
 			Modality modality,
 
-			@Size(max = 1000, message = "A observação pode ter até 1000 caracteres") String notes) {
+			@Size(max = 1000, message = "A observação pode ter até 1000 caracteres") String notes,
+
+			/** Triagem (opcional): motivo e sintomas atuais, para o profissional se preparar */
+			@Valid ScreeningRequest screening) {
+	}
+
+	/** Triagem antes da consulta. Os textos são gravados criptografados */
+	public record ScreeningRequest(
+			@NotBlank(message = "Conte o motivo da consulta")
+			@Size(max = 1000, message = "O motivo pode ter até 1000 caracteres")
+			String reason,
+
+			@Size(max = 2000, message = "Os sintomas podem ter até 2000 caracteres")
+			String symptoms,
+
+			@Min(value = 1, message = "Escolha de 1 a 5")
+			@Max(value = 5, message = "Escolha de 1 a 5")
+			Integer moodScore) {
 	}
 
 	public record CancelRequest(
@@ -114,6 +132,10 @@ public final class AppointmentDtos {
 			/** Paciente, consulta realizada e ainda sem avaliação: mostrar "Avaliar" */
 			boolean canReview,
 			/** Profissional, consulta já começou e não foi cancelada: mostrar "Registro da consulta" */
-			boolean canWriteRecord) {
+			boolean canWriteRecord,
+			/** Paciente, consulta agendada/confirmada que ainda não começou: mostrar "Triagem" */
+			boolean canEditScreening,
+			/** Consulta presencial: endereço do consultório ("Rua A, 10 - Centro, São Paulo/SP"); online: null */
+			String officeAddress) {
 	}
 }

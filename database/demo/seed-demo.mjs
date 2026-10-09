@@ -24,6 +24,7 @@
 // PASSADO e avaliações (ainda sem rota na API).
 // =============================================================
 
+import { readFile } from "node:fs/promises";
 import sql from "mssql";
 
 const API = process.env.API_URL ?? "http://localhost:8080";
@@ -33,6 +34,15 @@ const PASSWORD = "Demo1234";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 /** Fuso da agenda (o mesmo da API): consultas passadas às 10:00 daqui */
+// PDF mínimo (uma página em branco com um título), só para a demonstração dos documentos
+const DEMO_PDF = Buffer.from(
+  "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n" +
+  "3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 300 120]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj\n" +
+  "4 0 obj<</Length 58>>stream\nBT /F1 14 Tf 20 60 Td (Carteira CRP - demonstracao) Tj ET\nendstream endobj\n" +
+  "5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n",
+  "latin1",
+);
+
 const UTC_OFFSET_HOURS = -3; // America/Sao_Paulo (sem horário de verão desde 2019)
 
 // -------------------------------------------------------------
@@ -113,7 +123,7 @@ const PROFESSIONALS = [
     reviews: [[5, "Me senti acolhida desde a primeira sessão."]],
   },
   {
-    key: "beatriz", name: "Beatriz Lima", type: "PSICOLOGO", gender: "FEMALE", photo: "/doctor/psicologo3.jpg", price: 140,
+    key: "beatriz", name: "Beatriz Lima", type: "PSICOLOGO", gender: "FEMALE", photo: "/doctor/psicologo3.jpg", price: 140, office: null, // sem consultório: só online
     bio: "Atendimento à noite para quem trabalha durante o dia. Ansiedade, autoestima e relacionamento com o corpo.",
     specialties: ["Ansiedade", "Autoestima e Imagem Corporal"],
     windows: weekdays([1, 2, 3, 4], [["18:00", "22:00"]]),
@@ -125,6 +135,18 @@ const PROFESSIONALS = [
 ];
 
 /** Fica PENDENTE: aparece na fila de aprovação do admin */
+// Consultórios (consulta presencial). A Beatriz atende só online (office: null);
+// o Lucas, só presencial (online: false)
+const OFFICES = {
+  camila: { officeAddress: "Av. Paulista, 1000, sala 81 - Bela Vista", officeCity: "São Paulo", officeState: "SP" },
+  rafael: { officeAddress: "Rua da Bahia, 500, sala 302 - Centro", officeCity: "Belo Horizonte", officeState: "MG" },
+  larissa: { officeAddress: "Rua XV de Novembro, 200 - Centro", officeCity: "Curitiba", officeState: "PR" },
+  helena: { officeAddress: "Av. Atlântica, 1500, sala 12 - Copacabana", officeCity: "Rio de Janeiro", officeState: "RJ" },
+  mariana: { officeAddress: "Rua Augusta, 900, sala 45 - Consolação", officeCity: "São Paulo", officeState: "SP" },
+  lucas: { officeAddress: "Rua dos Andradas, 1200, sala 7 - Centro", officeCity: "Porto Alegre", officeState: "RS" },
+  juliana: { officeAddress: "SCS Quadra 2, Bloco C, sala 110 - Asa Sul", officeCity: "Brasília", officeState: "DF" },
+};
+
 const PENDING = {
   key: "andre", name: "André Nogueira", type: "PSICOLOGO", gender: "MALE",
   bio: "Psicólogo recém-chegado à plataforma, com foco em ansiedade em universitários.",
@@ -265,6 +287,7 @@ async function removePreviousDemo(db) {
   await db.query(`
     DELETE FROM reviews       WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo};
     DELETE FROM appointment_records WHERE appointment_id IN (SELECT id FROM appointments WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo});
+    DELETE FROM appointment_screenings WHERE appointment_id IN (SELECT id FROM appointments WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo});
     DELETE FROM refunds       WHERE payment_id IN (SELECT p.id FROM payments p JOIN appointments a ON a.id = p.appointment_id
                                                    WHERE a.patient_id IN ${inDemo} OR a.professional_id IN ${inDemo});
     DELETE FROM payments      WHERE appointment_id IN (SELECT id FROM appointments WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo});
@@ -323,6 +346,8 @@ async function createProfessionals(db, specialtyIdByName) {
           consultationPrice: p.price,
           // Cadastro no e-Psi / e-Nutricionista: sem ele, só consulta presencial
           telehealthRegistered: p.online ?? true,
+          // Consultório: sem ele, só consulta online
+          ...(p.office === null ? {} : OFFICES[p.key] ?? {}),
           specialtyIds: p.specialties.map((name) => {
             const sid = specialtyIdByName[`${p.type}:${name}`];
             if (!sid) throw new Error(`Especialidade "${name}" não encontrada (rodou o seed do banco?)`);
@@ -333,6 +358,14 @@ async function createProfessionals(db, specialtyIdByName) {
       await api("PUT", "/api/me/availability", { token, body: { windows: p.windows } });
       created[p.key] = { ...p, email, id, token };
     } else {
+      // Pendente: envia a carteira do conselho (PDF) para o admin conferir
+      const token = await login(email);
+      const form = new FormData();
+      form.append("file", new Blob([DEMO_PDF], { type: "application/pdf" }), "carteira-crp.pdf");
+      const r = await fetch(`${API}/api/me/documents?documentType=REGISTRO_CONSELHO`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form,
+      });
+      if (!r.ok) throw new Error(`documento do ${p.name}: ${r.status} ${await r.text()}`);
       created[p.key] = { ...p, email, id };
     }
     log(`profissional ${p.name}${p.price ? "" : " (pendente)"}`);
@@ -451,16 +484,57 @@ async function createUpcoming(professionals, patients) {
   const taken = new Set();
   const tokens = {};
   const tokenOf = async (key) => (tokens[key] ??= await login(patients[key].email));
-  const book = async (patientKey, professionalKey, hoursAhead, modality = "ONLINE", notes = null) => {
+  const book = async (patientKey, professionalKey, hoursAhead, modality = "ONLINE", notes = null, screening = undefined) => {
     const startsAt = await slotAfter(professionals[professionalKey], hoursAhead, taken);
     return api("POST", "/api/appointments", {
       token: await tokenOf(patientKey),
-      body: { professionalId: professionals[professionalKey].id, startsAt, modality, notes },
+      body: { professionalId: professionals[professionalKey].id, startsAt, modality, notes, screening },
     });
   };
 
+  // Questionário inicial da Ana (o profissional vê em GET /api/patients/{id}/intake)
+  await api("PUT", "/api/me/intake", {
+    token: await tokenOf("ana"),
+    body: {
+      goals: ["RELACAO_COM_A_COMIDA", "ANSIEDADE", "ENERGIA"],
+      mealsPerDay: 3,
+      waterLitersPerDay: 1.0,
+      activityLevel: "LEVE",
+      sleepQuality: 2,
+      stressLevel: 4,
+      dietaryRestrictions: "Intolerância à lactose.",
+      healthConditions: "Nenhuma doença diagnosticada. Ansiedade em períodos de muito trabalho.",
+      expectations: "Parar de beliscar à noite e ter uma rotina de refeições possível de seguir.",
+    },
+  });
+
+  // Diário alimentar da Ana: ontem inteiro, com foto no café da manhã
+  // (o profissional vê em GET /api/patients/{id}/meals)
+  const anaToken = await tokenOf("ana");
+  const at = (daysAgo, time) => `${localDate(daysAgo)}T${time}:00-03:00`;
+  const meals = [
+    { eatenAt: at(1, "07:30"), mealType: "CAFE_DA_MANHA", description: "Pão integral com ovo mexido e uma maçã", hungerLevel: 3, satisfactionLevel: 4, photo: true },
+    { eatenAt: at(1, "12:40"), mealType: "ALMOCO", description: "Arroz, feijão, frango grelhado e salada de folhas", notes: "Comi no restaurante do trabalho, com calma.", hungerLevel: 4, satisfactionLevel: 4 },
+    { eatenAt: at(1, "16:00"), mealType: "LANCHE_DA_TARDE", description: "Iogurte sem lactose com aveia", hungerLevel: 3, satisfactionLevel: 3 },
+    { eatenAt: at(1, "21:30"), mealType: "JANTAR", description: "Sanduíche e um pedaço de chocolate", notes: "Cheguei tarde e com muita fome. Belisquei antes do jantar.", hungerLevel: 5, satisfactionLevel: 2 },
+  ];
+  for (const { photo, ...meal } of meals) {
+    const created = await api("POST", "/api/me/meals", { token: anaToken, body: meal });
+    if (photo) {
+      const form = new FormData();
+      const image = await readFile(new URL("../../public/icons/apple.png", import.meta.url));
+      form.append("photo", new Blob([image], { type: "image/png" }), "cafe-da-manha.png");
+      const r = await fetch(`${API}/api/me/meals/${created.id}/photo`, { method: "PUT", headers: { Authorization: `Bearer ${anaToken}` }, body: form });
+      if (!r.ok) throw new Error(`foto do diário: ${r.status} ${await r.text()}`);
+    }
+  }
+
   // Paciente de demonstração: uma confirmada (com link de vídeo) e uma agendada
-  const anaCamila = await book("ana", "camila", 48, "ONLINE", "Retorno: quero ajustar o plano para a rotina de trabalho.");
+  const anaCamila = await book("ana", "camila", 48, "ONLINE", "Retorno: quero ajustar o plano para a rotina de trabalho.", {
+    reason: "Retorno para ajustar o plano à rotina de trabalho.",
+    symptoms: "Ainda belisco à noite quando o dia é corrido; cansaço no fim da tarde.",
+    moodScore: 3,
+  });
   await api("POST", `/api/appointments/${anaCamila.id}/confirm`, { token: professionals.camila.token });
   await book("ana", "mariana", 96, "ONLINE", "Primeira sessão.");
 
@@ -634,7 +708,7 @@ async function main() {
   console.log(`
 Pronto! Contas para a apresentação (senha de todas: ${PASSWORD})
 
-  Paciente      ana@${DOMAIN}       consultas, histórico e 2 planos de ação (checklist de hoje em aberto)
+  Paciente      ana@${DOMAIN}       questionário inicial, diário alimentar, consultas (com triagem), histórico e 2 planos de ação (checklist de hoje em aberto)
   Profissional  camila@${DOMAIN}    nutricionista com agenda movimentada
   Psicóloga     mariana@${DOMAIN}
   Admin         ${ADMIN_EMAIL}  (senha do .env) -> "${PENDING.name}" aguardando aprovação

@@ -29,6 +29,9 @@ const fraunces = Fraunces({
 export const metadata: Metadata = {
   title: "NutriMente",
   description: "Plataforma que conecta pacientes a profissionais da área da nutrição e psicologia",
+  icons: {
+    icon: "/logo/nutrimente-v2.png"
+  }
 };
 
 // Layout RAIZ: envolve TODAS as páginas (home, login, cadastro...).

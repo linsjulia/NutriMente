@@ -19,13 +19,14 @@ USER root
 WORKDIR /usr/src/nutrimente
 
 COPY scripts/ ./scripts/
+COPY migrations/ ./migrations/
 COPY entrypoint.sh ./entrypoint.sh
 
 # Quem edita no Windows salva quebras de linha como CRLF (\r\n), e o Linux
 # não entende o \r no .sh. O sed remove isso por segurança.
 # chmod +x torna o script executável; chown passa os arquivos para o usuário
 # "mssql", que é quem roda o SQL Server dentro da imagem.
-RUN sed -i 's/\r$//' ./entrypoint.sh ./scripts/*.sql \
+RUN sed -i 's/\r$//' ./entrypoint.sh ./scripts/*.sql ./migrations/*.sql \
     && chmod +x ./entrypoint.sh \
     && chown -R mssql:root /usr/src/nutrimente
 
@@ -45,9 +46,10 @@ EXPOSE 1433
 # O status "healthy" aparece no `docker compose ps` e é usado pelo compose
 # para só ligar a API depois que o banco estiver pronto.
 # Não basta o servidor responder: na primeira vez os scripts ainda estão
-# criando as tabelas. Por isso entramos com o usuário da APLICAÇÃO e lemos
-# a tabela preenchida pelo último script (03-seed.sql).
+# criando as tabelas, e a cada ligada as migrações podem estar rodando.
+# Por isso exigimos o arquivo que o entrypoint.sh cria no FIM (banco criado
+# e migrações aplicadas) e ainda entramos com o usuário da APLICAÇÃO.
 HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=12 \
-    CMD /opt/mssql-tools18/bin/sqlcmd -S localhost -U "$NUTRIMENTE_DB_USER" -P "$NUTRIMENTE_DB_PASSWORD" -C -d NutriMente -Q "SELECT TOP 1 1 FROM specialties" -b -o /dev/null || exit 1
+    CMD test -f /tmp/nutrimente-ready && /opt/mssql-tools18/bin/sqlcmd -S localhost -U "$NUTRIMENTE_DB_USER" -P "$NUTRIMENTE_DB_PASSWORD" -C -d NutriMente -Q "SELECT TOP 1 1 FROM specialties" -b -o /dev/null || exit 1
 
 ENTRYPOINT ["/usr/src/nutrimente/entrypoint.sh"]

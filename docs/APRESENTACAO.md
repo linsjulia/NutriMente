@@ -66,7 +66,8 @@ Ajuste os tempos ao limite da banca. Os papéis abaixo são sugestão: combinem 
 
 **4. Agendamento (Pessoa 2)**
 - Entrar como **Ana** → no perfil da Camila, escolher um **horário livre** → confirmar (online).
-- Mostrar: a consulta em "Próximas consultas", com o **link da videochamada**.
+- Mostrar: a consulta em "Próximas consultas", com o **link da videochamada**. **Não abra a chamada ao vivo:** o Jitsi pede login (Google, GitHub ou Facebook) de quem abre a sala e depende de internet. Se a banca pedir, abra a aba do Jitsi já preparada no ensaio (ver checklist).
+- Fala: "A consulta online usa o Jitsi Meet, que abre no navegador. O NutriMente **não grava** a chamada: gravar teleconsulta exige autorização expressa do paciente (CFN 666/2020), e o sigilo é dever ético do profissional."
 - Abrir o **Mailpit** e mostrar os **dois e-mails** (para a Ana e para a Camila).
 - Fala: "O sistema impede dois agendamentos no mesmo horário, mesmo que duas pessoas cliquem ao mesmo tempo."
 
@@ -136,6 +137,7 @@ Ela percorre, em cerca de 1 minuto: busca → perfil e avaliações → agendame
 - [ ] Gerar o site em **modo de produção** (mais rápido, sem o botão de desenvolvimento do Next na tela e sem depender de internet para as fontes): `npm install`, `npm run build` (precisa de internet nesta etapa) e `npm run start`.
 - [ ] **Ensaio completo** com o roteiro, cronometrado. Depois, `npm run seed` de novo.
 - [ ] Gravar um **vídeo de backup** da demonstração (Win + G no Windows grava a tela).
+- [ ] (Opcional) Se quiserem mostrar a videochamada: com internet, abrir o link de uma consulta, **entrar com uma conta Google** (vira moderador) e deixar a aba aberta para o dia.
 - [ ] Testar o computador no **projetor** (resolução e tamanho da letra) e a **rede**: a demo não precisa de internet, mas confirmem.
 
 ### No dia, cerca de 30 minutos antes
@@ -163,5 +165,6 @@ Ela percorre, em cerca de 1 minuto: busca → perfil e avaliações → agendame
 | O que impede dois pacientes no mesmo horário? | A API confere a sobreposição de horários, e o banco tem uma regra de unicidade: mesmo dois cliques no mesmo instante resultam em um só agendamento. |
 | Como um profissional entra na plataforma? | Ele se cadastra com o número do conselho (CRN ou CRP), e o admin confere no site do conselho antes de aprovar. Só então ele aparece na busca. |
 | Funciona no celular? | Sim: todas as telas são responsivas, e testamos em larguras de celular, tablet e computador. |
+| A consulta por vídeo é gravada? Onde fica salva? | Não é gravada. A chamada acontece no Jitsi Meet, direto entre os dois navegadores e o servidor do Jitsi, e nada passa pelo NutriMente. Guardamos só os dados da consulta (data, situação, valor, link) e o histórico de quem fez o quê. Gravar teleconsulta exige autorização expressa do paciente (CFN 666/2020), e o conteúdo da sessão é sigiloso. O registro que o profissional é obrigado a manter é o **prontuário** (CFP 01/2009, CFN 594/2017), e esse é o próximo passo do projeto. |
 | Está publicado na internet? | Ainda não: a apresentação roda localmente. O deploy já está preparado (Docker, HTTPS automático, backups; guia em `docs/DEPLOY-HOSTINGER.md`) e é o próximo passo. |
 | O que falta? | Chat entre paciente e profissional, pagamento online (em modo de teste) e o envio de foto e documento pela tela. |

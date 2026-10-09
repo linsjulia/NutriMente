@@ -80,7 +80,8 @@ class AppointmentIntegrationTest extends IntegrationTest {
 		assertFalse(slots.isEmpty());
 		Instant earliest = Instant.now().plus(Duration.ofHours(2)).minusSeconds(60);
 		assertTrue(slots.stream().allMatch(s -> Instant.parse(s).isAfter(earliest)), "nenhum horário com menos de 2 h");
-		getAs("/api/professionals/" + pro.id() + "/slots?days=1", null)
+		// 2 dias, não 1: depois das 22h não sobra horário "hoje" (antecedência mínima de 2 h)
+		getAs("/api/professionals/" + pro.id() + "/slots?days=2", null)
 				.andExpect(jsonPath("$[0].weekday").isString())
 				.andExpect(jsonPath("$[0].slots[0].time").isString());
 		getAs("/api/professionals/999999999/slots", null).andExpect(status().isNotFound());

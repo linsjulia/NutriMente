@@ -80,7 +80,7 @@ test("todas as 26 tabelas foram criadas", async () => {
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -298,4 +298,11 @@ test("cadastro para atender online (V003): começa desligado", () =>
       `SELECT telehealth_registered, telehealth_declared_at FROM professionals WHERE user_id = ${professional}`);
     assert.equal(recordset[0].telehealth_registered, false);
     assert.equal(recordset[0].telehealth_declared_at, null);
+  }));
+
+test("versão da sessão (V004): começa em 0", () =>
+  inTransaction(async (query) => {
+    await query("INSERT INTO users (name, email, role) VALUES (N'Sessao', 'sessao@teste.local', 'PATIENT')");
+    const { recordset } = await query("SELECT session_version FROM users WHERE email = 'sessao@teste.local'");
+    assert.equal(recordset[0].session_version, 0);
   }));

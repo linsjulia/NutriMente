@@ -1,8 +1,10 @@
 package br.com.nutrimente.api.account;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import br.com.nutrimente.api.common.validation.Celular;
@@ -64,11 +66,16 @@ public final class AccountDtos {
 			String bio,
 			BigDecimal consultationPrice,
 			VerificationStatus verificationStatus,
-			List<SpecialtyDto> specialties) {
+			List<SpecialtyDto> specialties,
+			/** Declarou cadastro no e-Psi / e-Nutricionista: atende online */
+			boolean telehealthRegistered,
+			Instant telehealthDeclaredAt) {
 
 		static ProfessionalProfile of(Professional p) {
 			return new ProfessionalProfile(p.getType(), p.getDocument(), p.getBio(), p.getConsultationPrice(),
-					p.getVerificationStatus(), p.getSpecialties().stream().map(SpecialtyDto::of).toList());
+					p.getVerificationStatus(), p.getSpecialties().stream().map(SpecialtyDto::of).toList(),
+					p.offersOnline(), p.getTelehealthDeclaredAt() == null ? null
+							: p.getTelehealthDeclaredAt().toInstant(ZoneOffset.UTC));
 		}
 	}
 
@@ -87,9 +94,10 @@ public final class AccountDtos {
 	}
 
 	/**
-	 * Só profissionais: bio, valor da consulta e especialidades.
+	 * Só profissionais: bio, valor da consulta, especialidades e atendimento online.
 	 * specialtyIds: lista com os ids escolhidos ([] = nenhuma).
-	 * Se o campo não vier no JSON (null), as especialidades não mudam.
+	 * telehealthRegistered: true = "tenho cadastro no e-Psi / e-Nutricionista".
+	 * Se specialtyIds ou telehealthRegistered não vierem no JSON (null), não mudam.
 	 */
 	public record UpdateProfessionalProfileRequest(
 			@Size(max = 500, message = "A bio pode ter até 500 caracteres")
@@ -101,7 +109,9 @@ public final class AccountDtos {
 			BigDecimal consultationPrice,
 
 			@Size(max = MAX_SPECIALTIES, message = "Escolha no máximo " + MAX_SPECIALTIES + " especialidades")
-			List<Integer> specialtyIds) {
+			List<Integer> specialtyIds,
+
+			Boolean telehealthRegistered) {
 
 		/** Limite para o perfil continuar objetivo para o paciente */
 		public static final int MAX_SPECIALTIES = 5;

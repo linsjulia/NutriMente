@@ -68,6 +68,9 @@ public class AccountService {
 		if (request.specialtyIds() != null) {
 			professional.replaceSpecialties(specialtiesFor(professional, request.specialtyIds()));
 		}
+		if (request.telehealthRegistered() != null) {
+			professional.declareTelehealth(request.telehealthRegistered());
+		}
 		audit(user, "UPDATE", "professionals");
 		return MeResponse.of(user, professional);
 	}

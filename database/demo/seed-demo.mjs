@@ -96,7 +96,7 @@ const PROFESSIONALS = [
     ],
   },
   {
-    key: "lucas", name: "Lucas Ferreira", type: "PSICOLOGO", gender: "MALE", photo: "/doctor/doctor-pfp.png", price: 160,
+    key: "lucas", name: "Lucas Ferreira", type: "PSICOLOGO", gender: "MALE", photo: "/doctor/doctor-pfp.png", price: 160, online: false, // sem cadastro no e-Psi: só presencial
     bio: "Psicólogo especializado em transtornos alimentares e imagem corporal. Atendo adolescentes e adultos, em parceria com nutricionistas.",
     specialties: ["Transtornos Alimentares", "Autoestima e Imagem Corporal"],
     windows: weekdays([1, 3, 5], [["14:00", "21:00"]]),
@@ -321,6 +321,8 @@ async function createProfessionals(db, specialtyIdByName) {
         body: {
           bio: p.bio,
           consultationPrice: p.price,
+          // Cadastro no e-Psi / e-Nutricionista: sem ele, só consulta presencial
+          telehealthRegistered: p.online ?? true,
           specialtyIds: p.specialties.map((name) => {
             const sid = specialtyIdByName[`${p.type}:${name}`];
             if (!sid) throw new Error(`Especialidade "${name}" não encontrada (rodou o seed do banco?)`);

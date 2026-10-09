@@ -99,7 +99,14 @@ public class AppointmentService {
 		LocalDateTime endsAt = startsAt.plus(rules.duration());
 		checkPatientFree(patientId, startsAt, endsAt);
 
-		Modality modality = request.modality() == null ? Modality.ONLINE : request.modality();
+		// Online só com quem declarou o cadastro no conselho (e-Psi / e-Nutricionista).
+		// Sem modalidade no pedido: online se o profissional atende online, senão presencial.
+		Modality modality = request.modality() != null ? request.modality()
+				: professional.offersOnline() ? Modality.ONLINE : Modality.PRESENCIAL;
+		if (modality == Modality.ONLINE && !professional.offersOnline()) {
+			throw new ApiException(HttpStatus.CONFLICT, "ONLINE_NOT_AVAILABLE",
+					"Este profissional ainda não atende online. Escolha a consulta presencial.");
+		}
 		Appointment appointment = save(new Appointment(patient, professional, startsAt, endsAt, modality,
 				videoUrlFor(modality), professional.getConsultationPrice(), Digits.trimToNull(request.notes()), null));
 

@@ -81,7 +81,7 @@ test("todas as 28 tabelas foram criadas", async () => {
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -334,4 +334,16 @@ test("triagem (V005): uma por consulta e protege a consulta contra exclusão", (
     );
     await query(`INSERT INTO appointment_screenings (appointment_id, reason, mood_score) VALUES (${appointment}, N'cifrado', 3)`);
     await assertFails(query(`DELETE FROM appointments WHERE id = ${appointment}`), /REFERENCE constraint/i);
+  }));
+
+test("lembrete (V006): coluna começa vazia e o índice filtrado existe", () =>
+  inTransaction(async (query) => {
+    const { patient, professional } = await createPatientAndProfessional(query);
+    const { recordset } = await query(`
+      INSERT INTO appointments (patient_id, professional_id, starts_at, ends_at, price)
+      OUTPUT inserted.reminder_sent_at
+      VALUES (${patient}, ${professional}, '2030-07-01 10:00', '2030-07-01 10:50', 150)`);
+    assert.equal(recordset[0].reminder_sent_at, null);
+    const index = await query("SELECT has_filter FROM sys.indexes WHERE name = 'ix_appointments_reminder'");
+    assert.equal(index.recordset[0]?.has_filter, true);
   }));

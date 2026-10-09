@@ -91,6 +91,13 @@ public class DataExportService {
 				JOIN users pru ON pru.id = a.professional_id
 				WHERE a.patient_id = :id OR a.professional_id = :id ORDER BY a.starts_at""", id));
 		out.put("registrosDasConsultas", records(userId, mine));
+		// Questionário inicial e triagens: dados do PACIENTE (textos decifrados aqui)
+		out.put("questionarioInicial", decrypted(
+				rows("SELECT * FROM patient_intakes WHERE patient_id = :id", id),
+				"dietary_restrictions", "health_conditions", "expectations"));
+		out.put("triagens", decrypted(rows("""
+				SELECT s.* FROM appointment_screenings s JOIN appointments a ON a.id = s.appointment_id
+				WHERE a.patient_id = :id ORDER BY s.appointment_id""", id), "reason", "symptoms"));
 		out.put("avaliacoes",
 				rows("SELECT * FROM reviews WHERE patient_id = :id OR professional_id = :id ORDER BY id", id));
 
@@ -141,6 +148,16 @@ public class DataExportService {
 				row.put("private_notes", cipher.decrypt((String) row.get("private_notes")));
 			} else {
 				row.remove("private_notes");
+			}
+		}
+		return rows;
+	}
+
+	/** Abre (decifra) as colunas criptografadas indicadas */
+	private List<Map<String, Object>> decrypted(List<Map<String, Object>> rows, String... columns) {
+		for (Map<String, Object> row : rows) {
+			for (String column : columns) {
+				row.put(column, cipher.decrypt((String) row.get(column)));
 			}
 		}
 		return rows;

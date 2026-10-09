@@ -17,7 +17,8 @@ import org.springframework.stereotype.Component;
 import br.com.nutrimente.api.config.AppProperties;
 
 /**
- * Criptografa o texto do registro da consulta antes de ir para o banco.
+ * Criptografa textos de saúde antes de irem para o banco: registro da
+ * consulta, questionário inicial e triagem.
  *
  * Por quê: prontuário é dado de saúde sigiloso (LGPD art. 11; sigilo
  * profissional). Com a criptografia, quem tiver acesso ao BANCO (um backup

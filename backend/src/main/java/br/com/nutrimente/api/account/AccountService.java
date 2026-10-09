@@ -19,6 +19,7 @@ import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.common.validation.Names;
 import br.com.nutrimente.api.config.JwtService;
+import br.com.nutrimente.api.intake.PatientIntakeRepository;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.specialty.Specialty;
 import br.com.nutrimente.api.specialty.SpecialtyRepository;
@@ -38,11 +39,13 @@ public class AccountService {
 	private final PasswordEncoder passwordEncoder;
 	private final LogClient logClient;
 	private final JwtService jwtService;
+	private final PatientIntakeRepository intakes;
 
 	public AccountService(UserRepository users, ProfessionalRepository professionals,
 			SpecialtyRepository specialties, PasswordEncoder passwordEncoder, LogClient logClient,
-			JwtService jwtService) {
+			JwtService jwtService, PatientIntakeRepository intakes) {
 		this.jwtService = jwtService;
+		this.intakes = intakes;
 		this.users = users;
 		this.professionals = professionals;
 		this.specialties = specialties;
@@ -54,7 +57,7 @@ public class AccountService {
 	@Transactional(readOnly = true)
 	public MeResponse me(Long userId) {
 		User user = activeUser(userId);
-		return MeResponse.of(user, professionalOf(user));
+		return meResponse(user, professionalOf(user));
 	}
 
 	@Transactional
@@ -62,7 +65,7 @@ public class AccountService {
 		User user = activeUser(userId);
 		user.updateProfile(Names.normalize(request.name()), Digits.only(request.telephone()), request.gender());
 		audit(user, "UPDATE", "users");
-		return MeResponse.of(user, professionalOf(user));
+		return meResponse(user, professionalOf(user));
 	}
 
 	@Transactional
@@ -78,7 +81,7 @@ public class AccountService {
 			professional.declareTelehealth(request.telehealthRegistered());
 		}
 		audit(user, "UPDATE", "professionals");
-		return MeResponse.of(user, professional);
+		return meResponse(user, professional);
 	}
 
 	@Transactional
@@ -138,6 +141,12 @@ public class AccountService {
 					Map.of("specialtyIds", "Escolha especialidades da lista da sua profissão"));
 		}
 		return new HashSet<>(found);
+	}
+
+	/** intakeCompleted só faz sentido para pacientes (null para os outros papéis) */
+	private MeResponse meResponse(User user, Professional professional) {
+		Boolean intakeCompleted = user.getRole() == Role.PATIENT ? intakes.existsById(user.getId()) : null;
+		return MeResponse.of(user, professional, intakeCompleted);
 	}
 
 	private Professional professionalOf(User user) {

@@ -239,8 +239,11 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
 ### `POST /api/appointments`: agendar (PATIENT)
 
 ```json
-{ "professionalId": 42, "startsAt": "2026-10-20T12:00:00Z", "modality": "ONLINE", "notes": "Primeira consulta" }
+{ "professionalId": 42, "startsAt": "2026-10-20T12:00:00Z", "modality": "ONLINE", "notes": "Primeira consulta",
+  "screening": { "reason": "Quero parar de beliscar à noite", "symptoms": "Ansiedade no fim do dia", "moodScore": 3 } }
 ```
+
+🆕 `screening` (triagem) é opcional: veja "Triagem antes da consulta" abaixo. Erros dentro dela voltam como `errors["screening.reason"]`.
 
 `modality` é opcional: `ONLINE` ou `PRESENCIAL`. Sem ela, vira `ONLINE` se o profissional atende online (`offersOnline`), senão `PRESENCIAL`. Pedir `ONLINE` a quem não atende online → **409 `ONLINE_NOT_AVAILABLE`**. `notes` também é opcional (até 1000 caracteres). Resposta **201** com a consulta (formato abaixo). A API manda e-mail para o paciente e para o profissional.
 
@@ -273,9 +276,12 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
   "canConfirm": false,
   "canComplete": false,
   "canReview": false,
-  "canWriteRecord": false
+  "canWriteRecord": false,
+  "canEditScreening": true
 }
 ```
+
+- 🆕 `canEditScreening`: `true` para o **paciente** numa consulta agendada ou confirmada que ainda não começou. Mostre "Triagem" (preencher ou ajustar).
 
 - 🆕 `canWriteRecord`: `true` para o **profissional** a partir do horário de início, se a consulta não foi cancelada nem remarcada. Mostre "Registro da consulta" (ver "Registro da consulta" abaixo).
 - `canReview`: `true` para o **paciente** numa consulta `COMPLETED` que ainda não avaliou. Mostre "Avaliar" (ver "Avaliações" abaixo).
@@ -362,6 +368,74 @@ Paginada (`page`, `size` até 50, padrão 10), **das mais recentes para as mais 
 - **404** se o profissional não existe ou não está aprovado.
 
 Sugestão de tela: no perfil, a nota média em estrelas (`ratingAverage` / `ratingCount`) e a lista de avaliações. No histórico do paciente, o botão "Avaliar" (quando `canReview`) abre as estrelas e o comentário.
+
+---
+
+## 🆕 Triagem antes da consulta
+
+O paciente conta o **motivo** e os **sintomas atuais** antes da consulta, e o profissional lê para se preparar. Pode ser enviada junto do agendamento (`screening` no `POST /api/appointments`) ou depois, até o início. Os textos são gravados **criptografados**, e a leitura pelo profissional vai para a auditoria. **Ao remarcar, a triagem vai junto** para a consulta nova.
+
+### `GET /api/appointments/{id}/screening` (paciente ou profissional da consulta)
+
+```json
+{ "appointmentId": 87, "reason": "Quero parar de beliscar à noite", "symptoms": "Ansiedade no fim do dia",
+  "moodScore": 3, "updatedAt": "2026-10-18T22:10:00Z", "canEdit": true }
+```
+
+Sem triagem: `reason`, `symptoms`, `moodScore` e `updatedAt` vêm `null` (não é erro). `canEdit` é igual a `canEditScreening` da consulta.
+
+### `PUT /api/appointments/{id}/screening` (PATIENT da consulta)
+
+```json
+{ "reason": "Quero parar de beliscar à noite", "symptoms": "Ansiedade no fim do dia", "moodScore": 3 }
+```
+
+- `reason` é **obrigatório** (até 1000). `symptoms` vai até 2000, e `moodScore` vai de 1 (muito mal) a 5 (muito bem); os dois são opcionais.
+- **409 `SCREENING_CLOSED`**: a consulta já começou, foi cancelada ou foi remarcada (ajuste a da consulta nova). **403**: profissional.
+
+Sugestão de tela: no passo de confirmação do agendamento, um bloco opcional "Conte para o profissional" (motivo, sintomas e cinco carinhas para o humor). Na consulta do profissional, um quadro "Triagem do paciente".
+
+---
+
+## 🆕 Questionário inicial do paciente
+
+Respondido **uma vez, depois do cadastro** (e editável depois). Ajuda o profissional a conhecer o paciente antes da primeira consulta. O `GET /api/me` do paciente traz **`intakeCompleted`** (`true`/`false`; `null` para profissional e admin). Sugestão: depois do primeiro login, se `intakeCompleted` for `false`, mostrar o questionário, com a opção "Responder depois".
+
+### `PUT /api/me/intake` (PATIENT): responder ou editar
+
+```json
+{
+  "goals": ["RELACAO_COM_A_COMIDA", "ANSIEDADE"],
+  "mealsPerDay": 3,
+  "waterLitersPerDay": 1.5,
+  "activityLevel": "LEVE",
+  "sleepQuality": 2,
+  "stressLevel": 4,
+  "dietaryRestrictions": "Intolerância à lactose",
+  "healthConditions": "Hipotireoidismo",
+  "expectations": "Comer melhor sem dieta restritiva"
+}
+```
+
+| Campo | Regra | Opções e textos para a tela |
+|---|---|---|
+| `goals` | 1 a 4 | `EMAGRECER` (Emagrecer com saúde), `GANHAR_MASSA` (Ganhar massa muscular), `ALIMENTACAO_SAUDAVEL` (Comer de forma mais equilibrada), `RELACAO_COM_A_COMIDA` (Melhorar minha relação com a comida), `ANSIEDADE` (Lidar com ansiedade e estresse), `SONO` (Dormir melhor), `ENERGIA` (Ter mais energia), `AUTOESTIMA` (Autoestima e imagem corporal) |
+| `mealsPerDay` | 1 a 10 | Quantas refeições você faz por dia? |
+| `waterLitersPerDay` | 0 a 10, uma casa decimal | Quantos litros de água por dia? |
+| `activityLevel` | obrigatório | `SEDENTARIO`, `LEVE` (1–2x por semana), `MODERADO` (3–4x), `INTENSO` (5x ou mais) |
+| `sleepQuality` | 1 a 5 | Como está seu sono? (1 = muito ruim) |
+| `stressLevel` | 1 a 5 | Qual seu nível de estresse? (1 = muito baixo) |
+| `dietaryRestrictions`, `healthConditions`, `expectations` | opcionais, até 2000 | Restrições alimentares; doenças e medicamentos; o que espera do acompanhamento |
+
+Resposta: as mesmas respostas, mais `createdAt` e `updatedAt`. Erros de validação: **400** com a mensagem pronta em `errors.<campo>`. Os textos livres são gravados **criptografados**.
+
+### `GET /api/me/intake` (PATIENT)
+
+Minhas respostas. **404 `INTAKE_NOT_ANSWERED`** se ainda não respondeu.
+
+### `GET /api/patients/{id}/intake` (PROFESSIONAL)
+
+As respostas de um paciente que o profissional **atende**, ou seja, com consulta agendada, confirmada ou realizada (mesma regra de "Meus pacientes"). Para os outros: **404**. A leitura vai para a auditoria. Sugestão: em "Meus pacientes" e na consulta, um botão "Questionário inicial".
 
 ---
 

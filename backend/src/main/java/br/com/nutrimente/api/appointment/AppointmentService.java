@@ -31,6 +31,7 @@ import br.com.nutrimente.api.notification.Notification;
 import br.com.nutrimente.api.notification.NotificationLinks;
 import br.com.nutrimente.api.notification.NotificationService;
 import br.com.nutrimente.api.review.ReviewRepository;
+import br.com.nutrimente.api.screening.ScreeningService;
 import br.com.nutrimente.api.user.Patient;
 import br.com.nutrimente.api.user.PatientRepository;
 import br.com.nutrimente.api.user.Professional;
@@ -60,12 +61,15 @@ public class AppointmentService {
 	private final EmailService emailService;
 	private final LogClient logClient;
 	private final ReviewRepository reviews;
+	private final ScreeningService screenings;
 	private final NotificationService notifications;
 	private final AppProperties.Appointments rules;
 
 	public AppointmentService(AppointmentRepository appointments, PatientRepository patients,
 			ProfessionalRepository professionals, ScheduleService schedule, EmailService emailService,
-			LogClient logClient, ReviewRepository reviews, NotificationService notifications, AppProperties properties) {
+			LogClient logClient, ReviewRepository reviews, NotificationService notifications, AppProperties properties,
+			ScreeningService screenings) {
+		this.screenings = screenings;
 		this.appointments = appointments;
 		this.patients = patients;
 		this.professionals = professionals;
@@ -109,6 +113,9 @@ public class AppointmentService {
 		}
 		Appointment appointment = save(new Appointment(patient, professional, startsAt, endsAt, modality,
 				videoUrlFor(modality), professional.getConsultationPrice(), Digits.trimToNull(request.notes()), null));
+		if (request.screening() != null) {
+			screenings.saveForNewAppointment(appointment.getId(), request.screening());
+		}
 
 		String when = describe(appointment);
 		inform(appointment, appointment.getProfessional().getUser(), "Nova consulta agendada",
@@ -204,6 +211,7 @@ public class AppointmentService {
 		Appointment created = save(new Appointment(original.getPatient(), original.getProfessional(), startsAt, endsAt,
 				original.getModality(), videoUrlFor(original.getModality()), original.getPrice(), original.getNotes(),
 				original.getId()));
+		screenings.copy(original.getId(), created.getId());
 
 		inform(created, created.getProfessional().getUser(), "Consulta remarcada",
 				"%s remarcou a consulta de %s para %s.".formatted(created.getPatient().getUser().getName(),
@@ -408,6 +416,7 @@ public class AppointmentService {
 				!viewerIsPatient && a.getStatus() == AppointmentStatus.SCHEDULED && now.isBefore(endsAt(a)),
 				!viewerIsPatient && a.getStatus().isChangeable() && !beforeStart,
 				viewerIsPatient && a.getStatus() == AppointmentStatus.COMPLETED && !reviewed,
-				!viewerIsPatient && a.acceptsRecord(now));
+				!viewerIsPatient && a.acceptsRecord(now),
+				viewerIsPatient && a.acceptsScreening(now));
 	}
 }

@@ -44,12 +44,15 @@ public final class AccountDtos {
 			String telephone,
 			Gender gender,
 			LocalDateTime createdAt,
-			ProfessionalProfile professional) {
+			ProfessionalProfile professional,
+			/** Paciente já respondeu o questionário inicial? (null para profissional e admin) */
+			Boolean intakeCompleted) {
 
-		static MeResponse of(User user, Professional professional) {
+		static MeResponse of(User user, Professional professional, Boolean intakeCompleted) {
 			return new MeResponse(user.getId(), user.getName(), user.getEmail(), user.getRole(), user.getPhotoUrl(),
 					maskCpf(user.getCpf()), user.getBirthDate(), user.getTelephone(), user.getGender(),
-					user.getCreatedAt(), professional == null ? null : ProfessionalProfile.of(professional));
+					user.getCreatedAt(), professional == null ? null : ProfessionalProfile.of(professional),
+					intakeCompleted);
 		}
 
 		private static String maskCpf(String cpf) {

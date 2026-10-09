@@ -132,6 +132,11 @@ public class Appointment {
 		status = AppointmentStatus.COMPLETED;
 	}
 
+	/** O paciente pode preencher a triagem: consulta agendada ou confirmada que ainda não começou */
+	public boolean acceptsScreening(Instant now) {
+		return status.isChangeable() && now.isBefore(startsAt.toInstant(ZoneOffset.UTC));
+	}
+
 	/** O profissional pode escrever o registro: a consulta já começou e não foi cancelada/remarcada */
 	public boolean acceptsRecord(Instant now) {
 		return status.acceptsRecord() && !now.isBefore(startsAt.toInstant(ZoneOffset.UTC));

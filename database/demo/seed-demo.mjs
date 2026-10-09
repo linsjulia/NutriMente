@@ -452,16 +452,36 @@ async function createUpcoming(professionals, patients) {
   const taken = new Set();
   const tokens = {};
   const tokenOf = async (key) => (tokens[key] ??= await login(patients[key].email));
-  const book = async (patientKey, professionalKey, hoursAhead, modality = "ONLINE", notes = null) => {
+  const book = async (patientKey, professionalKey, hoursAhead, modality = "ONLINE", notes = null, screening = undefined) => {
     const startsAt = await slotAfter(professionals[professionalKey], hoursAhead, taken);
     return api("POST", "/api/appointments", {
       token: await tokenOf(patientKey),
-      body: { professionalId: professionals[professionalKey].id, startsAt, modality, notes },
+      body: { professionalId: professionals[professionalKey].id, startsAt, modality, notes, screening },
     });
   };
 
+  // Questionário inicial da Ana (o profissional vê em GET /api/patients/{id}/intake)
+  await api("PUT", "/api/me/intake", {
+    token: await tokenOf("ana"),
+    body: {
+      goals: ["RELACAO_COM_A_COMIDA", "ANSIEDADE", "ENERGIA"],
+      mealsPerDay: 3,
+      waterLitersPerDay: 1.0,
+      activityLevel: "LEVE",
+      sleepQuality: 2,
+      stressLevel: 4,
+      dietaryRestrictions: "Intolerância à lactose.",
+      healthConditions: "Nenhuma doença diagnosticada. Ansiedade em períodos de muito trabalho.",
+      expectations: "Parar de beliscar à noite e ter uma rotina de refeições possível de seguir.",
+    },
+  });
+
   // Paciente de demonstração: uma confirmada (com link de vídeo) e uma agendada
-  const anaCamila = await book("ana", "camila", 48, "ONLINE", "Retorno: quero ajustar o plano para a rotina de trabalho.");
+  const anaCamila = await book("ana", "camila", 48, "ONLINE", "Retorno: quero ajustar o plano para a rotina de trabalho.", {
+    reason: "Retorno para ajustar o plano à rotina de trabalho.",
+    symptoms: "Ainda belisco à noite quando o dia é corrido; cansaço no fim da tarde.",
+    moodScore: 3,
+  });
   await api("POST", `/api/appointments/${anaCamila.id}/confirm`, { token: professionals.camila.token });
   await book("ana", "mariana", 96, "ONLINE", "Primeira sessão.");
 
@@ -635,7 +655,7 @@ async function main() {
   console.log(`
 Pronto! Contas para a apresentação (senha de todas: ${PASSWORD})
 
-  Paciente      ana@${DOMAIN}       consultas, histórico e 2 planos de ação (checklist de hoje em aberto)
+  Paciente      ana@${DOMAIN}       questionário inicial, consultas (com triagem), histórico e 2 planos de ação (checklist de hoje em aberto)
   Profissional  camila@${DOMAIN}    nutricionista com agenda movimentada
   Psicóloga     mariana@${DOMAIN}
   Admin         ${ADMIN_EMAIL}  (senha do .env) -> "${PENDING.name}" aguardando aprovação

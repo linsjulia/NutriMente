@@ -268,11 +268,13 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
   "canReschedule": true,
   "canConfirm": false,
   "canComplete": false,
-  "canReview": false
+  "canReview": false,
+  "canWriteRecord": false
 }
 ```
 
-- 🆕 `canReview`: `true` para o **paciente** numa consulta `COMPLETED` que ainda não avaliou. Mostre "Avaliar" (ver "Avaliações" abaixo).
+- 🆕 `canWriteRecord`: `true` para o **profissional** a partir do horário de início, se a consulta não foi cancelada nem remarcada. Mostre "Registro da consulta" (ver "Registro da consulta" abaixo).
+- `canReview`: `true` para o **paciente** numa consulta `COMPLETED` que ainda não avaliou. Mostre "Avaliar" (ver "Avaliações" abaixo).
 - **`can*` dizem quais botões mostrar** para quem está logado agora. Exemplo: `canConfirm` só é `true` para o profissional, numa consulta `SCHEDULED`. A API confere de novo ao receber a ação.
 - `status`: `SCHEDULED` (agendada), `CONFIRMED` (confirmada), `COMPLETED` (realizada), `CANCELLED` (cancelada), `RESCHEDULED` (remarcada; a nova consulta aponta para ela em `rescheduledFromId`).
 - `videoUrl`: link da videochamada (Jitsi Meet). Abra **numa aba nova** (`target="_blank"`), **não** dentro do site: no meet.jit.si público, a chamada embutida (iframe) cai em 5 minutos. Quem **abre a sala** (o primeiro a entrar) precisa entrar com uma conta Google, GitHub ou Facebook; os outros entram direto. Por isso, oriente na tela: **"O profissional entra primeiro"**. `null` na presencial. Nada da chamada é gravado pelo NutriMente.
@@ -356,6 +358,50 @@ Paginada (`page`, `size` até 50, padrão 10), **das mais recentes para as mais 
 - **404** se o profissional não existe ou não está aprovado.
 
 Sugestão de tela: no perfil, a nota média em estrelas (`ratingAverage` / `ratingCount`) e a lista de avaliações. No histórico do paciente, o botão "Avaliar" (quando `canReview`) abre as estrelas e o comentário.
+
+---
+
+## 🆕 Registro da consulta (prontuário)
+
+O que o profissional anota sobre cada atendimento. Os conselhos exigem esse registro (CFP 01/2009 para psicólogos, CFN 594/2017 para nutricionistas), guardado por pelo menos 5 anos. Ele tem duas partes:
+
+| Campo | Quem lê | Exemplo |
+|---|---|---|
+| `privateNotes` | **só o profissional** | evolução, hipóteses, anotações técnicas |
+| `patientGuidance` | profissional **e paciente** | "Jantar até as 20h; beber 2 L de água por dia" |
+
+Os textos são gravados **criptografados** no banco, e toda leitura e gravação vai para a auditoria.
+
+### `GET /api/appointments/{id}/record` (PATIENT ou PROFESSIONAL da consulta)
+
+```json
+{
+  "appointmentId": 87,
+  "privateNotes": "Relata compulsão à noite. Boa adesão ao plano.",
+  "patientGuidance": "Jantar até as 20h.",
+  "createdAt": "2026-10-20T13:05:00Z",
+  "updatedAt": "2026-10-20T13:40:00Z",
+  "canEdit": true
+}
+```
+
+- Sem registro ainda: os textos e as datas vêm `null` (não é erro).
+- Para o **paciente**, `privateNotes` vem **sempre `null`**.
+- `canEdit`: mostrar o formulário (só para o profissional, com as mesmas regras de `canWriteRecord`).
+- **404** se quem pede não participa da consulta.
+
+### `PUT /api/appointments/{id}/record` (PROFESSIONAL da consulta)
+
+```json
+{ "privateNotes": "Relata compulsão à noite.", "patientGuidance": "Jantar até as 20h." }
+```
+
+- Cria ou edita: existe **um registro por consulta**, e o PUT **substitui os dois textos**. Envie sempre os dois; campo vazio ou ausente apaga aquele texto.
+- Até 20000 caracteres em cada campo (400 com `errors.privateNotes` / `errors.patientGuidance`).
+- **409 `RECORD_NOT_ALLOWED`**: antes do horário de início, ou consulta cancelada ou remarcada. **403**: paciente.
+- Quando as orientações mudam, o paciente recebe uma **notificação** ("Orientações da consulta"), sem o texto. O texto só aparece com login, no site.
+
+Sugestão de tela: na consulta do profissional (quando `canWriteRecord`), um botão "Registro da consulta" abre duas caixas de texto ("Anotações privadas", com o aviso "só você vê", e "Orientações para o paciente"). Na consulta do paciente, um quadro "Orientações do profissional" quando `patientGuidance` não for `null`.
 
 ---
 

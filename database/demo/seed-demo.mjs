@@ -264,6 +264,7 @@ async function removePreviousDemo(db) {
   // Ordem importa: primeiro o que aponta para consultas e pessoas, por último as contas
   await db.query(`
     DELETE FROM reviews       WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo};
+    DELETE FROM appointment_records WHERE appointment_id IN (SELECT id FROM appointments WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo});
     DELETE FROM refunds       WHERE payment_id IN (SELECT p.id FROM payments p JOIN appointments a ON a.id = p.appointment_id
                                                    WHERE a.patient_id IN ${inDemo} OR a.professional_id IN ${inDemo});
     DELETE FROM payments      WHERE appointment_id IN (SELECT id FROM appointments WHERE patient_id IN ${inDemo} OR professional_id IN ${inDemo});
@@ -400,7 +401,27 @@ async function createHistory(db, professionals, patients) {
   const ana = patients.ana;
   const withCamila = await insertCompleted(ana, professionals.camila, 21, 2);
   await insertReview(withCamila, ana, professionals.camila, 5, "Primeira consulta incrível, saí com um plano possível de seguir!");
-  await insertCompleted(ana, professionals.mariana, 6, 1);
+  const withMariana = await insertCompleted(ana, professionals.mariana, 6, 1);
+
+  // Registro das consultas (prontuário). Pela API, e não direto no banco:
+  // a API grava o texto criptografado, e só ela tem a chave.
+  await api("PUT", `/api/appointments/${withCamila.id}/record`, {
+    token: professionals.camila.token,
+    body: {
+      privateNotes: "Primeira consulta. Queixa: beliscar à noite e pular o café da manhã. Sem restrições alimentares. "
+        + "Relata ansiedade no trabalho; sugerido acompanhamento psicológico.",
+      patientGuidance: "1. Tomar café da manhã todos os dias (pão integral, ovo e fruta).\n"
+        + "2. Beber 2 L de água: deixe a garrafa à vista na mesa.\n3. Jantar até as 20h.",
+    },
+  });
+  await api("PUT", `/api/appointments/${withMariana.id}/record`, {
+    token: professionals.mariana.token,
+    body: {
+      privateNotes: "Sessão 1. Ansiedade ligada à rotina de trabalho, com episódios de comer emocional à noite. "
+        + "Boa vinculação. Plano: registro de emoções e técnicas de respiração.",
+      patientGuidance: "Anote no app, ao fim do dia, como foi seu humor. Quando sentir ansiedade: respiração 4-7-8, três vezes.",
+    },
+  });
 
   // Nota média e quantidade de avaliações de cada profissional
   await db.query(`
@@ -410,7 +431,7 @@ async function createHistory(db, professionals, patients) {
           FROM reviews GROUP BY professional_id) r ON r.professional_id = p.user_id
     WHERE p.user_id IN (${Object.values(professionals).map((p) => p.id).join(",")})
   `);
-  log(`consultas realizadas e ${reviewCount} avaliações`);
+  log(`consultas realizadas, ${reviewCount} avaliações e 2 registros de consulta da Ana`);
 }
 
 /** Primeiro horário livre do profissional a pelo menos "hoursAhead" horas daqui */

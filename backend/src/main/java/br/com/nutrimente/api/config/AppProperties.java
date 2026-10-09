@@ -26,7 +26,8 @@ public record AppProperties(
 		@Valid @NotNull Logs logs,
 		@Valid @NotNull Admin admin,
 		@Valid @DefaultValue RateLimit rateLimit,
-		@Valid @DefaultValue Appointments appointments) {
+		@Valid @DefaultValue Appointments appointments,
+		@DefaultValue Records records) {
 
 	public record Jwt(
 			@NotBlank @Size(min = 32, message = "JWT_SECRET precisa ter pelo menos 32 caracteres") String secret,
@@ -61,6 +62,10 @@ public record AppProperties(
 			@DefaultValue("24h") @NotNull Duration patientCancelLimit,
 			@DefaultValue("60") @Positive int bookingWindowDays,
 			@DefaultValue("America/Sao_Paulo") @NotBlank String timezone) {
+	}
+
+	/** Chave do registro da consulta. Vazia = derivada do JWT_SECRET (ver RecordCipher) */
+	public record Records(String encryptionKey) {
 	}
 
 	/** Se e-mail/senha ficarem vazios, nenhum admin é criado */

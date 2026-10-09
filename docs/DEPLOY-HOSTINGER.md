@@ -186,6 +186,7 @@ openssl rand -hex 24
 | `MSSQL_SA_PASSWORD`, `NUTRIMENTE_DB_PASSWORD` | Uma chave gerada **+ `Aa1!` no final** (o SQL Server exige maiúscula, minúscula, número e símbolo) |
 | `MONGO_ROOT_PASSWORD`, `MONGO_APP_PASSWORD`, `LOGS_API_KEY` | Uma chave gerada cada |
 | `JWT_SECRET` | `openssl rand -hex 32` (64 caracteres) |
+| `RECORDS_ENCRYPTION_KEY` | `openssl rand -hex 32`. Criptografa o registro da consulta. **Guarde uma cópia fora do servidor**: sem ela, os registros do backup não podem ser lidos |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | O primeiro administrador. Senha com letras e números, 8+ caracteres |
 | `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | Os dados da caixa criada no passo 5 |
 

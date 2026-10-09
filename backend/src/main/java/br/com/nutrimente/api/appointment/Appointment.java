@@ -1,7 +1,9 @@
 package br.com.nutrimente.api.appointment;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import br.com.nutrimente.api.common.Clock;
 import br.com.nutrimente.api.user.Patient;
@@ -128,6 +130,11 @@ public class Appointment {
 
 	public void complete() {
 		status = AppointmentStatus.COMPLETED;
+	}
+
+	/** O profissional pode escrever o registro: a consulta já começou e não foi cancelada/remarcada */
+	public boolean acceptsRecord(Instant now) {
+		return status.acceptsRecord() && !now.isBefore(startsAt.toInstant(ZoneOffset.UTC));
 	}
 
 	public boolean hasParticipant(Long userId) {

@@ -78,6 +78,8 @@ public abstract class IntegrationTest {
 			// Consultas não somem em cascata (histórico importante): apaga antes do usuário
 			jdbc.update("DELETE FROM reviews WHERE patient_id = ? OR professional_id = ?", id, id);
 			jdbc.update("DELETE FROM action_plans WHERE patient_id = ? OR professional_id = ?", id, id);
+			jdbc.update("DELETE r FROM appointment_records r JOIN appointments a ON a.id = r.appointment_id"
+					+ " WHERE a.patient_id = ? OR a.professional_id = ?", id, id);
 			jdbc.update("DELETE FROM appointments WHERE patient_id = ? OR professional_id = ?", id, id);
 			jdbc.update("DELETE FROM users WHERE id = ?", id);
 		});

@@ -29,4 +29,13 @@ public enum AppointmentStatus {
 	public boolean isChangeable() {
 		return this == SCHEDULED || this == CONFIRMED;
 	}
+
+	/**
+	 * Aceita registro da consulta (prontuário). Cancelada ou remarcada não
+	 * aconteceu, então não tem o que registrar. "Não compareceu" (NO_SHOW)
+	 * aceita: a falta também é anotada no prontuário.
+	 */
+	public boolean acceptsRecord() {
+		return this != CANCELLED && this != RESCHEDULED;
+	}
 }

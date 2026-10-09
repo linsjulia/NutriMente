@@ -400,6 +400,7 @@ public class AppointmentService {
 				changeable && viewerIsPatient && withinPatientLimit,
 				!viewerIsPatient && a.getStatus() == AppointmentStatus.SCHEDULED && now.isBefore(endsAt(a)),
 				!viewerIsPatient && a.getStatus().isChangeable() && !beforeStart,
-				viewerIsPatient && a.getStatus() == AppointmentStatus.COMPLETED && !reviewed);
+				viewerIsPatient && a.getStatus() == AppointmentStatus.COMPLETED && !reviewed,
+				!viewerIsPatient && a.acceptsRecord(now));
 	}
 }

@@ -17,10 +17,11 @@ import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.common.validation.Names;
-import br.com.nutrimente.api.user.CouncilNumber;
 import br.com.nutrimente.api.config.JwtService;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.notification.EmailService;
+import br.com.nutrimente.api.record.RecordCipher;
+import br.com.nutrimente.api.user.CouncilNumber;
 import br.com.nutrimente.api.user.Patient;
 import br.com.nutrimente.api.user.PatientRepository;
 import br.com.nutrimente.api.user.Professional;
@@ -55,11 +56,13 @@ public class AuthService {
 	private final JwtService jwtService;
 	private final EmailService emailService;
 	private final LogClient logClient;
+	private final RecordCipher cipher;
 
 	public AuthService(UserRepository users, PatientRepository patients, ProfessionalRepository professionals,
 			UserTokenRepository tokens, LgpdConsentRepository consents, PasswordEncoder passwordEncoder,
-			JwtService jwtService, EmailService emailService, LogClient logClient) {
+			JwtService jwtService, EmailService emailService, LogClient logClient, RecordCipher cipher) {
 		this.users = users;
+		this.cipher = cipher;
 		this.patients = patients;
 		this.professionals = professionals;
 		this.tokens = tokens;
@@ -79,10 +82,11 @@ public class AuthService {
 	public void registerPatient(RegisterPatientRequest request, String ip) {
 		String email = normalizeEmail(request.email());
 		String cpf = Digits.only(request.cpf());
-		ensureUnique(email, cpf);
+		String cpfHash = cipher.blindIndex(cpf);
+		ensureUnique(email, cpfHash);
 
 		User user = users.save(User.withPersonalData(Names.normalize(request.name()), email,
-				passwordEncoder.encode(request.password()), Role.PATIENT, cpf, request.birthDate(),
+				passwordEncoder.encode(request.password()), Role.PATIENT, cpf, cpfHash, request.birthDate(),
 				Digits.only(request.telephone()), request.gender()));
 		patients.save(new Patient(user));
 
@@ -98,14 +102,15 @@ public class AuthService {
 				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
 						"Revise os campos destacados.",
 						Map.of("documentProfessional", CouncilNumber.errorMessage(request.professionalType()))));
-		ensureUnique(email, cpf);
+		String cpfHash = cipher.blindIndex(cpf);
+		ensureUnique(email, cpfHash);
 		if (professionals.existsByTypeAndDocument(request.professionalType(), document)) {
 			throw ApiException.conflict("documentProfessional",
 					"Este " + request.professionalType().council() + " já está cadastrado");
 		}
 
 		User user = users.save(User.withPersonalData(Names.normalize(request.name()), email,
-				passwordEncoder.encode(request.password()), Role.PROFESSIONAL, cpf, request.birthDate(),
+				passwordEncoder.encode(request.password()), Role.PROFESSIONAL, cpf, cpfHash, request.birthDate(),
 				Digits.only(request.telephone()), request.gender()));
 		professionals.save(new Professional(user, request.professionalType(), document, Digits.trimToNull(request.bio())));
 
@@ -113,11 +118,11 @@ public class AuthService {
 		afterRegister(user);
 	}
 
-	private void ensureUnique(String email, String cpf) {
+	private void ensureUnique(String email, String cpfHash) {
 		if (users.existsByEmail(email)) {
 			throw ApiException.conflict("email", "Este e-mail já está cadastrado");
 		}
-		if (users.existsByCpf(cpf)) {
+		if (users.existsByCpfHash(cpfHash)) {
 			throw ApiException.conflict("cpf", "Este CPF já está cadastrado");
 		}
 	}

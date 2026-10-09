@@ -5,8 +5,10 @@ import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.HexFormat;
 
 import javax.crypto.Cipher;
+import javax.crypto.Mac;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -17,8 +19,9 @@ import org.springframework.stereotype.Component;
 import br.com.nutrimente.api.config.AppProperties;
 
 /**
- * Criptografa textos de saúde antes de irem para o banco: registro da
- * consulta, questionário inicial e triagem.
+ * Criptografa dados sensíveis antes de irem para o banco: registro da
+ * consulta, questionário inicial, triagem e os dados pessoais do usuário
+ * (CPF, telefone, data de nascimento; ver EncryptedStringConverter).
  *
  * Por quê: prontuário é dado de saúde sigiloso (LGPD art. 11; sigilo
  * profissional). Com a criptografia, quem tiver acesso ao BANCO (um backup
@@ -47,6 +50,8 @@ public class RecordCipher {
 	private static final int TAG_BITS = 128;
 
 	private final SecretKeySpec key;
+	/** Chave separada para o índice cego (HMAC), derivada do mesmo segredo */
+	private final SecretKeySpec indexKey;
 	private final SecureRandom random = new SecureRandom();
 
 	public RecordCipher(AppProperties properties) {
@@ -58,6 +63,40 @@ public class RecordCipher {
 		}
 		// SHA-256 transforma qualquer texto numa chave de exatamente 32 bytes (AES-256)
 		this.key = new SecretKeySpec(sha256(secret), "AES");
+		this.indexKey = new SecretKeySpec(sha256("nutrimente-blind-index:" + secret), "HmacSHA256");
+	}
+
+	/**
+	 * Como decrypt, mas aceita valor ainda NÃO cifrado (gravado antes da
+	 * criptografia, V007) e o devolve como está. Assim a API funciona durante
+	 * a transição, até o LegacyPersonalDataEncryptor cifrar os registros antigos.
+	 */
+	public String decryptOrPlain(String stored) {
+		return stored == null || !stored.startsWith(PREFIX) ? stored : decrypt(stored);
+	}
+
+	/** Diz se o valor já está no formato cifrado */
+	public static boolean isEncrypted(String stored) {
+		return stored != null && stored.startsWith(PREFIX);
+	}
+
+	/**
+	 * "Índice cego": HMAC-SHA256 do valor, em hexadecimal (64 caracteres).
+	 * O mesmo valor dá sempre o mesmo resultado, então dá para procurar e
+	 * garantir unicidade (ex.: CPF) sem guardar o valor aberto. Sem a chave,
+	 * não dá para descobrir o valor testando todos os CPFs possíveis.
+	 */
+	public String blindIndex(String value) {
+		if (value == null) {
+			return null;
+		}
+		try {
+			Mac mac = Mac.getInstance("HmacSHA256");
+			mac.init(indexKey);
+			return HexFormat.of().formatHex(mac.doFinal(value.getBytes(StandardCharsets.UTF_8)));
+		} catch (GeneralSecurityException e) {
+			throw new IllegalStateException("Falha ao calcular o índice cego", e);
+		}
 	}
 
 	/** Texto -> "v1:..." (null continua null: campo vazio) */

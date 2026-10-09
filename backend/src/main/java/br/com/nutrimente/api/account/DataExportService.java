@@ -43,7 +43,7 @@ import br.com.nutrimente.api.user.UserRepository;
 public class DataExportService {
 
 	/** Colunas que nunca saem, de nenhuma tabela */
-	private static final Set<String> HIDDEN = Set.of("password_hash", "row_version");
+	private static final Set<String> HIDDEN = Set.of("password_hash", "row_version", "cpf_hash");
 
 	private final NamedParameterJdbcTemplate jdbc;
 	private final UserRepository users;
@@ -70,7 +70,12 @@ public class DataExportService {
 		out.put("geradoEm", Instant.now().truncatedTo(ChronoUnit.SECONDS));
 
 		// ---------- Conta ----------
-		out.put("conta", rows("SELECT * FROM users WHERE id = :id", id).getFirst());
+		// CPF, telefone e nascimento são guardados cifrados (V007): abertos aqui
+		Map<String, Object> account = rows("SELECT * FROM users WHERE id = :id", id).getFirst();
+		for (String column : List.of("cpf", "telephone", "birth_date")) {
+			account.put(column, cipher.decryptOrPlain((String) account.get(column)));
+		}
+		out.put("conta", account);
 		out.put("consentimentos", rows("SELECT * FROM lgpd_consents WHERE user_id = :id ORDER BY id", id));
 		out.put("paciente", rows("SELECT * FROM patients WHERE user_id = :id", id));
 		out.put("profissional", rows("SELECT * FROM professionals WHERE user_id = :id", id));

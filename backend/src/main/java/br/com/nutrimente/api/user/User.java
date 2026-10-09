@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import br.com.nutrimente.api.common.Clock;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -44,6 +45,8 @@ public class User {
 	@Column(name = "password_hash")
 	private String passwordHash;
 
+	/** Cifrado no banco (V007); aqui, só os dígitos */
+	@Convert(converter = EncryptedStringConverter.class)
 	private String telephone;
 
 	/**
@@ -53,10 +56,20 @@ public class User {
 	@Column(name = "photo_url")
 	private String photoUrl;
 
-	/** Somente os 11 dígitos */
+	/** Somente os 11 dígitos. Cifrado no banco (V007) */
+	@Convert(converter = EncryptedStringConverter.class)
 	private String cpf;
 
+	/**
+	 * "Índice cego" do CPF (HMAC, ver RecordCipher.blindIndex): é por ele que
+	 * o banco garante CPF único, já que o CPF cifrado muda a cada gravação.
+	 */
+	@Column(name = "cpf_hash")
+	private String cpfHash;
+
+	/** Cifrada no banco (V007) */
 	@Column(name = "birth_date")
+	@Convert(converter = EncryptedDateConverter.class)
 	private LocalDate birthDate;
 
 	@Enumerated(EnumType.STRING) // grava o nome ("FEMALE"), não a posição (0)
@@ -173,6 +186,7 @@ public class User {
 		this.telephone = null;
 		this.photoUrl = null;
 		this.cpf = null;
+		this.cpfHash = null;
 		this.birthDate = null;
 		this.gender = null;
 		this.active = false;
@@ -185,18 +199,19 @@ public class User {
 		this.gender = gender;
 	}
 
-	void setPersonalData(String cpf, LocalDate birthDate, String telephone, Gender gender) {
+	void setPersonalData(String cpf, String cpfHash, LocalDate birthDate, String telephone, Gender gender) {
 		this.cpf = cpf;
+		this.cpfHash = cpfHash;
 		this.birthDate = birthDate;
 		this.telephone = telephone;
 		this.gender = gender;
 	}
 
-	/** Usado só pelo cadastro */
+	/** Usado só pelo cadastro. cpfHash = RecordCipher.blindIndex(cpf) */
 	public static User withPersonalData(String name, String email, String passwordHash, Role role,
-			String cpf, LocalDate birthDate, String telephone, Gender gender) {
+			String cpf, String cpfHash, LocalDate birthDate, String telephone, Gender gender) {
 		User user = new User(name, email, passwordHash, role);
-		user.setPersonalData(cpf, birthDate, telephone, gender);
+		user.setPersonalData(cpf, cpfHash, birthDate, telephone, gender);
 		return user;
 	}
 

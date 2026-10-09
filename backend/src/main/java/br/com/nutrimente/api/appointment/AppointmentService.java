@@ -303,9 +303,20 @@ public class AppointmentService {
 	}
 
 	/**
-	 * Link de videochamada para consultas online. Jitsi Meet: gratuito, sem
-	 * cadastro, abre no navegador. O nome da sala é aleatório e difícil de
+	 * Link de videochamada para consultas online (Jitsi Meet, gratuito, abre no
+	 * navegador, numa aba nova). O nome da sala é aleatório e difícil de
 	 * adivinhar, e só os dois participantes o recebem.
+	 *
+	 * Regras do meet.jit.si público (desde 2023):
+	 * - quem ABRE a sala (o primeiro a entrar) precisa entrar com uma conta
+	 *   Google, GitHub ou Facebook e vira moderador; os demais entram sem
+	 *   conta. Por isso o profissional deve entrar primeiro;
+	 * - embutir a chamada dentro do site (iframe) derruba a ligação em 5 min.
+	 *   Para isso seria preciso o JaaS (Jitsi as a Service) ou um Jitsi próprio.
+	 *
+	 * Nada da chamada é gravado nem passa pelo NutriMente: o sistema guarda
+	 * só os dados da consulta (data, situação, link). A gravação de teleconsulta
+	 * exige autorização expressa (CFN 666/2020) e não faz parte do projeto.
 	 */
 	private static String videoUrlFor(Modality modality) {
 		if (modality != Modality.ONLINE) {

@@ -275,7 +275,7 @@ Resposta: a lista salva (mesmo formato do GET). Erros **400**, com a mensagem pr
 - 🆕 `canReview`: `true` para o **paciente** numa consulta `COMPLETED` que ainda não avaliou. Mostre "Avaliar" (ver "Avaliações" abaixo).
 - **`can*` dizem quais botões mostrar** para quem está logado agora. Exemplo: `canConfirm` só é `true` para o profissional, numa consulta `SCHEDULED`. A API confere de novo ao receber a ação.
 - `status`: `SCHEDULED` (agendada), `CONFIRMED` (confirmada), `COMPLETED` (realizada), `CANCELLED` (cancelada), `RESCHEDULED` (remarcada; a nova consulta aponta para ela em `rescheduledFromId`).
-- `videoUrl`: link da videochamada (Jitsi, abre no navegador, sem cadastro). `null` na presencial.
+- `videoUrl`: link da videochamada (Jitsi Meet). Abra **numa aba nova** (`target="_blank"`), **não** dentro do site: no meet.jit.si público, a chamada embutida (iframe) cai em 5 minutos. Quem **abre a sala** (o primeiro a entrar) precisa entrar com uma conta Google, GitHub ou Facebook; os outros entram direto. Por isso, oriente na tela: **"O profissional entra primeiro"**. `null` na presencial. Nada da chamada é gravado pelo NutriMente.
 - `price`: o valor **combinado no agendamento**. Não muda se o profissional alterar o preço depois.
 
 ### `GET /api/appointments`: minhas consultas (PATIENT ou PROFESSIONAL)

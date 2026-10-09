@@ -72,16 +72,16 @@ async function createPatientAndProfessional(query) {
 // -------------------------------------------------------------
 
 // 24 dos scripts iniciais + schema_migrations (controle) + appointment_records (V002)
-// + patient_intakes e appointment_screenings (V005)
-test("todas as 28 tabelas foram criadas", async () => {
+// + patient_intakes e appointment_screenings (V005) + meal_logs (V008)
+test("todas as 29 tabelas foram criadas", async () => {
   const { recordset } = await pool.query("SELECT COUNT(*) AS total FROM sys.tables");
-  assert.equal(recordset[0].total, 28);
+  assert.equal(recordset[0].total, 29);
 });
 
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -350,4 +350,20 @@ test("lembrete (V006): coluna começa vazia e o índice filtrado existe", () =>
     assert.equal(recordset[0].reminder_sent_at, null);
     const index = await query("SELECT has_filter FROM sys.indexes WHERE name = 'ix_appointments_reminder'");
     assert.equal(index.recordset[0]?.has_filter, true);
+  }));
+
+test("diário alimentar (V008): só tipos e notas válidos, e some com o paciente", () =>
+  inTransaction(async (query) => {
+    const { patient } = await createPatientAndProfessional(query);
+    const insert = (type, hunger, photoType = null) =>
+      query(`INSERT INTO meal_logs (patient_id, eaten_at, meal_type, description, hunger_level, photo_content_type)
+             VALUES (${patient}, '2030-08-01 12:00', '${type}', N'cifrado', ${hunger}, ${photoType ? `'${photoType}'` : "NULL"})`);
+    await assertFails(insert("BRUNCH", 3), /ck_meal_logs_type/);
+    await assertFails(insert("ALMOCO", 8), /ck_meal_logs_hunger/);
+    await assertFails(insert("ALMOCO", 3, "image/gif"), /ck_meal_logs_photo_type/);
+    await insert("ALMOCO", 3, "image/jpeg");
+    // Diário é do paciente: excluir o perfil apaga junto (CASCADE)
+    await query(`DELETE FROM patients WHERE user_id = ${patient}`);
+    const { recordset } = await query(`SELECT COUNT(*) AS total FROM meal_logs WHERE patient_id = ${patient}`);
+    assert.equal(recordset[0].total, 0);
   }));

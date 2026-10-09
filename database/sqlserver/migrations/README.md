@@ -38,3 +38,4 @@ O usuário da aplicação já tem leitura e escrita em tabelas novas (`db_datare
 | `V005` | Questionário inicial (`patient_intakes`) e triagem antes da consulta (`appointment_screenings`) |
 | `V006` | Lembrete na véspera (`appointments.reminder_sent_at` + índice filtrado) |
 | `V007` | CPF, telefone e nascimento criptografados pela API; CPF único via `users.cpf_hash` (HMAC) |
+| `V008` | Diário alimentar (`meal_logs`): refeições, anotações e foto (arquivo cifrado fora do banco) |

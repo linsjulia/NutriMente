@@ -18,7 +18,7 @@ Três diferenciais para repetir ao longo da apresentação:
 
 1. **Cuidado integrado:** nutricionista e psicóloga acompanhando a mesma paciente, cada uma com seu plano.
 2. **Acompanhamento contínuo:** o cuidado não acaba na consulta (checklist diário, metas, adesão da semana, registro de peso e humor).
-3. **Confiável e seguro:** profissionais verificados pelo admin (com documentos), dados de saúde **criptografados**, LGPD desde o início, acessibilidade (tamanho da fonte e alto contraste) e **162 testes automáticos** rodando a cada mudança.
+3. **Confiável e seguro:** profissionais verificados pelo admin (com documentos), dados de saúde **criptografados**, LGPD desde o início, acessibilidade (tamanho da fonte e alto contraste) e **164 testes automáticos** rodando a cada mudança.
 
 ## 2. Contas da demonstração
 
@@ -107,7 +107,7 @@ Navegador ──► Next.js (site + "BFF")        ──► API Java (Spring Boo
 - **Segurança:** senha com hash (BCrypt), login com token que o JavaScript da página não consegue ler (cookie httpOnly), limite de tentativas por IP, **trocar a senha encerra as sessões abertas** e cada pessoa só enxerga os próprios dados (uma consulta de outra pessoa "não existe" para ela).
 - **Criptografia:** CPF, telefone, nascimento, prontuário, questionário, triagem, diário e as fotos/documentos ficam **cifrados (AES-256)** no banco e no disco. Quem abrir o banco vê só "v1:...". O CPF continua único graças a um "índice cego" (HMAC com chave secreta).
 - **LGPD:** consentimentos registrados, nome abreviado nas avaliações, **"Baixar meus dados"** (todos os dados da pessoa em um arquivo), exclusão de conta (anonimiza; apaga diário, questionário e documentos; o prontuário fica por obrigação legal) e trilha de auditoria (quem acessou ou alterou dados de quem) no MongoDB.
-- **Qualidade:** **162 testes automáticos** (67 da API, 51 do site no navegador, 33 do banco e 11 do serviço de logs) que rodam sozinhos no GitHub a cada mudança, antes do merge. O banco evolui com **migrações** (9 versões), sem perder dados.
+- **Qualidade:** **164 testes automáticos** (67 da API, 53 do site no navegador, 33 do banco e 11 do serviço de logs) que rodam sozinhos no GitHub a cada mudança, antes do merge. O banco evolui com **migrações** (9 versões), sem perder dados.
 
 **9. Encerramento (Pessoa 1)**
 - Próximos passos: chat entre paciente e profissional, pagamento online, videochamada dentro do site e publicação na internet.
@@ -186,7 +186,7 @@ Ela percorre, em cerca de 1 minuto e meio:
 | E a LGPD? | Consentimento registrado no cadastro, coleta mínima (gênero opcional, CPF mascarado na tela), dados de saúde e pessoais **criptografados**, **"baixar meus dados"**, exclusão de conta (anonimiza e apaga o que não tem obrigação de guarda), nome abreviado nas avaliações e auditoria de quem acessou cada dado. |
 | Se alguém roubar o banco de dados, o que vê? | CPF, telefone, nascimento, prontuário, questionário, triagem e diário aparecem como "v1:..." (AES-256-GCM). As fotos e os documentos ficam cifrados no disco. A chave fica fora do banco, com a API. Senhas nem são guardadas, só o hash (BCrypt). |
 | Como o CPF continua único se está cifrado? | O mesmo CPF gera um texto cifrado diferente a cada vez, então guardamos também um "índice cego": um HMAC do CPF com chave secreta. O mesmo CPF dá sempre o mesmo HMAC, e o banco tem índice único nele. Sem a chave, não dá para descobrir o CPF testando todos. |
-| Como sabem que funciona? | 162 testes automáticos (API, banco, logs e o site no navegador, incluindo acessibilidade) rodando no GitHub a cada Pull Request. Nada entra na versão principal com teste falhando. |
+| Como sabem que funciona? | 164 testes automáticos (API, banco, logs e o site no navegador, incluindo acessibilidade) rodando no GitHub a cada Pull Request. Nada entra na versão principal com teste falhando. |
 | O que impede dois pacientes no mesmo horário? | A API confere a sobreposição de horários, e o banco tem uma regra de unicidade: mesmo dois cliques no mesmo instante resultam em um só agendamento. |
 | Como um profissional entra na plataforma? | Ele se cadastra com o número do conselho (CRN ou CRP), e o admin confere no site do conselho antes de aprovar. Só então ele aparece na busca. |
 | Funciona no celular? | Sim: todas as telas são responsivas, e testamos em larguras de celular, tablet e computador. |

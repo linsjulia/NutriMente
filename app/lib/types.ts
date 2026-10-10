@@ -18,6 +18,8 @@ export type Me = {
   telephone: string | null;
   gender: Gender | null;
   createdAt: string;
+  /** Paciente já respondeu o questionário inicial? (null para profissional e admin) */
+  intakeCompleted: boolean | null;
   professional: {
     type: ProfessionalType;
     document: string;
@@ -25,6 +27,11 @@ export type Me = {
     consultationPrice: number | null;
     verificationStatus: VerificationStatus;
     specialties: Specialty[];
+    telehealthRegistered: boolean;
+    telehealthDeclaredAt: string | null;
+    officeAddress: string | null;
+    officeCity: string | null;
+    officeState: string | null;
   } | null;
 };
 

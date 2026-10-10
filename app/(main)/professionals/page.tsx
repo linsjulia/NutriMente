@@ -120,7 +120,9 @@ export default async function ProfessionalsPage({ searchParams }: PageProps<"/pr
           <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {result.data.items.map((p) => (
               <li key={p.id} className="card flex flex-col gap-3">
-                <h2 className="text-lg font-bold">{p.name}</h2>
+                <h2 className="text-lg font-bold">
+                  <Link href={`/professionals/${p.id}`} className="underline-offset-4 hover:underline">{p.name}</Link>
+                </h2>
                 <p className="text-gray-700">
                   {PROFESSION_LABELS[p.type]} · {COUNCIL[p.type]} {p.document}
                 </p>
@@ -135,6 +137,9 @@ export default async function ProfessionalsPage({ searchParams }: PageProps<"/pr
                 )}
                 <p className="flex-1">{p.bio ?? "Este profissional ainda não escreveu uma apresentação."}</p>
                 <p className="font-semibold">{p.consultationPrice != null ? `${brl.format(p.consultationPrice)} por consulta` : "Valor a combinar"}</p>
+                <Link href={`/professionals/${p.id}`} className="btn-secondary self-start" aria-label={`Ver perfil e agendar com ${p.name}`}>
+                  Ver perfil e agendar
+                </Link>
               </li>
             ))}
           </ul>

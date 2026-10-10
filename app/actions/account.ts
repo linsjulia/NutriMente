@@ -47,6 +47,16 @@ export async function updateProfessionalProfile(_state: FormState, formData: For
       consultationPrice: price.value,
       // Só envia se a lista apareceu na tela; senão a API mantém as atuais
       ...(formData.has("specialtiesShown") ? { specialtyIds } : {}),
+      // Atendimento online e consultório: os três campos do endereço vão juntos
+      // (vazios = apagar o endereço; a API exige os três preenchidos ou nenhum)
+      ...(formData.has("attendanceShown")
+        ? {
+            telehealthRegistered: formData.get("telehealthRegistered") === "on",
+            officeAddress: text(formData, "officeAddress"),
+            officeCity: text(formData, "officeCity"),
+            officeState: text(formData, "officeState"),
+          }
+        : {}),
     },
   });
   if (!result.ok) return fromApiError(result.error, values);

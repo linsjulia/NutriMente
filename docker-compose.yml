@@ -42,7 +42,11 @@ services:
 
   # Banco de logs. Usa a imagem oficial pronta (não precisa de Dockerfile)
   mongodb:
-    image: mongo:8.0
+    # 8.2, não 8.0: a imagem 8.0 se recusa a ligar em Linux com kernel 6.19 ou
+    # mais novo (bug SERVER-121912 do MongoDB, com o TCMalloc). O servidor do
+    # Azure atualizou para o kernel 7.0 e o MongoDB parou. A 8.2 já tem a
+    # correção. Os dados da 8.0 abrem na 8.2 sem conversão manual.
+    image: mongo:8.2
     container_name: nutrimente-mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}

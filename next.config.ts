@@ -35,6 +35,11 @@ const nextConfig: NextConfig = {
   // Next, e o deploy dele falha com esse modo ligado.
   output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   allowedDevOrigins,
+  // Server Actions aceitam 1 MB por padrão; a foto do diário vai até 5 MB
+  // (o mesmo limite da API), mais os outros campos do formulário.
+  experimental: {
+    serverActions: { bodySizeLimit: "6mb" },
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

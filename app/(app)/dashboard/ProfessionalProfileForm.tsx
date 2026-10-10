@@ -16,9 +16,13 @@ type Props = {
   /** null = a lista não carregou (a API ficou fora); o resto do formulário funciona */
   specialtyOptions: Specialty[] | null;
   specialtyIds: number[];
+  telehealthRegistered: boolean;
+  office: { address: string | null; city: string | null; state: string | null };
 };
 
-export default function ProfessionalProfileForm({ bio, consultationPrice, specialtyOptions, specialtyIds }: Props) {
+const UFS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+
+export default function ProfessionalProfileForm({ bio, consultationPrice, specialtyOptions, specialtyIds, telehealthRegistered, office }: Props) {
   const [state, action, pending] = useActionState<FormState, FormData>(updateProfessionalProfile, {});
   const resultRef = useRef<HTMLFormElement>(null);
   useFocusOnError(resultRef, state);
@@ -66,6 +70,32 @@ export default function ProfessionalProfileForm({ bio, consultationPrice, specia
       ) : (
         <p className="text-sm text-gray-700">Não conseguimos carregar as especialidades agora. Tente de novo em instantes.</p>
       )}
+      <fieldset className="flex flex-col gap-4">
+        <legend className="mb-1 text-lg font-bold">Como você atende</legend>
+        <input type="hidden" name="attendanceShown" value="1" />
+        <div className="flex items-start gap-3">
+          <input id="telehealthRegistered" name="telehealthRegistered" type="checkbox" defaultChecked={values ? values.telehealthRegistered === "on" : telehealthRegistered}
+            aria-describedby="telehealth-hint" className="mt-1 h-5 w-5 shrink-0 accent-blue1" />
+          <label htmlFor="telehealthRegistered">Atendo online e tenho cadastro no <strong>e-Psi</strong> (psicólogos) ou no <strong>e-Nutricionista</strong> (nutricionistas)</label>
+        </div>
+        <p id="telehealth-hint" className="text-sm text-gray-600">Exigência dos conselhos (CFP 11/2018, CFN 666/2020). Nossa equipe confere.</p>
+        <p className="font-semibold">Consultório <span className="font-normal text-gray-600">(para consultas presenciais; deixe em branco se atende só online)</span></p>
+        <Field label="Endereço" name="officeAddress" maxLength={200} placeholder="Rua, número, sala, bairro"
+          defaultValue={values?.officeAddress ?? office.address ?? ""} error={state.errors?.officeAddress} />
+        <div className="flex flex-wrap gap-4">
+          <Field label="Cidade" name="officeCity" maxLength={100} className="min-w-60 flex-1"
+            defaultValue={values?.officeCity ?? office.city ?? ""} error={state.errors?.officeCity} />
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="officeState" className="font-semibold">UF</label>
+            <select id="officeState" name="officeState" defaultValue={values?.officeState ?? office.state ?? ""} className="form-input"
+              aria-invalid={state.errors?.officeState ? true : undefined}>
+              <option value="">—</option>
+              {UFS.map((uf) => <option key={uf} value={uf}>{uf}</option>)}
+            </select>
+            {state.errors?.officeState && <p className="text-sm font-semibold text-red-700">{state.errors.officeState}</p>}
+          </div>
+        </div>
+      </fieldset>
       <SubmitButton pending={pending} className="self-start">
         Salvar perfil
       </SubmitButton>

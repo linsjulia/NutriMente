@@ -338,6 +338,7 @@ Depois de reiniciar o VPS, tudo volta sozinho (`restart: unless-stopped`).
 | Navegador diz "não seguro" / sem cadeado | DNS ainda não aponta para o VPS, ou porta 80/443 bloqueada | Confira o `nslookup` (passo 2) e o firewall (passo 3.3). Depois `docker compose restart caddy` e veja `docker compose logs caddy` |
 | `nutrimente-sqlserver` reiniciando | Senha fraca no `.env` ou pouca memória | Senha com `Aa1!` no fim; veja `free -h`; em VPS de 4 GB, use `MSSQL_MEMORY_LIMIT_MB=1536` |
 | `nutrimente-api` unhealthy | Senha do banco diferente da usada na primeira subida, ou `JWT_SECRET` curto | As senhas do banco são gravadas na **primeira** subida: não as troque depois só no `.env` |
+| `nutrimente-mongodb` reiniciando sem parar, com "Linux kernel versions 6.19 and newer has a known incompatibility" no log | O servidor atualizou o kernel do Linux (acontece depois de `apt upgrade` + reinício) e a imagem do MongoDB é antiga | Use `mongo:8.2` ou mais nova no `docker-compose.yml` (já é o padrão) e rode `docker compose up -d mongodb`. Os dados continuam |
 | E-mails não chegam | Dados SMTP errados, ou caem no spam | `docker compose logs api \| grep -i mail`; confira usuário/senha; confira SPF/DKIM (passo 5) |
 | Página de erro "Algo deu errado" | API fora do ar | `docker compose ps` e `docker compose logs api` |
 | Servidor muito lento | Memória esgotada | `docker stats --no-stream`; considere o KVM 2 |

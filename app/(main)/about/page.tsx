@@ -1,28 +1,27 @@
 import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "lucide-react";
 
-export default function SobrePage() {
+    export default function AboutPage() {
   return (
     <main className="bg-white text-slate-800">
-      {/* ---------- TOPO: título, foto e números ---------- */}
       <section className="bg-[#eaf6fd] px-4 py-10 md:py-14">
         <div className="mx-auto max-w-5xl">
-          <h1 className="mb-8 text-center font-serif text-3xl font-bold text-[#0a3d8f] md:text-4xl">
+          <h1 className="mb-8 text-center font-fraunces text-3xl font-bold text-[#0a3d8f] md:text-4xl">
             Sobre o NutriMente
           </h1>
 
-          <div className="relative h-60 overflow-hidden rounded-2xl md:h-80">
+          <div className="relative h-60 overflow-hidden rounded-2xl md:h-100">
             <img
               src="/patient/consulta-paciente-profissional.png"
               alt="Duas mulheres conversando durante uma consulta"
               className="h-full w-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#00286e] to-transparent opacity-80"></div>
-            <p className="absolute bottom-4 left-0 right-0 px-4 text-center font-serif text-lg font-bold text-white md:bottom-8 md:text-2xl">
+            <p className="absolute bottom-4 left-0 right-0 px-4 text-center font-serif text-lg text-white md:bottom-8 md:text-2xl">
               Psicologia nutricional com abordagem humana, técnica e continuidade de cuidado.
             </p>
           </div>
 
-          <div className="mt-8 flex flex-col rounded-2xl border-2 border-[#004aad] bg-white md:flex-row">
+          <div className="mt-20 flex flex-col rounded-2xl border-2 border-[#004aad] bg-white md:flex-row">
             <div className="flex-1 p-6 text-center font-serif text-xl font-bold text-[#00c853] md:text-2xl">
               + 1 mil pacientes já atendidos
             </div>
@@ -33,7 +32,6 @@ export default function SobrePage() {
         </div>
       </section>
 
-      {/* ---------- PROPÓSITO ---------- */}
       <section className="bg-[#004aad] px-4 pt-10 text-center text-white">
         <div className="mx-auto max-w-3xl">
           <h2 className="mb-6 font-serif text-2xl font-bold text-[#5eecd8] md:text-3xl">
@@ -59,27 +57,23 @@ export default function SobrePage() {
       </section>
 
       {/* ---------- PARA QUEM É ---------- */}
-      <section className="px-4 pt-24">
+      <section className="px-4 pt-36 h-screen">
         <h2 className="text-center font-serif text-2xl font-bold text-[#0a3d8f] md:text-3xl">
           Para quem é
         </h2>
-
-        <div className="mx-auto mt-6 grid max-w-5xl grid-cols-1 items-end md:grid-cols-4">
-          {/* Texto: no celular vem primeiro, no notebook fica no meio */}
-          <div className="order-1 pb-8 text-center text-lg text-[#0071c9] md:order-2 md:col-span-2 md:text-xl">
-            <p className="font-bold">Pessoas que buscam cuidar de sua:</p>
-            <p>Alimentação</p>
-            <p>Saúde mental</p>
-            <p>Rotina</p>
-            <p>Tudo isso com acompanhamento de um profissional especializado da nossa plataforma</p>
+        <div className="mx-auto mt-6 max-w-5xl grid-cols-1 items-end md:grid-cols-5">
+          <div className="mx-auto mt-6 flex max-w-3xl flex-col gap-10 pb-8 text-center text-lg text-[#0071c9] md:text-xl">
+            <p className="text-blue2">Pessoas que buscam cuidar de sua:</p>
+              <p className="font-bold">● Alimentação</p>
+              <p className="font-bold">● Saúde mental</p>
+              <p className="font-bold">● Rotina</p>
+            <p className="text-blue2">Tudo isso com acompanhamento de um profissional especializado da nossa plataforma</p>
           </div>
-
-          {/* Ilustração: no celular vem depois, no notebook fica na esquerda */}
-          <img
+          {/* <img
             src="/patient/professional-talk-patient.png"
             alt="Ilustração de paciente e profissional em consulta"
-            className="order-2 mx-auto w-60 md:order-1 md:col-span-1 md:w-full"
-          />
+            className="order-2 mx-auto w-80 md:order-1 md:col-span-2 md:w-full "
+          /> */}
         </div>
       </section>
 

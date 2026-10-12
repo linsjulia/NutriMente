@@ -61,7 +61,7 @@ import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "luci
         <h2 className="text-center font-serif text-2xl font-bold text-[#0a3d8f] md:text-3xl">
           Para quem é
         </h2>
-        <div className="mx-auto mt-6 max-w-5xl grid-cols-1 items-end md:grid-cols-5">
+        <div className="mx-auto mt-6 max-w-5xl">
           <div className="mx-auto mt-6 flex max-w-3xl flex-col gap-10 pb-8 text-center text-lg text-[#0071c9] md:text-xl">
             <p className="text-blue2">Pessoas que buscam cuidar de sua:</p>
               <p className="font-bold">● Alimentação</p>
@@ -78,42 +78,46 @@ import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "luci
           O que nos torna confiáveis
         </h2>
 
-        <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-10 md:grid-cols-2">
-          <div className="flex flex-col items-center gap-3 text-center bg-white p-10 rounded-2xl">
+        <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-10 md:grid-cols-2 auto-rows-fr">
+          <div className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl bg-white p-10 text-center shadow-lg shadow-blue-900/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-900/20">
+
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00e060]">
               <UserCheck className="h-7 w-7 text-white" />
             </div>
             <p>
-              <span className="text-[#0071c9]">Profissionais verificados</span> com formação e
+              <span className="text-[#0071c9] font-bold">Profissionais verificados</span> com formação e
               registro conferidos
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-3 text-center bg-white p-10 rounded-2xl">
+          <div className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl bg-white p-10 text-center shadow-lg shadow-blue-900/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-900/20">
+
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00e060]">
               <BadgeDollarSign className="h-7 w-7 text-white" />
             </div>
             <p>
-              <span className="text-[#0071c9]">Simplifique seus pagamentos</span> adicionando saldo
+              <span className="text-[#0071c9] font-bold">Simplifique seus pagamentos</span> adicionando saldo
               diretamente à sua conta no site
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-3 text-center bg-white p-10 rounded-2xl">
+          <div className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl bg-white p-10 text-center shadow-lg shadow-blue-900/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-900/20">
+
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00e060]">
               <MessageCirclePlus className="h-7 w-7 text-white" />
             </div>
             <p>
-              <span className="text-[#0071c9]">Confirmação imediata</span> de atendimento
+              <span className="text-[#0071c9] font-bold">Confirmação imediata</span> de atendimento
             </p>
           </div>
 
-          <div className="flex flex-col items-center gap-3 text-center bg-white p-10 rounded-2xl">
+          <div className="flex cursor-pointer flex-col items-center gap-3 rounded-2xl bg-white p-10 text-center shadow-lg shadow-blue-900/10 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-900/20">
+          
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00e060]">
               <ShieldCheck className="h-7 w-7 text-white" />
             </div>
             <p>
-              <span className="text-[#0071c9]">Dados protegidos</span> com sigilo e segurança
+              <span className="text-[#0071c9] font-bold">Dados protegidos</span> com sigilo e segurança
             </p>
           </div>
         </div>

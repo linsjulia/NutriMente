@@ -3,7 +3,7 @@ import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "luci
     export default function AboutPage() {
   return (
     <main className="bg-white text-slate-800">
-      <section className="bg-[#eaf6fd] px-4 py-10 md:py-14">
+      <section className="flex min-h-screen flex-col justify-center bg-[#eaf6fd] px-4 py-10 md:py-14">
         <div className="mx-auto max-w-5xl">
           <h1 className="mb-8 text-center font-fraunces text-3xl font-bold text-[#0a3d8f] md:text-4xl">
             Sobre o NutriMente
@@ -57,7 +57,7 @@ import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "luci
       </section>
 
       {/* ---------- PARA QUEM É ---------- */}
-      <section className="px-4 pt-36 h-screen">
+      <section className="flex min-h-screen flex-col justify-center px-4 pt-36">
         <h2 className="text-center font-serif text-2xl font-bold text-[#0a3d8f] md:text-3xl">
           Para quem é
         </h2>
@@ -69,16 +69,11 @@ import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "luci
               <p className="font-bold">● Rotina</p>
             <p className="text-blue2">Tudo isso com acompanhamento de um profissional especializado da nossa plataforma</p>
           </div>
-          {/* <img
-            src="/patient/professional-talk-patient.png"
-            alt="Ilustração de paciente e profissional em consulta"
-            className="order-2 mx-auto w-80 md:order-1 md:col-span-2 md:w-full "
-          /> */}
         </div>
       </section>
 
       {/* ---------- O QUE NOS TORNA CONFIÁVEIS ---------- */}
-      <section className="bg-[#d9f0fc] px-4 py-10 md:py-14">
+      <section className="flex min-h-screen flex-col justify-center bg-[#d9f0fc] px-4 py-10 md:py-14">
         <h2 className="text-center font-serif text-2xl font-bold text-[#0a3d8f] md:text-3xl">
           O que nos torna confiáveis
         </h2>

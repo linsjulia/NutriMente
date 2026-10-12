@@ -1,34 +1,134 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "lucide-react";
 
-export const metadata: Metadata = { title: "Sobre nós | NutriMente" };
-
-// Antes esta página era um <div> vazio (e o rodapé apontava para ela).
-export default function AboutPage() {
+export default function SobrePage() {
   return (
-    <main id="conteudo" className="prose-page">
-      <h1>Sobre o NutriMente</h1>
-      <p>
-        O NutriMente é um Projeto Semestral do curso de Desenvolvimento de Software Multiplataforma (DSM) da FATEC
-        Luigi Papaiz. A proposta é aproximar profissionais de Psicologia e Nutrição dos seus pacientes em um único
-        lugar, reunindo consulta, acompanhamento e comunicação.
-      </p>
-      <h2>Por que saúde mental e alimentação juntas?</h2>
-      <p>
-        As duas áreas se encontram no dia a dia: ansiedade afeta a alimentação, e a alimentação afeta o bem-estar.
-        Acompanhar as duas de forma integrada torna o cuidado mais completo.
-      </p>
-      <h2>Compromissos</h2>
-      <ul>
-        <li><strong>ODS 3, Saúde e Bem-Estar</strong>: ampliar o acesso a cuidado nutricional e psicológico.</li>
-        <li><strong>ODS 16</strong>: segurança, privacidade e respeito à LGPD.</li>
-        <li><strong>Acessibilidade</strong>: tamanho de texto ajustável, alto contraste e navegação por teclado.</li>
-      </ul>
-      <p>
-        <Link href="/register" className="btn-primary not-prose">
-          Criar minha conta
-        </Link>
-      </p>
+    <main className="bg-white text-slate-800">
+      {/* ---------- TOPO: título, foto e números ---------- */}
+      <section className="bg-[#eaf6fd] px-4 py-10 md:py-14">
+        <div className="mx-auto max-w-5xl">
+          <h1 className="mb-8 text-center font-serif text-3xl font-bold text-[#0a3d8f] md:text-4xl">
+            Sobre o NutriMente
+          </h1>
+
+          <div className="relative h-60 overflow-hidden rounded-2xl md:h-80">
+            <img
+              src="/patient/consulta-paciente-profissional.png"
+              alt="Duas mulheres conversando durante uma consulta"
+              className="h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#00286e] to-transparent opacity-80"></div>
+            <p className="absolute bottom-4 left-0 right-0 px-4 text-center font-serif text-lg font-bold text-white md:bottom-8 md:text-2xl">
+              Psicologia nutricional com abordagem humana, técnica e continuidade de cuidado.
+            </p>
+          </div>
+
+          <div className="mt-8 flex flex-col rounded-2xl border-2 border-[#004aad] bg-white md:flex-row">
+            <div className="flex-1 p-6 text-center font-serif text-xl font-bold text-[#00c853] md:text-2xl">
+              + 1 mil pacientes já atendidos
+            </div>
+            <div className="flex-1 border-t-2 border-[#004aad] p-6 text-center font-serif text-xl font-bold text-[#00c853] md:border-l-2 md:border-t-0 md:text-2xl">
+              +300 nutricionistas e psicólogos cadastrados
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------- PROPÓSITO ---------- */}
+      <section className="bg-[#004aad] px-4 pt-10 text-center text-white">
+        <div className="mx-auto max-w-3xl">
+          <h2 className="mb-6 font-serif text-2xl font-bold text-[#5eecd8] md:text-3xl">
+            Propósito
+          </h2>
+          <p className="mb-6 text-base leading-8 md:text-xl md:leading-9">
+            O NutriMente é uma plataforma de saúde multidisciplinar desenvolvida com o objetivo
+            fundamental de unir, em um único ecossistema digital, o cuidado com a mente e com a
+            alimentação.
+          </p>
+          <p className="mb-6 text-base leading-8 md:text-xl md:leading-9">
+            Mais do que um sistema de agendamento, o projeto surge como uma solução para a
+            fragmentação dos tratamentos de saúde, propondo uma abordagem onde a psicologia e a
+            nutrição trabalham em total sinergia.
+          </p>
+        </div>
+        {/* A logo fica metade dentro e metade fora do bloco azul */}
+        <img
+          src="/logo/nutrimente-v1.png"
+          alt="Logo NutriMente"
+          className="relative top-8 mx-auto w-40 rounded-2xl md:w-52"
+        />
+      </section>
+
+      {/* ---------- PARA QUEM É ---------- */}
+      <section className="px-4 pt-24">
+        <h2 className="text-center font-serif text-2xl font-bold text-[#0a3d8f] md:text-3xl">
+          Para quem é
+        </h2>
+
+        <div className="mx-auto mt-6 grid max-w-5xl grid-cols-1 items-end md:grid-cols-4">
+          {/* Texto: no celular vem primeiro, no notebook fica no meio */}
+          <div className="order-1 pb-8 text-center text-lg text-[#0071c9] md:order-2 md:col-span-2 md:text-xl">
+            <p className="font-bold">Pessoas que buscam cuidar de sua:</p>
+            <p>Alimentação</p>
+            <p>Saúde mental</p>
+            <p>Rotina</p>
+            <p>Tudo isso com acompanhamento de um profissional especializado da nossa plataforma</p>
+          </div>
+
+          {/* Ilustração: no celular vem depois, no notebook fica na esquerda */}
+          <img
+            src="/patient/professional-talk-patient.png"
+            alt="Ilustração de paciente e profissional em consulta"
+            className="order-2 mx-auto w-60 md:order-1 md:col-span-1 md:w-full"
+          />
+        </div>
+      </section>
+
+      {/* ---------- O QUE NOS TORNA CONFIÁVEIS ---------- */}
+      <section className="bg-[#d9f0fc] px-4 py-10 md:py-14">
+        <h2 className="text-center font-serif text-2xl font-bold text-[#0a3d8f] md:text-3xl">
+          O que nos torna confiáveis
+        </h2>
+
+        <div className="mx-auto mt-8 grid max-w-3xl grid-cols-1 gap-10 md:grid-cols-2">
+          <div className="flex flex-col items-center gap-3 text-center bg-white p-10 rounded-2xl">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00e060]">
+              <UserCheck className="h-7 w-7 text-white" />
+            </div>
+            <p>
+              <span className="text-[#0071c9]">Profissionais verificados</span> com formação e
+              registro conferidos
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-3 text-center bg-white p-10 rounded-2xl">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00e060]">
+              <BadgeDollarSign className="h-7 w-7 text-white" />
+            </div>
+            <p>
+              <span className="text-[#0071c9]">Simplifique seus pagamentos</span> adicionando saldo
+              diretamente à sua conta no site
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-3 text-center bg-white p-10 rounded-2xl">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00e060]">
+              <MessageCirclePlus className="h-7 w-7 text-white" />
+            </div>
+            <p>
+              <span className="text-[#0071c9]">Confirmação imediata</span> de atendimento
+            </p>
+          </div>
+
+          <div className="flex flex-col items-center gap-3 text-center bg-white p-10 rounded-2xl">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#00e060]">
+              <ShieldCheck className="h-7 w-7 text-white" />
+            </div>
+            <p>
+              <span className="text-[#0071c9]">Dados protegidos</span> com sigilo e segurança
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

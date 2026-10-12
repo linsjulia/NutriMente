@@ -18,6 +18,7 @@ const slides = [
   {
     src: "/doctor/nutricionista2.jpg",
     alt: "Nutricionista realizando atendimento",
+    loading: "eager"
   },
   {
     src: "/doctor/psicologo6.jpg",

@@ -22,10 +22,10 @@ import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "luci
           </div>
 
           <div className="mt-20 flex flex-col rounded-2xl border-2 border-[#004aad] bg-white md:flex-row">
-            <div className="flex-1 p-6 text-center font-serif text-xl font-bold text-[#00c853] md:text-2xl">
+            <div className="flex-1 p-6 text-center font-serif text-xl font-bold text-green-700 md:text-2xl">
               + 1 mil pacientes já atendidos
             </div>
-            <div className="flex-1 border-t-2 border-[#004aad] p-6 text-center font-serif text-xl font-bold text-[#00c853] md:border-l-2 md:border-t-0 md:text-2xl">
+            <div className="flex-1 border-t-2 border-[#004aad] p-6 text-center font-serif text-xl font-bold text-green-700 md:border-l-2 md:border-t-0 md:text-2xl">
               +300 nutricionistas e psicólogos cadastrados
             </div>
           </div>

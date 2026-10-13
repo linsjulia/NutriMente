@@ -19,10 +19,11 @@ export default function CTASection() {
           </div>
 
           {/* Texto */}
-          <div className="relative order-1 flex w-full flex-col items-center gap-6 p-8 text-center md:p-12 lg:w-1/2 lg:items-start lg:gap-10 lg:p-16 xl:p-20 lg:text-left">
-            <h2 className="font-fraunces text-3xl font-medium text-white md:text-4xl">
+          <div className="relative order-1 flex w-full flex-col items-center gap-6 p-8 text-center md:p-12 lg:w-1/2 lg:items-start lg:gap-10 lg:p-16 xl:p-20 lg:text-left text-white">
+            <h2 className="font-fraunces text-3xl font-medium md:text-4xl">
               Pronto para transformar sua saúde mental e alimentar?
             </h2>
+            <p className="text-lg">Para quem busca cuidado e para quem cuida: tudo em uma só plataforma.</p>
             <LandingButton href="/register/patient" />
           </div>
 

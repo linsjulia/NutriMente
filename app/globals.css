@@ -758,6 +758,10 @@ input:checked + .profession-card {
   margin: 0.75rem 0;
 }
 
+h2{
+  font-weight: 600;
+}
+
 /* =============================================================
    ACESSIBILIDADE
    Cada bloco abaixo corresponde a um botão do menu de acessibilidade

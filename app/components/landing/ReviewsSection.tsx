@@ -1,38 +1,163 @@
-import FadeScroll from "../fade-effect/FadeScroll";
-import ReviewCards from "../cards/ReviewCards";
+'use client';
+
+import { useRef, useState, useEffect } from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
+import type { Swiper as SwiperClass } from 'swiper';
+import ReviewCard from '../cards/ReviewCards';
+
+import 'swiper/css'
+import 'swiper/css/pagination';
+
+interface Testimonial {
+  id: string;
+  name: string;
+  role: string;
+  crp: string;
+  avatarLetter: string;
+  quote: string;
+  highlightedText?: string;
+  bgLeftColor: string;
+}
+
+const testimonialsData: Testimonial[] = [
+  {
+    id: '1',
+    name: 'Dra. Márcia',
+    role: 'Nutricionista',
+    crp: 'CRN 00/00000',
+    avatarLetter: 'M',
+    quote: 'Acompanhar a evolução dos pacientes ficou muito mais intuitivo e prático.',
+    bgLeftColor: 'bg-[#C89B8D]',
+  },
+  {
+    id: '2',
+    name: 'Dr. Roberto',
+    role: 'Psicólogo',
+    crp: 'CRP 00/00000',
+    avatarLetter: 'R',
+    quote: 'Ferramenta indispensável para alinhar o plano alimentar com o comportamento.',
+    bgLeftColor: 'bg-[#7C92A6]',
+  },
+  {
+    id: '3',
+    name: 'Dra. Camila',
+    role: 'Nutricionista',
+    crp: 'CRN 00/00000',
+    avatarLetter: 'C',
+    quote: 'Os relatórios facilitam demais a visualização do progresso semanal.',
+    bgLeftColor: 'bg-[#9FB29F]',
+  },
+  {
+    id: '4',
+    name: 'Dra. Helena',
+    role: 'Psicóloga',
+    crp: 'CRP 00/00000',
+    avatarLetter: 'H',
+    quote: 'Ter a rotina alimentar do paciente à mão muda a qualidade da sessão. Consigo trabalhar o que ele realmente viveu na semana.',
+    highlightedText: 'muda a qualidade da sessão.',
+    bgLeftColor: 'bg-[#9370DB]',
+  },
+  {
+    id: '5',
+    name: 'Dr. Lucas',
+    role: 'Nutricionista',
+    crp: 'CRN 00/00000',
+    avatarLetter: 'L',
+    quote: 'Uma plataforma completa que revolucionou o meu atendimento clínico diário.',
+    bgLeftColor: 'bg-[#7EAEA3]',
+  },
+];
 
 export default function ReviewsSection() {
+  const swiperRef = useRef<SwiperClass | null>(null);
+  const [activeIndex, setActiveIndex] = useState(1);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   return (
-    <FadeScroll>
-      <section className="flex flex-col justify-center overflow-x-clip bg-blue-100 px-4 py-16 md:px-8 md:py-24 lg:min-h-screen lg:py-28">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="font-fraunces text-3xl font-medium md:text-4xl lg:text-[clamp(2rem,2.6vw,3rem)]">
-            O que dizem sobre nossa plataforma
-          </h2>
-          <p className="mt-4 text-base text-balance lg:text-[clamp(0.875rem,1.05vw,1.125rem)]">
-            Uma plataforma criada para tornar o acompanhamento nutricional e
-            psicológico mais acessível, organizado e personalizado.
-          </p>
-        </div>
+    <section className="w-full bg-[#E8EEF5] py-16 px-4 flex flex-col items-center justify-center font-sans">
 
-        <div className="mx-auto mt-10 flex w-full max-w-2xl flex-col gap-6 md:mt-16 lg:max-w-6xl lg:flex-row lg:gap-[clamp(1.5rem,3vw,3rem)]">
-          <div className="flex min-w-0 flex-1 [&>*]:w-full [&>*]:min-w-0">
-            <ReviewCards
-              titulo="Mariana S., Paciente"
-              avaliacao="O NutriMente facilitou muito minha rotina. Antes eu perdia os papéis da dieta, agora recebo as metas direto no celular e os lembretes de consulta me ajudam a não esquecer de nada. Muito prático!"
-              img="/patient/paciente2.png"
-            />
+      <div className="text-center max-w-2xl mb-12">
+        <h2 className="text-3xl md:text-4xl font-fraunces mb-3">
+          O que dizem sobre a NutriMente
+        </h2>
+        <p className="text-sm md:text-base">
+          Uma plataforma criada para tornar o acompanhamento nutricional e psicológico mais acessível.
+        </p>
+      </div>
+
+      {isClient && (
+        <div className="w-full flex flex-col items-center">
+          <div className="w-full max-w-4xl relative">
+            <Swiper
+              modules={[Navigation, Pagination, A11y, Autoplay]}
+              onBeforeInit={(swiper) => {
+                swiperRef.current = swiper;
+              }}
+              initialSlide={3}
+              onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+              spaceBetween={0}
+              slidesPerView={1}
+              loop={true}
+              autoplay={{
+                delay: 4500,
+                disableOnInteraction: false,
+                pauseOnMouseEnter: true,
+              }}
+              className="w-full rounded-3xl"
+            >
+              {testimonialsData.map((item) => (
+                <SwiperSlide key={item.id}>
+                  <ReviewCard {...item} />
+                </SwiperSlide>
+              ))}
+            </Swiper>
           </div>
 
-          <div className="flex min-w-0 flex-1 [&>*]:w-full [&>*]:min-w-0">
-            <ReviewCards
-              titulo="Dr. Ricardo, Nutricionista"
-              avaliacao="Como profissional, a gestão da agenda ficou muito mais organizada. O diário alimentar com fotos que os pacientes enviam me permite dar um feedback muito mais preciso entre as consultas."
-              img="/doctor/doctor-pfp.png"
-            />
+          <div className="flex items-center justify-center space-x-4 mt-8">
+            {testimonialsData.map((item, index) => {
+              const isActive = activeIndex === index;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => swiperRef.current?.slideToLoop(index)}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white transition-all duration-300 shadow-md ${
+                    item.bgLeftColor
+                  } ${
+                    isActive
+                      ? 'ring-4 ring-[#112233] scale-110 shadow-lg'
+                      : 'opacity-70 hover:opacity-100 hover:scale-105'
+                  }`}
+                >
+                  {item.avatarLetter}
+                </button>
+              );
+            })}
           </div>
+
+          <div className="flex items-center space-x-2 mt-4">
+            {testimonialsData.map((_, index) => {
+              const isActive = activeIndex === index;
+              return (
+                <button
+                  key={index}
+                  onClick={() => swiperRef.current?.slideToLoop(index)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    isActive ? 'w-6 bg-[#112233]' : 'w-2 bg-[#A0AEC0]'
+                  }`}
+                  aria-label={`Ir para slide ${index + 1}`}
+                />
+              );
+            })}
+          </div>
+
         </div>
-      </section>
-    </FadeScroll>
+      )}
+
+    </section>
   );
 }

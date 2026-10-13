@@ -26,13 +26,11 @@ const fraunces = Fraunces({
   subsets: ["latin"],
 });
 
-// Favicon: app/icon.png (64x64, gerado do logo). Antes era um PNG de 800 KB.
+// Favicon: app/icon.png (64x64, gerado do logo com fundo transparente, ~9 KB).
+// Não aponte para /logo/nutrimente-v2.png: são 458 KB baixados em toda página.
 export const metadata: Metadata = {
   title: "NutriMente",
   description: "Plataforma que conecta pacientes a profissionais da área da nutrição e psicologia",
-  icons: {
-    icon: "/logo/nutrimente-v2.png"
-  }
 };
 
 // Layout RAIZ: envolve TODAS as páginas (home, login, cadastro...).

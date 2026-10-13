@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "lucide-react";
 
-    export default function AboutPage() {
+export const metadata: Metadata = { title: "Sobre nós | NutriMente" };
+
+export default function AboutPage() {
   return (
-    <main className="bg-white text-slate-800">
+    // id="conteudo": destino do link "Pular para o conteúdo" (SkipLink)
+    <main id="conteudo" className="bg-white text-slate-800">
       <section className="flex min-h-screen flex-col justify-center bg-[#eaf6fd] px-4 py-10 md:py-14">
         <div className="mx-auto max-w-5xl">
           <h1 className="mb-8 text-center font-fraunces text-3xl font-bold text-[#0a3d8f] md:text-4xl">

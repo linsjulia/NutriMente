@@ -29,6 +29,8 @@ const allowedDevOrigins = (process.env.ALLOWED_DEV_ORIGINS ?? "")
   .filter(Boolean);
 
 const nextConfig: NextConfig = {
+  // Não anuncia "X-Powered-By: Next.js" (não ajuda ninguém e entrega a tecnologia)
+  poweredByHeader: false,
   // "standalone" gera em .next/standalone uma versão enxuta do site para rodar
   // em Docker (deploy na VPS). Só liga quando o Dockerfile pede
   // (NEXT_OUTPUT=standalone): o Vercel tem o próprio jeito de empacotar o

@@ -344,7 +344,7 @@ O SQL Server **não fica aberto na internet**: só escuta em `127.0.0.1:1433` de
 
 | Campo | Valor |
 |---|---|
-| Server name | `localhost,14330` (com vírgula) |
+| Server name | `tcp:127.0.0.1,14330` (com vírgula; `localhost` pode não funcionar no Windows) |
 | Authentication | SQL Server Authentication |
 | Login / Password | `sa` / a senha do passo 1 |
 | Encryption | Mandatory |

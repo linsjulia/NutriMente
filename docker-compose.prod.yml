@@ -26,7 +26,7 @@ services:
       MSSQL_MEMORY_LIMIT_MB: ${MSSQL_MEMORY_LIMIT_MB:-2048}
     # Só na própria máquina (127.0.0.1), nunca na internet. Serve para abrir o
     # banco no SSMS/DBeaver por um túnel SSH (docs/DEPLOY-HOSTINGER.md, passo 11):
-    #   ssh -N -L 14330:127.0.0.1:1433 nutrimente   →   localhost,14330
+    #   ssh -N -L 14330:127.0.0.1:1433 nutrimente   →   tcp:127.0.0.1,14330
     ports: !override
       - "127.0.0.1:1433:1433"
 

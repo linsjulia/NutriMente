@@ -331,6 +331,30 @@ docker compose start api
 
 Depois de reiniciar o VPS, tudo volta sozinho (`restart: unless-stopped`).
 
+### Abrir o banco no SSMS (ou DBeaver)
+
+O SQL Server **não fica aberto na internet**: só escuta em `127.0.0.1:1433` dentro do servidor. Para usar no seu computador, abra um túnel pelo SSH.
+
+1. Pegue a senha (no seu terminal): `ssh nutrimente "grep MSSQL_SA_PASSWORD /opt/nutrimente/.env"`
+2. Abra o túnel e **deixe a janela aberta** enquanto usa o banco (`Ctrl+C` fecha):
+   ```
+   ssh -N -L 14330:127.0.0.1:1433 nutrimente
+   ```
+3. No SSMS → **Connect → Database Engine**:
+
+| Campo | Valor |
+|---|---|
+| Server name | `localhost,14330` (com vírgula) |
+| Authentication | SQL Server Authentication |
+| Login / Password | `sa` / a senha do passo 1 |
+| Encryption | Mandatory |
+| Trust server certificate | ☑ marcado |
+
+Em **Options → Connection Properties → Connect to database**, escolha `NutriMente`.
+
+- CPF, telefone, nascimento, prontuário e questionários aparecem **cifrados** (`v1:...`). É a proteção da LGPD; legível só pelo site.
+- O `sa` pode tudo: para olhar, use só `SELECT`. Não copie dados de pacientes para fora do servidor.
+
 ## 12. Problemas comuns
 
 | Sintoma | Causa provável | Solução |

@@ -23,13 +23,16 @@ export default async function RegisterSuccessPage({ searchParams }: PageProps<"/
           seu perfil enquanto isso.
         </p>
       )}
-      <p className="text-sm text-gray-700">
-        Em ambiente de desenvolvimento, os e-mails aparecem no Mailpit:{" "}
-        <a href="http://localhost:8025" className="underline" target="_blank" rel="noreferrer">
-          localhost:8025
-        </a>
-        .
-      </p>
+      <p className="text-sm text-gray-700">Não chegou em alguns minutos? Confira a caixa de spam ou de promoções.</p>
+      {process.env.NODE_ENV !== "production" && (
+        <p className="text-sm text-gray-700">
+          Em ambiente de desenvolvimento, os e-mails aparecem no Mailpit:{" "}
+          <a href="http://localhost:8025" className="underline" target="_blank" rel="noreferrer">
+            localhost:8025
+          </a>
+          .
+        </p>
+      )}
       <ResendVerification email={address} />
       <Link href="/login" className="btn-primary self-start">
         Ir para o login

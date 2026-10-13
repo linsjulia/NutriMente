@@ -18,7 +18,6 @@ const slides = [
   {
     src: "/doctor/nutricionista2.jpg",
     alt: "Nutricionista realizando atendimento",
-    loading: "eager"
   },
   {
     src: "/doctor/psicologo6.jpg",
@@ -48,20 +47,15 @@ export default function CarouselHeroSection() {
   }, [paused]);
 
   return (
-    <div className="relative h-90 w-full overflow-hidden sm:h-120 md:h-140 lg:h-screen">
+    <div className="relative aspect-4/3 w-full overflow-hidden sm:aspect-16/10 lg:aspect-auto lg:h-full lg:min-h-[32rem]">
       <Swiper
         className="h-full w-full"
-        // A11y: o Swiper adiciona rótulos para leitores de tela ("slide 1 de 5")
-        // Keyboard: permite trocar de slide com as setas do teclado
         modules={[Autoplay, Pagination, A11y, Keyboard]}
         onSwiper={(swiper) => {
           swiperRef.current = swiper;
           if (paused) swiper.autoplay.stop();
         }}
         slidesPerView={1}
-        // rewind (e não loop): no fim, volta ao primeiro slide. O "loop" move
-        // os slides de lugar no HTML enquanto as fotos ainda carregam, e na 1ª
-        // visita em 414px/1024px algumas fotos ficavam pendentes para sempre.
         rewind
         keyboard={{ enabled: true }}
         a11y={{
@@ -73,15 +67,12 @@ export default function CarouselHeroSection() {
         autoplay={{
           delay: 3000,
           disableOnInteraction: false,
-          // Pausa enquanto o mouse está em cima, dando tempo de ver a imagem
           pauseOnMouseEnter: true,
         }}
         pagination={{
           clickable: true,
         }}
       >
-        {/* next/image: o Next entrega a foto no tamanho da tela e em formato
-            leve (WebP/AVIF). As originais têm até 8000px e 25 MB. */}
         {slides.map((slide, index) => (
           <SwiperSlide key={slide.src} className="relative h-full w-full">
             <Image
@@ -90,6 +81,7 @@ export default function CarouselHeroSection() {
               fill
               sizes="(min-width: 1024px) 50vw, 100vw"
               preload={index === 0}
+              loading={index === 0 ? undefined : "lazy"}
               className="object-cover object-center"
             />
           </SwiperSlide>
@@ -100,7 +92,7 @@ export default function CarouselHeroSection() {
         type="button"
         onClick={() => setPaused((current) => !current)}
         aria-label={paused ? "Continuar carrossel" : "Pausar carrossel"}
-        className="absolute bottom-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-blue1 shadow-md"
+        className="absolute bottom-3 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-blue1 shadow-md sm:bottom-4 sm:right-4"
       >
         {paused ? <Play aria-hidden size={20} /> : <Pause aria-hidden size={20} />}
       </button>

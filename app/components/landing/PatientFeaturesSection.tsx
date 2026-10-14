@@ -1,21 +1,20 @@
 import Image from "next/image";
 import FadeScroll from "../fade-effect/FadeScroll";
 import CardFeatures from "../cards/CardFeatures";
-import { FileText, LaptopMinimalCheck, NotebookPen } from 'lucide-react'
+import { FileText, LaptopMinimalCheck, NotebookPen } from "lucide-react";
 
 export default function PatientFeaturesSection() {
   return (
     <FadeScroll>
-      <section className="bg-blue-100 flex flex-col justify-center px-4 py-16 sm:px-8 lg:min-h-screen">
-        <h2 className="font-fraunces font-medium text-3xl sm:text-4xl md:text-5xl text-center">
+      <section className="flex flex-col justify-center bg-blue-100 border border-blue-400 px-4 py-16 sm:px-8 lg:min-h-screen lg:py-[clamp(3rem,5vw,6rem)]">
+        <h2 className="text-center font-fraunces text-3xl font-medium sm:text-4xl md:text-5xl lg:text-[clamp(2rem,3vw,3rem)]">
           Para <span className="text-[#0069F6]">Pacientes</span>
         </h2>
-        <p className="text-lg text-center mt-3 mb-10 lg:mb-20">
+        <p className="mb-10 mt-3 text-center text-base sm:text-lg lg:mb-[clamp(2rem,4vw,5rem)] lg:text-[clamp(0.875rem,1.1vw,1.125rem)]">
           Cuidado personalizado, do primeiro contato ao acompanhamento contínuo.
         </p>
 
-        <div className="mx-auto grid w-full max-w-6xl gap-4 lg:grid-cols-2">
-
+        <div className="mx-auto grid w-full max-w-6xl gap-4 lg:max-w-[clamp(52rem,78vw,72rem)] lg:grid-cols-2 lg:gap-[clamp(0.75rem,1.2vw,1rem)]">
           <div className="relative min-h-80 overflow-hidden rounded-2xl shadow-lg shadow-blue-900/5">
             <Image
               src="/patient/pacientes.jfif"
@@ -26,7 +25,7 @@ export default function PatientFeaturesSection() {
             />
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 lg:gap-[clamp(0.75rem,1.2vw,1rem)]">
             <CardFeatures
               titulo="Avaliação Inicial Inteligente"
               descricao="Conte-nos seus objetivos e receba um acompanhamento personalizado."

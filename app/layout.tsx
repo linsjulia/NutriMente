@@ -5,6 +5,7 @@ import "./globals.css";
 import SkipLink from "./components/accessibility/SkipLink";
 import AccessibilityMenu from "./components/accessibility/AccessibilityMenu";
 import { INLINE_APPLY_SCRIPT } from "./components/accessibility/preferences";
+import Script from 'next/script';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,7 +53,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           desenhada, evitando que ela "pisque" com o visual padrão.
           Ver app/components/accessibility/preferences.ts
         */}
-        <script dangerouslySetInnerHTML={{ __html: INLINE_APPLY_SCRIPT }} />
+      
+      <Script
+        id="accessibility-preferences-script"
+        strategy="beforeInteractive"
+        dangerouslySetInnerHTML={{ __html: INLINE_APPLY_SCRIPT }}
+      />
       </head>
       {/* pb-20: espaço para o botão flutuante de acessibilidade não cobrir o fim da página */}
       <body className="min-h-full flex flex-col pb-20 text-blue2 font-open-sans sm:pb-0">

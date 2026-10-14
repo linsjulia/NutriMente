@@ -1,6 +1,7 @@
 package br.com.nutrimente.api.auth;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +14,11 @@ import br.com.nutrimente.api.auth.AuthDtos.LoginResponse;
 import br.com.nutrimente.api.auth.AuthDtos.MessageResponse;
 import br.com.nutrimente.api.auth.AuthDtos.RegisterPatientRequest;
 import br.com.nutrimente.api.auth.AuthDtos.RegisterProfessionalRequest;
+import br.com.nutrimente.api.auth.AuthDtos.RegisterResponse;
 import br.com.nutrimente.api.auth.AuthDtos.ResetPasswordRequest;
+import br.com.nutrimente.api.auth.AuthDtos.TicketRequest;
 import br.com.nutrimente.api.auth.AuthDtos.TokenRequest;
+import br.com.nutrimente.api.auth.AuthDtos.VerifyEmailResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -28,7 +32,8 @@ import jakarta.validation.Valid;
  * POST /api/auth/register/patient       cadastro de cliente
  * POST /api/auth/register/professional  cadastro de profissional
  * POST /api/auth/login                  login -> token JWT
- * POST /api/auth/verify-email           confirma o e-mail (token do link)
+ * POST /api/auth/verify-email           confirma o e-mail (token do link) e já abre a sessão
+ * POST /api/auth/registration-session   troca o ticket do cadastro por uma sessão, depois da confirmação
  * POST /api/auth/resend-verification    reenvia o e-mail de confirmação
  * POST /api/auth/forgot-password        envia o link de redefinição
  * POST /api/auth/reset-password         define a nova senha (token do link)
@@ -50,19 +55,19 @@ public class AuthController {
 
 	@PostMapping("/register/patient")
 	@ResponseStatus(HttpStatus.CREATED)
-	public MessageResponse registerPatient(@Valid @RequestBody RegisterPatientRequest request,
+	public RegisterResponse registerPatient(@Valid @RequestBody RegisterPatientRequest request,
 			HttpServletRequest http) {
-		authService.registerPatient(request, clientIp(http));
-		return new MessageResponse("Cadastro realizado! Enviamos um link de confirmação para o seu e-mail.");
+		String ticket = authService.registerPatient(request, clientIp(http));
+		return new RegisterResponse("Cadastro realizado! Enviamos um link de confirmação para o seu e-mail.", ticket);
 	}
 
 	@PostMapping("/register/professional")
 	@ResponseStatus(HttpStatus.CREATED)
-	public MessageResponse registerProfessional(@Valid @RequestBody RegisterProfessionalRequest request,
+	public RegisterResponse registerProfessional(@Valid @RequestBody RegisterProfessionalRequest request,
 			HttpServletRequest http) {
-		authService.registerProfessional(request, clientIp(http));
-		return new MessageResponse("Cadastro realizado! Confirme seu e-mail; depois, nossa equipe vai verificar "
-				+ "seu registro profissional.");
+		String ticket = authService.registerProfessional(request, clientIp(http));
+		return new RegisterResponse("Cadastro realizado! Confirme seu e-mail; depois, nossa equipe vai verificar "
+				+ "seu registro profissional.", ticket);
 	}
 
 	@PostMapping("/login")
@@ -71,9 +76,22 @@ public class AuthController {
 	}
 
 	@PostMapping("/verify-email")
-	public MessageResponse verifyEmail(@Valid @RequestBody TokenRequest request) {
-		authService.verifyEmail(request.token());
-		return new MessageResponse("E-mail confirmado! Você já pode entrar.");
+	public VerifyEmailResponse verifyEmail(@Valid @RequestBody TokenRequest request, HttpServletRequest http) {
+		LoginResponse session = authService.verifyEmail(request.token(), clientIp(http));
+		return new VerifyEmailResponse("E-mail confirmado! Bem-vindo ao NutriMente.", session.accessToken(),
+				session.expiresAt(), session.user());
+	}
+
+	/**
+	 * 200 com a sessão quando o e-mail já foi confirmado; 204 enquanto não foi
+	 * (a tela pergunta de novo em alguns segundos).
+	 */
+	@PostMapping("/registration-session")
+	public ResponseEntity<LoginResponse> registrationSession(@Valid @RequestBody TicketRequest request,
+			HttpServletRequest http) {
+		return authService.registrationSession(request.ticket(), clientIp(http))
+				.map(ResponseEntity::ok)
+				.orElseGet(() -> ResponseEntity.noContent().build());
 	}
 
 	@PostMapping("/resend-verification")

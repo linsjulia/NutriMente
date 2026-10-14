@@ -17,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	/** CPF já cadastrado? A busca é pelo índice cego (o CPF em si está cifrado) */
 	boolean existsByCpfHash(String cpfHash);
+
+	Optional<User> findByCpfHash(String cpfHash);
 }

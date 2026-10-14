@@ -1,4 +1,3 @@
-import Image from "next/image";
 import FadeScroll from "../fade-effect/FadeScroll";
 import ProfessionalCards from "../cards/ProfessionalCards";
 

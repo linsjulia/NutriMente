@@ -28,10 +28,10 @@ export default function ReviewCard({
             <span className="text-4xl md:text-5xl font-bold tracking-wider">{avatarLetter}</span>
           </div>
           <h3 className="text-xl font-bold">{name}</h3>
-          <p className="text-xs md:text-sm text-white/90 mt-1">
+          <p className="text-xs md:text-sm text-white mt-1">
             {role} · {crp}
           </p>
-          <span className="mt-4 px-4 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-medium tracking-wide">
+          <span className="mt-4 px-4 py-1 bg-black/25 border border-white/60 rounded-full text-xs font-medium tracking-wide">
             Profissional
           </span>
         </div>
@@ -51,7 +51,7 @@ export default function ReviewCard({
               src="/icons/estrelas.svg"
               width={50}
               height={50}
-              alt="Icones de estrela"
+              alt="Avaliação: 5 de 5 estrelas"
             />
           </div>
         </div>

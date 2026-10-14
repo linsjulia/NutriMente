@@ -65,6 +65,40 @@ Datas e horas vêm em **UTC**, no formato ISO (`"2026-10-20T13:00:00"`). Valores
 
 ---
 
+## 🆕 Cadastro, confirmação de e-mail e entrada automática
+
+### `POST /api/auth/register/patient` e `/register/professional`
+Agora devolvem também um **ticket do cadastro** (201):
+
+```json
+{ "message": "Cadastro realizado! ...", "registrationTicket": "q3V...x9" }
+```
+
+Guarde o ticket num **cookie httpOnly** do navegador que fez o cadastro (nunca na URL). Ele vale 24 horas e só pode ser usado uma vez.
+
+**Cadastro pendente não prende mais e-mail nem CPF:** se já existe uma conta com o mesmo e-mail ou CPF que **nunca confirmou o e-mail**, ela é anonimizada (como na exclusão de conta) e o cadastro novo segue. Conta confirmada continua dando `409`.
+
+### `POST /api/auth/verify-email`: confirma e já entra
+Body `{ "token": "..." }`. Além da mensagem, devolve uma sessão igual à do login:
+
+```json
+{ "message": "E-mail confirmado! Bem-vindo ao NutriMente.", "accessToken": "eyJ...", "expiresAt": "...",
+  "user": { "id": 12, "name": "Ana", "role": "PATIENT" } }
+```
+
+Erros: `400 INVALID_TOKEN` (link usado, vencido ou inventado).
+
+### `POST /api/auth/registration-session`: a tela do cadastro entra sozinha
+Body `{ "ticket": "..." }`. A tela "Confirme seu e-mail" chama a cada poucos segundos:
+
+| Resposta | Significado |
+|---|---|
+| `204` | Ainda não confirmou: pergunte de novo depois |
+| `200` + sessão (igual ao login) | Confirmou (por exemplo, pelo celular): crie a sessão e vá para a área logada. O ticket é gasto |
+| `400 INVALID_TOKEN` | Ticket usado, vencido ou inventado: mande para o login |
+
+Essa rota não conta no limite de tentativas de `/api/auth/*`.
+
 ## Profissionais (públicas, sem login)
 
 ### `GET /api/professionals`: busca

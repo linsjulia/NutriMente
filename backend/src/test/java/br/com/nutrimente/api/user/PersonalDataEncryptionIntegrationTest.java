@@ -36,12 +36,13 @@ class PersonalDataEncryptionIntegrationTest extends IntegrationTest {
 		assertThat((String) stored.get("birth_date")).startsWith("v1:").doesNotContain("1990");
 		assertThat((String) stored.get("cpf_hash")).matches("[0-9a-f]{64}");
 
-		// Mesmo CPF com outro e-mail: barrado pelo índice cego
+		postJson("/api/auth/verify-email", "{\"token\": \"%s\"}".formatted(capturedVerificationToken(email)));
+
+		// Mesmo CPF com outro e-mail (conta já confirmada): barrado pelo índice cego
 		postJson("/api/auth/register/patient", patientJson(uniqueEmail(), cpf))
 				.andExpect(status().isConflict())
 				.andExpect(jsonPath("$.errors.cpf").value("Este CPF já está cadastrado"));
 
-		postJson("/api/auth/verify-email", "{\"token\": \"%s\"}".formatted(capturedVerificationToken(email)));
 		getAs("/api/me", login(email, PASSWORD))
 				.andExpect(jsonPath("$.cpfMasked").value("***." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-**"))
 				.andExpect(jsonPath("$.birthDate").value("1990-05-10"))

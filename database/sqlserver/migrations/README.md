@@ -40,3 +40,4 @@ O usuário da aplicação já tem leitura e escrita em tabelas novas (`db_datare
 | `V007` | CPF, telefone e nascimento criptografados pela API; CPF único via `users.cpf_hash` (HMAC) |
 | `V008` | Diário alimentar (`meal_logs`): refeições, anotações e foto (arquivo cifrado fora do banco) |
 | `V009` | Tipo do arquivo em `professional_documents` e endereço do consultório (`professionals.office_*`) |
+| `V010` | Ticket de cadastro (`user_tokens.purpose` aceita `REGISTRATION`): entrar sozinho depois de confirmar o e-mail em outro aparelho |

@@ -140,4 +140,15 @@ public final class AuthDtos {
 	/** Resposta simples com uma mensagem para mostrar na tela */
 	public record MessageResponse(String message) {
 	}
+
+	/** Resposta do cadastro: a mensagem e o ticket do navegador (ver AuthService#registrationSession) */
+	public record RegisterResponse(String message, String registrationTicket) {
+	}
+
+	/** Confirmação de e-mail: a mensagem e a sessão já aberta */
+	public record VerifyEmailResponse(String message, String accessToken, Instant expiresAt, SessionUser user) {
+	}
+
+	public record TicketRequest(@NotBlank(message = "Ticket inválido") String ticket) {
+	}
 }

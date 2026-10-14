@@ -14,11 +14,21 @@
 
 import { redirect } from "next/navigation";
 import { api } from "@/app/lib/api";
-import { createSession, deleteSession, homeFor, type Role } from "@/app/lib/session";
+import {
+  createSession,
+  deleteRegistrationTicket,
+  deleteSession,
+  getRegistrationTicket,
+  homeFor,
+  saveRegistrationTicket,
+  type Role,
+} from "@/app/lib/session";
 import { fromApiError, formValues, text, type FormState } from "@/app/lib/form";
 
 type LoginResponse = { accessToken: string; expiresAt: string; user: { id: number; name: string; role: Role } };
 type Message = { message: string };
+type RegisterResponse = { message: string; registrationTicket: string };
+type VerifyEmailResponse = LoginResponse & { message: string };
 
 // ---------------- Login / logout ----------------
 
@@ -79,11 +89,12 @@ export async function registerPatient(_state: FormState, formData: FormData): Pr
   const mismatch = checkPasswordConfirmation(formData);
   if (mismatch) return { ok: false, message: "Revise os campos destacados.", errors: mismatch, values };
 
-  const result = await api<Message>("/api/auth/register/patient", {
+  const result = await api<RegisterResponse>("/api/auth/register/patient", {
     method: "POST",
     body: { ...commonFields(formData), acceptHealthData: formData.get("acceptHealthData") === "on" },
   });
   if (!result.ok) return fromApiError(result.error, values);
+  await saveRegistrationTicket(result.data.registrationTicket);
   redirect(`/register/success?email=${encodeURIComponent(values.email ?? "")}`);
 }
 
@@ -92,7 +103,7 @@ export async function registerProfessional(_state: FormState, formData: FormData
   const mismatch = checkPasswordConfirmation(formData);
   if (mismatch) return { ok: false, message: "Revise os campos destacados.", errors: mismatch, values };
 
-  const result = await api<Message>("/api/auth/register/professional", {
+  const result = await api<RegisterResponse>("/api/auth/register/professional", {
     method: "POST",
     body: {
       ...commonFields(formData),
@@ -102,18 +113,50 @@ export async function registerProfessional(_state: FormState, formData: FormData
     },
   });
   if (!result.ok) return fromApiError(result.error, values);
+  await saveRegistrationTicket(result.data.registrationTicket);
   redirect(`/register/success?email=${encodeURIComponent(values.email ?? "")}&type=professional`);
 }
 
 // ---------------- E-mail e senha ----------------
 
+/** Confirma o e-mail e já entra: quem abriu o link provou que é dono do e-mail */
 export async function verifyEmail(_state: FormState, formData: FormData): Promise<FormState> {
-  const result = await api<Message>("/api/auth/verify-email", {
+  const result = await api<VerifyEmailResponse>("/api/auth/verify-email", {
     method: "POST",
     body: { token: text(formData, "token") },
   });
   if (!result.ok) return fromApiError(result.error);
-  return { ok: true, message: result.data.message };
+
+  await createSession(result.data.accessToken, result.data.expiresAt);
+  await deleteRegistrationTicket();
+  redirect(`${homeFor(result.data.user.role)}?emailConfirmado=1`);
+}
+
+export type RegistrationStatus = { status: "pending" } | { status: "done"; href: string } | { status: "none" };
+
+/**
+ * A tela "Confirme seu e-mail" chama a cada poucos segundos. Quando a pessoa
+ * confirma (em qualquer aparelho), o ticket deste navegador vira uma sessão.
+ */
+export async function checkRegistration(): Promise<RegistrationStatus> {
+  const ticket = await getRegistrationTicket();
+  if (!ticket) return { status: "none" };
+
+  const result = await api<LoginResponse | undefined>("/api/auth/registration-session", {
+    method: "POST",
+    body: { ticket },
+  });
+  if (!result.ok) {
+    // 400: ticket usado ou vencido. Outro erro (API fora do ar): tenta de novo depois
+    if (result.error.status !== 400) return { status: "pending" };
+    await deleteRegistrationTicket();
+    return { status: "none" };
+  }
+  if (!result.data) return { status: "pending" };
+
+  await createSession(result.data.accessToken, result.data.expiresAt);
+  await deleteRegistrationTicket();
+  return { status: "done", href: `${homeFor(result.data.user.role)}?emailConfirmado=1` };
 }
 
 export async function resendVerification(_state: FormState, formData: FormData): Promise<FormState> {

@@ -91,6 +91,49 @@ test("paciente: cadastro -> e-mail -> confirmação -> login -> editar conta -> 
   await page.waitForURL(/\/login\?next=/);
 });
 
+test("confirmar o e-mail em outro aparelho: a aba do cadastro entra sozinha", async ({ browser }) => {
+  const email = uniqueEmail("doisaparelhos");
+  created.push(email);
+
+  // "Computador": faz o cadastro e fica na tela "Confirme seu e-mail"
+  const pc = await (await browser.newContext()).newPage();
+  await registerPatient(pc, email);
+  await expect(pc.getByText("esta página entra sozinha")).toBeVisible();
+
+  // "Celular": abre o link do e-mail e confirma (já entra também)
+  const phone = await (await browser.newContext()).newPage();
+  await confirmEmail(phone, email, { stayLoggedIn: true });
+  await expect(phone.getByRole("heading", { name: "Olá, Ana!" })).toBeVisible();
+
+  // O computador percebe sozinho (pergunta a cada 5 s) e entra
+  await expect(pc).toHaveURL(/\/dashboard\?emailConfirmado=1$/, { timeout: 15_000 });
+  await expect(pc.getByRole("heading", { name: "Olá, Ana!" })).toBeVisible();
+});
+
+test("desistiu antes de confirmar: dá para se cadastrar de novo com o mesmo CPF e outro e-mail", async ({ page }) => {
+  const cpf = randomCpf();
+  const first = uniqueEmail("desistiu");
+  const second = uniqueEmail("recomecou");
+  created.push(second);
+  for (const email of [first, second]) {
+    await page.context().clearCookies();
+    await page.goto("/register/patient");
+    await page.getByLabel("Nome completo").fill("Ana Paciente");
+    await page.getByLabel("E-mail").fill(email);
+    await page.getByLabel("CPF").fill(cpf);
+    await page.getByLabel("Celular").fill("11988887777");
+    await page.getByLabel("Data de nascimento").fill("1992-03-15");
+    await page.getByText("Prefiro não informar").click();
+    await page.getByLabel("Senha", { exact: true }).fill(PASSWORD);
+    await page.getByLabel("Repita a senha").fill(PASSWORD);
+    await page.getByLabel(/Li e aceito/).check();
+    await page.getByLabel(/Autorizo o uso dos meus dados de saúde/).check();
+    await page.getByRole("button", { name: "Criar conta" }).click();
+    await expect(page.getByRole("heading", { name: "Confirme seu e-mail" })).toBeVisible();
+  }
+  await confirmEmail(page, second);
+});
+
 test("cadastro mostra os erros da API no campo certo", async ({ page }) => {
   await page.goto("/register/patient");
   await page.getByLabel("Nome completo").fill("Ana Paciente");

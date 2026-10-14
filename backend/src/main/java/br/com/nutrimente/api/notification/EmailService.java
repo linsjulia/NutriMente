@@ -1,5 +1,8 @@
 package br.com.nutrimente.api.notification;
 
+import java.util.List;
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -86,6 +89,10 @@ public class EmailService {
 	}
 
 	private void send(String to, String subject, String name, String intro, String button, String link, String footer) {
+		if (isSkipped(to, properties.mail().skipDomains())) {
+			log.info("E-mail '{}' não enviado: domínio de demonstração", subject);
+			return;
+		}
 		try {
 			MimeMessage message = mailSender.createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -98,6 +105,17 @@ public class EmailService {
 		} catch (Exception e) {
 			log.error("Falha ao enviar e-mail '{}'", subject, e);
 		}
+	}
+
+	/** O destinatário é de um domínio sem envio (ex.: contas de demonstração)? */
+	static boolean isSkipped(String to, List<String> skipDomains) {
+		if (to == null || skipDomains == null) {
+			return false;
+		}
+		String domain = to.substring(to.lastIndexOf('@') + 1).strip().toLowerCase(Locale.ROOT);
+		return skipDomains.stream()
+				.map(d -> d.strip().toLowerCase(Locale.ROOT))
+				.anyMatch(d -> !d.isEmpty() && domain.equals(d));
 	}
 
 	private static String plainText(String name, String intro, String link, String footer) {

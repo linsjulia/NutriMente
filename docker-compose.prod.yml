@@ -52,6 +52,8 @@ services:
       MAIL_SSL: ${MAIL_SSL:-true}
       MAIL_STARTTLS: ${MAIL_STARTTLS:-false}
       MAIL_FROM: ${MAIL_FROM}
+      # Contas de demonstração (@nutrimente.demo) não recebem e-mail em produção
+      MAIL_SKIP_DOMAINS: ${MAIL_SKIP_DOMAINS:-nutrimente.demo}
       # A JVM usa no máximo 60% da memória que o container pode ter
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=60
     mem_limit: ${API_MEMORY_LIMIT:-1g}

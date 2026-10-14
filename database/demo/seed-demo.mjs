@@ -673,7 +673,8 @@ async function main() {
   console.log("\nNutriMente: criando dados de demonstração\n");
   await checkServices();
   const db = await sql.connect({
-    server: "localhost",
+    // No PC é localhost; no servidor o script roda num contêiner da rede do compose (DB_HOST=sqlserver)
+    server: process.env.DB_HOST || "localhost",
     port: Number(process.env.MSSQL_PORT || 1433),
     user: process.env.NUTRIMENTE_DB_USER,
     password: process.env.NUTRIMENTE_DB_PASSWORD,

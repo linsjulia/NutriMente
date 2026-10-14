@@ -317,6 +317,19 @@ docker compose start api
 
 (o comando pede a senha `MSSQL_SA_PASSWORD`)
 
+### Dados de demonstração em produção (profissionais para testes)
+
+O mesmo script do PC (`database/demo/seed-demo.mjs`) cria 8 profissionais aprovados, pacientes de exemplo, consultas e avaliações, todos com e-mail `@nutrimente.demo` e senha `Demo1234`. Em produção ele roda **dentro do servidor**, num contêiner na rede do compose (senhas e banco não saem da máquina):
+
+```bash
+cd /opt/nutrimente
+sudo docker run --rm --network nutrimente_default --env-file .env   -e API_URL=http://api:8080 -e DB_HOST=sqlserver -e MSSQL_PORT=1433   -v "$PWD":/repo -w /repo/database/demo node:24-alpine   sh -c "npm ci --silent && node seed-demo.mjs"
+```
+
+- Pode rodar de novo quando quiser: ele apaga só as contas `@nutrimente.demo` (e o que depende delas) e recria.
+- Essas contas **não recebem e-mail** em produção (`MAIL_SKIP_DOMAINS=nutrimente.demo`, padrão do `docker-compose.prod.yml`).
+- Logins prontos: `ana@nutrimente.demo` (paciente) e `camila@nutrimente.demo` (nutricionista), senha `Demo1234`.
+
 ## 11. Comandos do dia a dia
 
 | Para... | Comando (dentro de `/opt/nutrimente`) |

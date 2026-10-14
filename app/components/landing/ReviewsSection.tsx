@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
 import type { Swiper as SwiperClass } from 'swiper';
@@ -69,14 +69,12 @@ const testimonialsData: Testimonial[] = [
   },
 ];
 
+const emptySubscribe = () => () => {};
+
 export default function ReviewsSection() {
   const swiperRef = useRef<SwiperClass | null>(null);
   const [activeIndex, setActiveIndex] = useState(1);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
   return (
     <section className="w-full bg-[#E8EEF5] py-16 px-4 flex flex-col items-center justify-center font-sans">

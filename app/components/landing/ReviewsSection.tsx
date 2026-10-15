@@ -6,7 +6,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
 import type { Swiper as SwiperClass } from 'swiper';
 import ReviewCard from '../cards/ReviewCards';
-import Image from 'next/image';
 import 'swiper/css'
 import 'swiper/css/pagination';
 

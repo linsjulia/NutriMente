@@ -13,7 +13,6 @@ interface ReviewCardProps {
 export default function ReviewCard({
   name,
   role,
-  crp,
   avatarSrc,
   quote,
   bgLeftColor,

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { UserCheck, BadgeDollarSign, MessageCirclePlus, ShieldCheck } from "lucide-react";
-
+import Image from "next/image"
 export const metadata: Metadata = { title: "Sobre nós | NutriMente" };
 
 export default function AboutPage() {
@@ -14,8 +14,10 @@ export default function AboutPage() {
           </h1>
 
           <div className="relative h-60 overflow-hidden rounded-2xl md:h-100">
-            <img
+            <Image
               src="/patient/consulta-paciente-profissional.png"
+              width={1300}
+              height={1300}
               alt="Duas mulheres conversando durante uma consulta"
               className="h-full w-full object-cover"
             />
@@ -53,8 +55,10 @@ export default function AboutPage() {
           </p>
         </div>
         {/* A logo fica metade dentro e metade fora do bloco azul */}
-        <img
+        <Image
           src="/logo/nutrimente-v1.png"
+          width={100}
+          height={100}
           alt="Logo NutriMente"
           className="relative top-8 mx-auto w-40 rounded-2xl md:w-52"
         />

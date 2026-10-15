@@ -211,6 +211,11 @@ test("profissional: 3 etapas -> confirmação -> em análise -> admin aprova -> 
   // Admin aprova
   await login(page, adminEmail!, adminPassword!);
   await expect(page).toHaveURL(/\/admin\/professionals$/);
+  // Atalho para conferir o registro no site oficial do conselho
+  const review = page.getByRole("listitem").filter({ hasText: name });
+  await expect(review.getByRole("link", { name: /Consultar no CFN/ })).toHaveAttribute("href", /cnn\.cfn\.org\.br/);
+  await expect(review.getByRole("link", { name: /Consultar no CFN/ })).toHaveAttribute("target", "_blank");
+  await expect(review.getByRole("button", { name: /Copiar número/ })).toBeVisible();
   await page.getByRole("button", { name: `Aprovar ${name}` }).click();
   await expect(page.getByRole("button", { name: `Aprovar ${name}` })).toHaveCount(0);
   await logout(page);

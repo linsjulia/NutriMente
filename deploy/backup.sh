@@ -9,7 +9,8 @@
 #   logs_AAAA-MM-DD_HHMM.archive.gz       -> MongoDB (logs e auditoria LGPD)
 # e apaga os backups com mais de $KEEP_DAYS dias (padrão: 14).
 #
-# Para rodar todo dia às 3h, veja "Backups" em docs/DEPLOY-HOSTINGER.md.
+# Para rodar todo dia, veja "Backups" em docs/DEPLOY-HOSTINGER.md (o cron chama
+# deploy/backup-se-atrasado.sh de hora em hora, que chama este quando precisa).
 # =============================================================
 set -euo pipefail
 

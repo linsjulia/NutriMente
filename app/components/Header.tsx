@@ -45,7 +45,7 @@ export default function Header({ user }: HeaderProps) {
       <Link href="/login" className="rounded-full border-2 border-white px-6 py-2.5 font-bold transition hover:bg-white/10">
         Entrar
       </Link>
-      <Link href="/register" className="rounded-full bg-green1 px-6 py-3 font-bold text-blue2 transition hover:bg-green3">
+      <Link href="/register" className="rounded-full bg-green1 px-6 py-3 font-bold transition hover:bg-green3">
         Cadastre-se
       </Link>
     </>

@@ -51,16 +51,10 @@ export default function CardProfi({
 
       <div className="flex flex-wrap gap-3">
         <Link
-          href="/professionals"
-          className="rounded-lg border border-gray-300 p-2 text-base transition duration-300 hover:-translate-y-0.5 hover:bg-gray-50 lg:text-[clamp(0.8125rem,1vw,1rem)]"
-        >
-          Ver profissionais
-        </Link>
-        <Link
           href="/register/patient"
-          className="rounded-lg bg-green1 p-2 text-base font-semibold text-blue2 shadow-md shadow-green-900/10 transition duration-300 hover:-translate-y-0.5 hover:bg-green3 hover:shadow-lg hover:shadow-green-900/20 lg:text-[clamp(0.8125rem,1vw,1rem)]"
+          className="rounded-lg bg-green1 p-2 text-base font-semibold text-white shadow-md shadow-green-900/10 transition duration-300 hover:-translate-y-0.5 hover:bg-green3 hover:shadow-lg hover:shadow-green-900/20 lg:text-[clamp(0.8125rem,1vw,1rem)]"
         >
-          Agendar
+          Ver profissional
         </Link>
       </div>
     </article>

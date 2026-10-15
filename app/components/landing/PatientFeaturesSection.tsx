@@ -6,7 +6,7 @@ import { FileText, LaptopMinimalCheck, NotebookPen } from "lucide-react";
 export default function PatientFeaturesSection() {
   return (
     <FadeScroll>
-      <section className="flex flex-col justify-center bg-blue-100 border border-blue-400 px-4 py-16 sm:px-8 lg:min-h-screen lg:py-[clamp(3rem,5vw,6rem)]">
+      <section className="flex flex-col justify-center bg-blue-100 px-4 py-16 sm:px-8 lg:min-h-screen lg:py-[clamp(3rem,5vw,6rem)]">
         <h2 className="text-center font-fraunces text-3xl font-medium sm:text-4xl md:text-5xl lg:text-[clamp(2rem,3vw,3rem)]">
           Para <span className="text-[#0069F6]">Pacientes</span>
         </h2>

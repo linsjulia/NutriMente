@@ -882,9 +882,9 @@ html[data-a11y-contrast="high"] img {
    O sistema operacional pode pedir menos movimento (Windows: Configurações >
    Acessibilidade > Efeitos visuais). Respeitamos isso sem precisar de botão. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *:not(.swiper-wrapper),
+  *:not(.swiper-wrapper)::before,
+  *:not(.swiper-wrapper)::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;

@@ -122,6 +122,10 @@ export default function BookingForm({ professionalId, days, offersOnline, offers
       </details>
 
       <p className="font-semibold">Valor: {price != null ? `R$ ${formatBRL(price)}` : "a combinar"}</p>
+      {/* Mesma regra da API (nutrimente.agenda.patient-cancel-limit = 24h) */}
+      <p className="text-sm text-gray-700">
+        Você pode cancelar ou remarcar pelo site até 24 horas antes da consulta.
+      </p>
       <SubmitButton pending={pending} className="self-start">Agendar consulta</SubmitButton>
     </form>
   );

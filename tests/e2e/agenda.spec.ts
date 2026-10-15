@@ -204,3 +204,28 @@ test("acompanhamento: questionário e diário com foto; profissional cria plano 
   await bruna.getByRole("button", { name: /Jantar até as 20h/ }).click();
   await expect(checklist).toContainText("(1/1)");
 });
+
+test("paciente com consulta em menos de 24 h vê por que não pode mais cancelar", async ({ browser }) => {
+  const suffix = letters();
+  const pro = await readyProfessional(`Olivia ${suffix[0].toUpperCase()}${suffix.slice(1)}`);
+  const patient = await createVerified("patient", "Carla Paciente");
+  const slots = await apiCall("GET", `/api/professionals/${pro.id}/slots?days=2`);
+  const soon = slots
+    .flatMap((d: { slots: { startsAt: string }[] }) => d.slots)
+    .find((s: { startsAt: string }) => new Date(s.startsAt).getTime() - Date.now() < 23 * 3600_000);
+  test.skip(!soon, "sem horário livre nas próximas 23 horas");
+  const appt = await apiCall("POST", "/api/appointments", patient.token, { professionalId: pro.id, startsAt: soon.startsAt, modality: "ONLINE" });
+
+  const carla = await (await browser.newContext()).newPage();
+  await login(carla, patient.email);
+  await expect(carla).toHaveURL(/\/dashboard$/);
+  await carla.goto(`/appointments/${appt.id}`);
+  await settle(carla);
+  await expect(carla.getByText("Faltam menos de 24 horas para a consulta")).toBeVisible();
+  await expect(carla.getByText("Cancelar consulta")).toHaveCount(0);
+
+  // O formulário de agendamento já avisa a regra
+  await carla.goto(`/professionals/${pro.id}`);
+  await settle(carla);
+  await expect(carla.getByText("até 24 horas antes da consulta")).toBeVisible();
+});

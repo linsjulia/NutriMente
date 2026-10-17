@@ -1,5 +1,6 @@
 "use client";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faCalendar } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { 
  Accordion,
  AccordionItem,

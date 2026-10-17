@@ -15,7 +15,7 @@ export default function Logo() {
       loading="eager"
       draggable={false}
       alt="Logo do NutriMente"
-      className="h-full w-auto select-none"
+      className="select-none"
     />
   );
 }

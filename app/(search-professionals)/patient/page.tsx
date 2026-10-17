@@ -2,6 +2,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight, faCalendar, faChevronDown, faClose, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useState, type ReactNode } from "react";
 import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard"
+import Checkbox from "../../components/inputs/checkbox";
+import { Check } from "lucide-react";
 
 type Profissional = {
   id: number;
@@ -142,9 +144,9 @@ function Filtros() {
       </div>
 
       <Grupo titulo="Área">
-        <Opcao label="Psicologia" />
-        <Opcao label="Nutrição" />
-        <Opcao label="Psicologia nutricional" marcado />
+        <Checkbox label="Psicologia" />
+        <Checkbox label="Nutrição" />
+        <Checkbox label="Psicologia nutricional" marcado />
       </Grupo>
 
       <Grupo titulo="Tema">
@@ -156,22 +158,22 @@ function Filtros() {
           />
           <FontAwesomeIcon icon={faSearch} className="h-4 w-4 text-blue-700" />
         </div>
-        <Opcao label="Comer emocional" marcado />
-        <Opcao label="Compulsão alimentar" />
-        <Opcao label="Anorexia e bulimia" />
-        <Opcao label="Imagem corporal" />
-        <Opcao label="Ansiedade" marcado />
+        <Checkbox label="Comer emocional" marcado />
+        <Checkbox label="Compulsão alimentar" />
+        <Checkbox label="Anorexia e bulimia" />
+        <Checkbox label="Imagem corporal" />
+        <Checkbox label="Ansiedade" marcado />
         <button type="button" className="pt-1 text-xs font-semibold text-green-600">
           Ver todos os temas
         </button>
       </Grupo>
 
       <Grupo titulo="Público" resumo="adulto..." abertoInicial={false}>
-        <Opcao label="Adulto" />
-        <Opcao label="Adolescente" />
-        <Opcao label="Criança" />
-        <Opcao label="Casal" />
-        <Opcao label="Idoso" />
+        <Checkbox label="Adulto" />
+        <Checkbox label="Adolescente" />
+        <Checkbox label="Criança" />
+        <Checkbox label="Casal" />
+        <Checkbox label="Idoso" />
       </Grupo>
 
       <Grupo titulo="Preço da consulta">
@@ -186,9 +188,9 @@ function Filtros() {
       </Grupo>
 
       <Grupo titulo="Horário disponível">
-        <Opcao label="Hoje" marcado />
-        <Opcao label="Esta semana" />
-        <Opcao label="Fim de Semana" />
+        <Checkbox label="Hoje" marcado />
+        <Checkbox label="Esta semana" />
+        <Checkbox label="Fim de Semana" />
         <Segmentos opcoes={["Manhã", "Tarde", "Noite"]} inicial="Tarde" />
         <button
           type="button"
@@ -204,8 +206,8 @@ function Filtros() {
       </Grupo>
 
       <Grupo titulo="Perfil do profissional">
-        <Opcao label="Feminino" marcado />
-        <Opcao label="Masculino" />
+        <Checkbox label="Feminino" marcado />
+        <Checkbox label="Masculino" />
       </Grupo>
     </aside>
   );

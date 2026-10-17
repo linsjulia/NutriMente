@@ -1,5 +1,5 @@
 import FadeScroll from "../fade-effect/FadeScroll";
-import ProfessionalCards from "../cards/ProfessionalCards";
+import ProfessionalCards from "../cards/HomeProfessionalCard";
 
 export default function SpecialistsSection() {
   return (

@@ -13,7 +13,6 @@ type Profissional = {
   foto?: string; // se não vier foto, mostra as iniciais
 };
 
-const filtrosAtivos = ["Psicologia nutricional", "Ansiedade", "Comer emocional"];
 
 export default function CardProfissional({ p }: { p: Profissional }) {
   const iniciais = p.nome.split(" ").map((parte) => parte[0]).slice(0, 2).join("");
@@ -25,8 +24,8 @@ export default function CardProfissional({ p }: { p: Profissional }) {
         {p.foto ? (
           <Image
             src={p.foto}
-            width={14}
-            height={14}
+            width={56}
+            height={56}
             alt={p.nome}
             className="shrink-0 rounded-full object-cover ring-2 ring-blue-900"
           />

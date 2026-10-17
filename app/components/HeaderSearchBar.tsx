@@ -13,12 +13,12 @@ import Link from "next/link";
 
 export default function HeaderSearchBar() {
   return (
-    <header className="bg-linear-to-r from-emerald-100 via-cyan-100 to-sky-200">
+    <header className="bg-linear-to-r sticky z-50 top-0 bg-blue1">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:gap-8 md:px-8">
         <Image
-          src="/logo/nutrimente-v2.png"
-          width={50}
-          height={50}
+          src="/logo/nutrimente-v1.png"
+          width={60}
+          height={60}
           alt="Logo do NutriMente"
         />
         <form onSubmit={(e) => e.preventDefault()} className="">
@@ -34,13 +34,13 @@ export default function HeaderSearchBar() {
         </form>
 
         <div className="ml-auto flex items-center gap-3">
-          <span className="hidden text-sm font-semibold text-blue-900 sm:inline">
+          <span className="hidden text-sm font-semibold text-white sm:inline">
             Júlia
           </span>
           <Image
             src="/icons/circle-user-solid-full.svg"
-            width={30}
-            height={30}
+            width={50}
+            height={50}
             alt="Icon de usuário"
           />
         </div>

@@ -69,30 +69,6 @@ const profissionais: Profissional[] = [
   },
 ];
 
-/* ---------- peças dos filtros ---------- */
-
-
-function Segmentos({ opcoes, inicial }: { opcoes: string[]; inicial?: string }) {
-  const [selecionado, setSelecionado] = useState(inicial);
-  return (
-    <div className="flex flex-wrap gap-2">
-      {opcoes.map((o) => (
-        <button
-          key={o}
-          type="button"
-          onClick={() => setSelecionado(o)}
-          className={`rounded border px-2 py-1 text-xs ${
-            selecionado === o
-              ? "border-green-600 bg-green-100 text-green-800"
-              : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
-          }`}
-        >
-          {o}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function Grupo({
   titulo,

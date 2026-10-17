@@ -1,6 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight, faCalendar, faChevronDown, faClose, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { useState, type ReactNode } from "react";
 import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard"
 
 type Profissional = {

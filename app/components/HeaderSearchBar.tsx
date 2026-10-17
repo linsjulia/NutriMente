@@ -9,6 +9,7 @@ import {
   InputGroupButton,
 } from "@/components/ui/input-group";
 import { Search } from "lucide-react";
+import Link from "next/link";
 
 export default function HeaderSearchBar() {
   return (
@@ -22,31 +23,13 @@ export default function HeaderSearchBar() {
         />
         <form onSubmit={(e) => e.preventDefault()} className="">
           <div className="min-w-0 flex-1">
-            <label
-              htmlFor="busca"
-              className="block text-xs font-bold text-slate-900"
-            >
-              O que você procura?
-            </label>
-            {/* <input
-                id="busca"
-                type="text"
-                placeholder="Nome, área de atuação, tipo de profissional"
-                className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400 outline-none"
-              /> */}
-
-            <InputGroup>
-              <InputGroupInput type="text" placeholder="Buscar..." className="bg-white"/>
-              <InputGroupAddon align="inline-start">
-                <Search className="h-4 w-4" />
-              </InputGroupAddon>
-
-              <InputGroupAddon align="inline-end">
-                <InputGroupButton variant="default" size="sm" className="mr-1">
-                  Buscar
-                </InputGroupButton>
-              </InputGroupAddon>
-            </InputGroup>
+          <div className="flex bg-white rounded-lg gap-10 p-4">
+            <div className="flex flex-col">
+                <label htmlFor="busca">O que você procura?</label>
+                <input type="text" placeholder="Nome, área de atuação, tipo de profissional" className="outline-none w-78"/>
+            </div>
+            <Link href="/" className="button bg-green-600 rounded-lg p-3 px-5 text-white font-bold transition hover:bg-green-600/80">Buscar</Link>
+            </div>
           </div>
         </form>
 

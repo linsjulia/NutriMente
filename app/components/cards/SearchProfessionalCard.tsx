@@ -1,8 +1,6 @@
 "use client"
 import Image from "next/image"
 
-
-/* ---------- dados de exemplo (troque pela sua API) ---------- */
 type Profissional = {
   id: number;
   titulo: string;

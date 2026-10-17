@@ -5,8 +5,6 @@ import { faArrowLeft, faArrowRight, faCalendar, faChevronDown, faClose, faSearch
 import { useState, type ReactNode } from "react";
 import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard"
 
-
-
 type Profissional = {
   id: number;
   titulo: string;
@@ -171,10 +169,8 @@ function Filtros() {
 
       <Grupo titulo="Preço da consulta">
         {/* Visual apenas: troque por um slider de verdade (ex.: rc-slider) */}
-        <div className="relative mx-2 mt-4 h-1 rounded bg-slate-200">
-          <div className="absolute inset-y-0 left-[10%] right-[15%] rounded bg-green-600" />
-          <span className="absolute -top-1.5 left-[10%] h-4 w-4 -translate-x-1/2 rounded-full border-2 border-green-600 bg-white" />
-          <span className="absolute -top-1.5 right-[15%] h-4 w-4 translate-x-1/2 rounded-full border-2 border-green-600 bg-white" />
+        <div className="relative w-fit">
+          <input type="range"/>
         </div>
         <div className="flex justify-between pt-2 text-xs font-semibold text-slate-700">
           <span>R$ 80</span>
@@ -203,7 +199,6 @@ function Filtros() {
       <Grupo titulo="Perfil do profissional">
         <Opcao label="Feminino" marcado />
         <Opcao label="Masculino" />
-        <Opcao label="Atende pessoas LGBTQIA+" />
       </Grupo>
     </aside>
   );
@@ -212,15 +207,10 @@ function Filtros() {
 /* ---------- página ---------- */
 export default function BuscaProfissionais() {
   return (
-    <div className="min-h-screen bg-sky-50 text-slate-800">
-      {/* cabeçalho com busca */} 
-
-      {/* conteúdo */}
+    <div className="min-h-screen bg-sky-50 text-slate-800"> 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:flex-row md:px-8">
-        <Filtros />
-
+        <Filtros/>
         <section className="min-w-0 flex-1">
-          {/* filtros ativos e ordenação */}
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {filtrosAtivos.map((f) => (

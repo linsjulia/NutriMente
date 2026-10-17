@@ -762,6 +762,10 @@ h2{
   font-weight: 600;
 }
 
+button{
+  cursor: pointer;
+}
+
 /* =============================================================
    ACESSIBILIDADE
    Cada bloco abaixo corresponde a um botão do menu de acessibilidade

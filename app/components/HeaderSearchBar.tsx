@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function HeaderSearchBar() {
   return (
     <header className="bg-linear-to-r sticky z-50 top-0 bg-blue1">
-      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 md:gap-8 md:px-8">
+      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2 md:gap-8 md:px-8">
         <Image
           src="/logo/nutrimente-v1.png"
           width={60}
@@ -15,7 +15,7 @@ export default function HeaderSearchBar() {
         />
         <form onSubmit={(e) => e.preventDefault()} className="">
           <div className="min-w-0 flex-1">
-          <div className="flex bg-white rounded-lg gap-10 p-4 shadow-md">
+          <div className="flex bg-white rounded-lg gap-10 p-2 px-4 shadow-md">
             <div className="flex flex-col">
                 <label htmlFor="busca">O que você procura?</label>
                 <input type="text" placeholder="Nome, área de atuação, tipo de profissional" className="outline-none w-78"/>

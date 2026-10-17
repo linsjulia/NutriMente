@@ -3,7 +3,6 @@ import { faArrowLeft, faArrowRight, faCalendar, faChevronDown, faClose, faSearch
 import { useState, type ReactNode } from "react";
 import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard"
 import Checkbox from "../../components/inputs/checkbox";
-import { Check } from "lucide-react";
 
 type Profissional = {
   id: number;

@@ -1,12 +1,12 @@
 "use client";
-import { AccordionContent } from "@/components/ui/accordion";
-import Checkbox from "../inputs/checkbox";
 import { 
-Accordion,
-AccordionItem,
-AccordionTrigger
+ Accordion,
+ AccordionItem,
+ AccordionTrigger,
+ AccordionContent 
 
- } from "@base-ui/react/accordion";
+} from "@/components/ui/accordion";
+import Checkbox from "../inputs/Checkbox";
 
 export default function Filtros() {
   return (
@@ -18,7 +18,7 @@ export default function Filtros() {
         </button>
       </div>
 
-      <Accordion type="multiple" defaultValue={["area"]}>
+      <Accordion defaultValue={["area"]}>
         <AccordionItem value="area">
             <AccordionTrigger>Área</AccordionTrigger>
             <AccordionContent>
@@ -27,6 +27,7 @@ export default function Filtros() {
                 <Checkbox label="Psicologia nutricional" marcado />
             </AccordionContent>
         </AccordionItem>
+       </Accordion> 
 
       <Grupo titulo="Tema">
         <div className="flex items-center rounded-md border border-slate-300 px-2 py-1.5">

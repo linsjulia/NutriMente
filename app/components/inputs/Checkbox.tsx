@@ -1,6 +1,6 @@
 
 
-export default function Opcao({ label, marcado = false }: { label: string; marcado?: boolean }) {
+export default function Checkbox({ label, marcado = false }: { label: string; marcado?: boolean }) {
   return (
     <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
       <input

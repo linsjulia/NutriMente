@@ -6,7 +6,6 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, A11y, Autoplay } from 'swiper/modules';
 import type { Swiper as SwiperClass } from 'swiper';
 import ReviewCard from '../cards/ReviewCards';
-
 import 'swiper/css'
 import 'swiper/css/pagination';
 
@@ -15,7 +14,7 @@ interface Testimonial {
   name: string;
   role: string;
   crp: string;
-  avatarLetter: string;
+  avatarSrc: string;
   quote: string;
   highlightedText?: string;
   bgLeftColor: string;
@@ -25,49 +24,48 @@ interface Testimonial {
 const testimonialsData: Testimonial[] = [
   {
     id: '1',
-    name: 'Dra. Márcia',
-    role: 'Nutricionista',
+    name: 'Marina Santos',
+    role: 'Paciente',
     crp: 'CRN 00/00000',
-    avatarLetter: 'M',
-    quote: 'Acompanhar a evolução dos pacientes ficou muito mais intuitivo e prático.',
-    bgLeftColor: 'bg-[#8A5546]',
+    avatarSrc: '/patient/marina-review.webp',
+    quote: 'Eu fazia terapia e dieta em lugares separados e nada conversava entre si. Aqui o nutricionista e a psicóloga acompanham minha rotina, e os checklists me ajudam a manter o ritmo.',
+    bgLeftColor: 'bg-blue-400',
   },
   {
     id: '2',
-    name: 'Dr. Roberto',
-    role: 'Psicólogo',
+    name: 'Dra. Camila Ribeiro ',
+    role: 'Psicóloga',
     crp: 'CRP 00/00000',
-    avatarLetter: 'R',
-    quote: 'Ferramenta indispensável para alinhar o plano alimentar com o comportamento.',
-    bgLeftColor: 'bg-[#4A6075]',
+    avatarSrc: '/doctor/camila-review.webp',
+    quote: 'Consigo organizar minha agenda, definir meus horários e valores e acompanhar a evolução de cada paciente em um só lugar. O cadastro com verificação do registro passa confiança.',
+    bgLeftColor: 'bg-sky-400',
   },
   {
     id: '3',
-    name: 'Dra. Camila',
-    role: 'Nutricionista',
+    name: 'Rafael Torres',
+    role: 'Paciente',
     crp: 'CRN 00/00000',
-    avatarLetter: 'C',
-    quote: 'Os relatórios facilitam demais a visualização do progresso semanal.',
-    bgLeftColor: 'bg-[#4D6A4D]',
+    avatarSrc: '/patient/rafael-review.webp',
+    quote: 'Agendei, paguei com o saldo da conta e a confirmação veio na hora. A consulta por vídeo funcionou sem complicação e os lembretes me ajudam a não esquecer as metas.',
+    bgLeftColor: 'bg-cyan-400',
   },
   {
     id: '4',
-    name: 'Dra. Helena',
-    role: 'Psicóloga',
+    name: 'Dr. André Menezes',
+    role: 'Nutricionista',
     crp: 'CRP 00/00000',
-    avatarLetter: 'H',
-    quote: 'Ter a rotina alimentar do paciente à mão muda a qualidade da sessão. Consigo trabalhar o que ele realmente viveu na semana.',
-    highlightedText: 'muda a qualidade da sessão.',
-    bgLeftColor: 'bg-[#6A48B0]',
+    avatarSrc: '/doctor/andre-review.jpg',
+    quote: 'Os planos personalizados e as metas quinzenais deixam o acompanhamento muito mais próximo. Trabalhar junto com a psicologia mostra resultados que a dieta sozinha não alcança.',
+    bgLeftColor: 'bg-teal-600',
   },
   {
     id: '5',
-    name: 'Dr. Lucas',
-    role: 'Nutricionista',
+    name: 'Beatriz Lima',
+    role: 'Paciente',
     crp: 'CRN 00/00000',
-    avatarLetter: 'L',
-    quote: 'Uma plataforma completa que revolucionou o meu atendimento clínico diário.',
-    bgLeftColor: 'bg-[#3B6E64]',
+    avatarSrc: '/patient/beatriz-review.webp',
+    quote: 'Poder registrar minhas refeições com foto e anotações fez diferença. Meu profissional ajusta o plano conforme eu evoluo, e eu me sinto realmente acompanhada.',
+    bgLeftColor: 'bg-emerald-400',
   },
 ];
 
@@ -85,7 +83,7 @@ export default function ReviewsSection() {
   }, [paused]);
 
   return (
-    <section className="w-full bg-[#E8EEF5] py-16 px-4 flex flex-col items-center justify-center font-sans">
+    <section className="w-full bg-blue-100 py-16 px-4 flex flex-col items-center justify-center font-sans">
 
       <div className="text-center max-w-2xl mb-12">
         <h2 className="text-3xl md:text-4xl font-fraunces mb-3">
@@ -123,29 +121,6 @@ export default function ReviewsSection() {
             </Swiper>
           </div>
 
-          <div className="flex items-center justify-center space-x-4 mt-8">
-            {testimonialsData.map((item, index) => {
-              const isActive = activeIndex === index;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => swiperRef.current?.slideToLoop(index)}
-                  aria-label={`Ver depoimento de ${item.name}`}
-                  aria-current={isActive ? 'true' : undefined}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white transition-all duration-300 shadow-md ${
-                    item.bgLeftColor
-                  } ${
-                    isActive
-                      ? 'ring-4 ring-[#112233] scale-110 shadow-lg'
-                      : 'opacity-70 hover:opacity-100 hover:scale-105'
-                  }`}
-                >
-                  {item.avatarLetter}
-                </button>
-              );
-            })}
-          </div>
 
           <div className="flex items-center gap-1 mt-4">
             {testimonialsData.map((_, index) => {
@@ -156,7 +131,7 @@ export default function ReviewsSection() {
                   key={index}
                   type="button"
                   onClick={() => swiperRef.current?.slideToLoop(index)}
-                  className="flex h-6 min-w-6 items-center justify-center"
+                  className="flex h-6 min-w-6 items-center justify-center cursor-pointer"
                   aria-label={`Ir para o depoimento ${index + 1}`}
                   aria-current={isActive ? 'true' : undefined}
                 >

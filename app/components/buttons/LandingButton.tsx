@@ -10,7 +10,7 @@ import Link from "next/link";
 export default function LandingButton({ href }: { href: string }) {
   return (
     <div>
-      <Link href={href} className="button-test w-fit mb-10 inline-flex items-center rounded-4xl p-2 font-bold">
+      <Link href={href} className="button-test w-fit mb-10 inline-flex items-center rounded-4xl p-2 font-bold cursor-pointer">
         <Image src="/icons/cronograma.png" alt="" width={64} height={64} className="mx-2 w-10" />
         <span className="button__text">Começar agora</span>
       </Link>

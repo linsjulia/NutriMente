@@ -10,6 +10,39 @@ import {
 } from "@/components/ui/accordion";
 import Checkbox from "../inputs/Checkbox";
 
+
+const area = [
+    { label: 'Psicologia'},
+    { label: 'Nutrição'},
+    { label: 'Psicologia nutricional'},
+]
+
+const tema = [
+    { label: 'Comer emocional'},
+    { label: 'Compulsão alimentar'},
+    { label: 'Anorexia e bulimia'},
+    { label: 'Imagem corporal'},
+    { label: 'Ansiedade'},
+]
+
+const publico = [
+    { label: 'Criança'},
+    { label: 'Adolescente'},
+    { label: 'Adulto'},
+    { label: 'Idoso'},
+]
+
+const horarioDisponivel = [
+    { label: 'Hoje'},
+    { label: 'Amanhã'},
+    { label: 'Fim de semana'},
+]
+
+const perfilProfissional = [
+    { label: 'Feminino'},
+    { label: 'Masculino'},
+]
+
 export default function Filtros() {
   return (
     <aside className="w-full shrink-0 rounded-2xl bg-white p-10 shadow-sm md:w-64 md:self-start lg:w-72 overflow-y-auto">
@@ -21,13 +54,12 @@ export default function Filtros() {
       </div>
 
       <Accordion defaultValue={["area"]}>
-
         <AccordionItem value="area">
             <AccordionTrigger>Área</AccordionTrigger>
             <AccordionContent>
-                <Checkbox label="Psicologia" />
-                <Checkbox label="Nutrição" />
-                <Checkbox label="Psicologia nutricional" marcado />
+                {area.map((l, index) => (
+                    <Checkbox key={index} label={l.label}/>
+                ))}
             </AccordionContent>
         </AccordionItem>
 
@@ -38,11 +70,9 @@ export default function Filtros() {
                     <input type="text" placeholder="Buscar tema..." className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400"/>
                         <FontAwesomeIcon icon={faSearch} className="h-4 w-4 text-blue-700" />
                 </div>
-                <Checkbox label="Comer emocional" marcado />
-                <Checkbox label="Compulsão alimentar" />
-                <Checkbox label="Anorexia e bulimia" />
-                <Checkbox label="Imagem corporal" />
-                <Checkbox label="Ansiedade" marcado />
+                {tema.map((l, index) => (
+                    <Checkbox key={index} label={l.label}/>
+                ))}
                 <button type="button" className="pt-1 text-xs font-semibold text-green-600">Ver todos os temas</button>
             </AccordionContent>
         </AccordionItem>
@@ -50,47 +80,55 @@ export default function Filtros() {
         <AccordionItem value="publico">
             <AccordionTrigger>Público</AccordionTrigger>
             <AccordionContent>
-                <Checkbox label="Adulto" />
-                <Checkbox label="Adolescente" />
-                <Checkbox label="Criança" />
-                <Checkbox label="Casal" />
-                <Checkbox label="Idoso" />
+                {publico.map((l, index) => (
+                    <Checkbox key={index} label={l.label}/>
+                ))}
+            </AccordionContent>
+        </AccordionItem >
+
+        <AccordionItem value="preco-consulta">
+            <AccordionTrigger>Preço da Consulta</AccordionTrigger>
+            <AccordionContent>
+                <div className="relative w-fit">
+                <input type="range"/>
+                </div>
+                <div className="flex justify-between pt-2 text-xs font-semibold text-slate-700">
+                <span>R$ 80</span>
+                <span>R$ 300</span>
+                </div>
+            </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="horario-disponivel">
+                <AccordionTrigger>Horário Disponível</AccordionTrigger>
+                <AccordionContent>
+                    {horarioDisponivel.map((l, index) => (
+                        <Checkbox key={index} label={l.label}/>
+                    ))}
+                    <Segmentos opcoes={["Manhã", "Tarde", "Noite"]} inicial="Tarde" />
+                    <button type="button" className="flex items-center gap-2 pt-1 text-xs font-semibold text-green-600">
+                        <FontAwesomeIcon icon={faCalendar} /> 
+                        Selecionar data
+                    </button>
+                </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="duracao-consulta">
+                <AccordionTrigger>Duração da Consulta</AccordionTrigger>
+                <AccordionContent>
+                    <Segmentos opcoes={["Até 30 min", "Até 60 min", "Mais de 60 min"]} inicial="Até 60 min" />
+                </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem>
+            <AccordionTrigger>Perfil do Profissional</AccordionTrigger>
+            <AccordionContent>
+                {perfilProfissional.map((l, index) => (
+                    <Checkbox key={index} label={l.label}/>
+                ))}
             </AccordionContent>
         </AccordionItem>
        </Accordion> 
-
-      <Grupo titulo="Preço da consulta">
-        <div className="relative w-fit">
-          <input type="range"/>
-        </div>
-        <div className="flex justify-between pt-2 text-xs font-semibold text-slate-700">
-          <span>R$ 80</span>
-          <span>R$ 300</span>
-        </div>
-      </Grupo>
-
-      <Grupo titulo="Horário disponível">
-        <Checkbox label="Hoje" marcado />
-        <Checkbox label="Esta semana" />
-        <Checkbox label="Fim de Semana" />
-        <Segmentos opcoes={["Manhã", "Tarde", "Noite"]} inicial="Tarde" />
-        <button
-          type="button"
-          className="flex items-center gap-2 pt-1 text-xs font-semibold text-green-600"
-        >
-          <FontAwesomeIcon icon={faCalendar} />
-          Selecionar data
-        </button>
-      </Grupo>
-
-      <Grupo titulo="Duração da consulta">
-        <Segmentos opcoes={["Até 30 min", "Até 60 min", "Mais de 60 min"]} inicial="Até 60 min" />
-      </Grupo>
-
-      <Grupo titulo="Perfil do profissional">
-        <Checkbox label="Feminino" marcado />
-        <Checkbox label="Masculino" />
-      </Grupo>
     </aside>
   );
 }

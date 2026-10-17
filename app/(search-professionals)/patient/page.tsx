@@ -1,6 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight, faCalendar, faChevronDown, faClose, faSearch } from "@fortawesome/free-solid-svg-icons";
 import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard"
+import SearchProfessionalFilter from "../../components/filter/SearchProfessionalFilter";
 
 type Profissional = {
   id: number;
@@ -77,7 +78,7 @@ export default function BuscaProfissionais() {
   return (
     <div className="min-h-screen bg-sky-50 text-slate-800"> 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:flex-row md:px-8">
-        <Filtros/>
+        <SearchProfessionalFilter/>
         <section className="min-w-0 flex-1">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">

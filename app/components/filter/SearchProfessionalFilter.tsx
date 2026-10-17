@@ -27,17 +27,19 @@ export default function Filtros() {
                 <Checkbox label="Psicologia nutricional" marcado />
             </AccordionContent>
         </AccordionItem>
+
+        <AccordionItem value="tema">
+            <AccordionTrigger>Tema</AccordionTrigger>
+            <AccordionContent>
+                <div className="flex items-center rounded-md border border-slate-300 px-2 py-1.5">
+                    <input type="text" placeholder="Buscar tema..." className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400"/>
+                        <FontAwesomeIcon icon={faSearch} className="h-4 w-4 text-blue-700" />
+                </div>
+            </AccordionContent>
+        </AccordionItem>
        </Accordion> 
 
       <Grupo titulo="Tema">
-        <div className="flex items-center rounded-md border border-slate-300 px-2 py-1.5">
-          <input
-            type="text"
-            placeholder="Buscar tema..."
-            className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400"
-          />
-          <FontAwesomeIcon icon={faSearch} className="h-4 w-4 text-blue-700" />
-        </div>
         <Checkbox label="Comer emocional" marcado />
         <Checkbox label="Compulsão alimentar" />
         <Checkbox label="Anorexia e bulimia" />

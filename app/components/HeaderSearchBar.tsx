@@ -23,7 +23,7 @@ export default function HeaderSearchBar() {
         />
         <form onSubmit={(e) => e.preventDefault()} className="">
           <div className="min-w-0 flex-1">
-          <div className="flex bg-white rounded-lg gap-10 p-4">
+          <div className="flex bg-white rounded-lg gap-10 p-4 shadow-md">
             <div className="flex flex-col">
                 <label htmlFor="busca">O que você procura?</label>
                 <input type="text" placeholder="Nome, área de atuação, tipo de profissional" className="outline-none w-78"/>

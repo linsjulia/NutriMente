@@ -17,7 +17,7 @@ export default function PatientFeaturesSection() {
         <div className="mx-auto grid w-full max-w-6xl gap-4 lg:max-w-[clamp(52rem,78vw,72rem)] lg:grid-cols-2 lg:gap-[clamp(0.75rem,1.2vw,1rem)]">
           <div className="relative min-h-80 overflow-hidden rounded-2xl shadow-lg shadow-blue-900/5">
             <Image
-              src="/patient/pacientes.jfif"
+              src="/patient/pacientes.webp"
               alt=""
               fill
               sizes="(min-width: 1024px) 576px, 100vw"

@@ -26,15 +26,15 @@ export default function HeaderSearchBar() {
         </form>
 
         <div className="ml-auto flex items-center gap-3">
-          <span className="hidden text-sm font-semibold text-white sm:inline">
-            Júlia
-          </span>
           <Image
             src="/icons/circle-user-solid-full.svg"
             width={50}
             height={50}
             alt="Icon de usuário"
           />
+          <span className="hidden text-sm font-semibold text-white sm:inline">
+            Júlia
+          </span>
         </div>
       </div>
     </header>

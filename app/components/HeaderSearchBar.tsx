@@ -1,14 +1,6 @@
 "use client";
 
 import Image from "next/image";
-
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupButton,
-} from "@/components/ui/input-group";
-import { Search } from "lucide-react";
 import Link from "next/link";
 
 export default function HeaderSearchBar() {

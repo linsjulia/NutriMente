@@ -1,4 +1,5 @@
 "use client";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { 
  Accordion,
  AccordionItem,
@@ -19,7 +20,7 @@ export default function Filtros() {
       </div>
 
       <Accordion defaultValue={["area"]}>
-        
+
         <AccordionItem value="area">
             <AccordionTrigger>Área</AccordionTrigger>
             <AccordionContent>

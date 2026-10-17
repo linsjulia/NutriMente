@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faArrowRight, faCalendar, faChevronDown, faClose, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faArrowRight, faChevronDown, faClose, } from "@fortawesome/free-solid-svg-icons";
 import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard"
 import SearchProfessionalFilter from "../../components/filter/SearchProfessionalFilter";
 

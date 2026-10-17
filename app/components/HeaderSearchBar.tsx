@@ -24,18 +24,17 @@ export default function HeaderSearchBar() {
             </div>
           </div>
         </form>
-
-        <div className="ml-auto flex items-center gap-3">
-          <Image
-            src="/icons/circle-user-solid-full.svg"
-            width={50}
-            height={50}
-            alt="Icon de usuário"
+          <Link href="/patient" className="ml-auto flex items-center gap-3">
+            <Image
+              src="/icons/circle-user-solid-full.svg"
+              width={50}
+              height={50}
+              alt="Icon de usuário"
           />
           <span className="hidden text-sm font-semibold text-white sm:inline">
             Júlia
           </span>
-        </div>
+          </Link>
       </div>
     </header>
   );

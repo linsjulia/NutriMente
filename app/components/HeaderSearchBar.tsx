@@ -1,8 +1,7 @@
 "use client";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
+
 import {
   InputGroup,
   InputGroupAddon,

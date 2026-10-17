@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight, faCalendar, faChevronDown, faClose, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { useState, type ReactNode } from "react";
@@ -218,10 +219,12 @@ function CardProfissional({ p }: { p: Profissional }) {
       {/* esquerda: foto, nome e áreas */}
       <div className="flex gap-4">
         {p.foto ? (
-          <img
+          <Image
             src={p.foto}
+            width={14}
+            height={14}
             alt={p.nome}
-            className="h-14 w-14 shrink-0 rounded-full object-cover ring-2 ring-blue-900"
+            className="shrink-0 rounded-full object-cover ring-2 ring-blue-900"
           />
         ) : (
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-100 font-semibold text-blue-900 ring-2 ring-blue-900">

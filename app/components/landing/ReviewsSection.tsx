@@ -56,7 +56,7 @@ const testimonialsData: Testimonial[] = [
     crp: 'CRP 00/00000',
     avatarSrc: '/doctor/andre-review.jpg',
     quote: 'Os planos personalizados e as metas quinzenais deixam o acompanhamento muito mais próximo. Trabalhar junto com a psicologia mostra resultados que a dieta sozinha não alcança.',
-    bgLeftColor: 'bg-teal-500',
+    bgLeftColor: 'bg-teal-600',
   },
   {
     id: '5',

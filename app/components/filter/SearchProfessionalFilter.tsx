@@ -35,27 +35,33 @@ export default function Filtros() {
                     <input type="text" placeholder="Buscar tema..." className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400"/>
                         <FontAwesomeIcon icon={faSearch} className="h-4 w-4 text-blue-700" />
                 </div>
+                <Checkbox label="Comer emocional" marcado />
+                <Checkbox label="Compulsão alimentar" />
+                <Checkbox label="Anorexia e bulimia" />
+                <Checkbox label="Imagem corporal" />
+                <Checkbox label="Ansiedade" marcado />
+                <button type="button" className="pt-1 text-xs font-semibold text-green-600">Ver todos os temas</button>
+            </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="publico">
+            <AccordionTrigger>Público</AccordionTrigger>
+            <AccordionContent>
+                <Checkbox label="Adulto" />
+                <Checkbox label="Adolescente" />
+                <Checkbox label="Criança" />
+                <Checkbox label="Casal" />
+                <Checkbox label="Idoso" />
             </AccordionContent>
         </AccordionItem>
        </Accordion> 
 
       <Grupo titulo="Tema">
-        <Checkbox label="Comer emocional" marcado />
-        <Checkbox label="Compulsão alimentar" />
-        <Checkbox label="Anorexia e bulimia" />
-        <Checkbox label="Imagem corporal" />
-        <Checkbox label="Ansiedade" marcado />
-        <button type="button" className="pt-1 text-xs font-semibold text-green-600">
-          Ver todos os temas
-        </button>
+
       </Grupo>
 
       <Grupo titulo="Público" resumo="adulto..." abertoInicial={false}>
-        <Checkbox label="Adulto" />
-        <Checkbox label="Adolescente" />
-        <Checkbox label="Criança" />
-        <Checkbox label="Casal" />
-        <Checkbox label="Idoso" />
+ 
       </Grupo>
 
       <Grupo titulo="Preço da consulta">

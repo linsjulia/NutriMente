@@ -19,6 +19,7 @@ export default function Filtros() {
       </div>
 
       <Accordion defaultValue={["area"]}>
+        
         <AccordionItem value="area">
             <AccordionTrigger>Área</AccordionTrigger>
             <AccordionContent>
@@ -55,14 +56,6 @@ export default function Filtros() {
             </AccordionContent>
         </AccordionItem>
        </Accordion> 
-
-      <Grupo titulo="Tema">
-
-      </Grupo>
-
-      <Grupo titulo="Público" resumo="adulto..." abertoInicial={false}>
- 
-      </Grupo>
 
       <Grupo titulo="Preço da consulta">
         <div className="relative w-fit">

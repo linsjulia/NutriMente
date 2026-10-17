@@ -70,41 +70,6 @@ const profissionais: Profissional[] = [
 ];
 
 
-function Grupo({
-  titulo,
-  resumo,
-  abertoInicial = true,
-  children,
-}: {
-  titulo: string;
-  resumo?: string;
-  abertoInicial?: boolean;
-  children: ReactNode;
-}) {
-  const [aberto, setAberto] = useState(abertoInicial);
-  return (
-    <section className="border-t border-slate-200 py-4 first:border-t-0 first:pt-0">
-      <button
-        type="button"
-        onClick={() => setAberto(!aberto)}
-        aria-expanded={aberto}
-        className="flex w-full items-center justify-between text-left font-semibold text-blue-900"
-      >
-        <span>{titulo}</span>
-        <span className="flex items-center gap-2">
-          {!aberto && resumo && (
-            <span className="text-xs font-normal text-slate-400">{resumo}</span>
-          )}
-          <FontAwesomeIcon
-            icon={faChevronDown}
-            className={`h-4 w-4 transition-transform ${aberto ? "rotate-180" : ""}`}
-          />
-        </span>
-      </button>
-      {aberto && <div className="mt-3 space-y-2">{children}</div>}
-    </section>
-  );
-}
 
 
 /* ---------- página ---------- */

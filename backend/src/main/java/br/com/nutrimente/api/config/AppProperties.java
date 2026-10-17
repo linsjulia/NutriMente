@@ -1,5 +1,7 @@
 package br.com.nutrimente.api.config;
 
+import java.util.List;
+
 import java.time.Duration;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -35,7 +37,13 @@ public record AppProperties(
 			@NotNull Duration expiration) {
 	}
 
-	public record Mail(@NotBlank String from) {
+	/**
+	 * skipDomains: domínios para os quais NÃO se envia e-mail. Em produção vem
+	 * "nutrimente.demo" (contas de demonstração: o endereço não existe e o
+	 * provedor contaria como devolvido, o que derruba a reputação do domínio).
+	 * No PC fica vazio, e o Mailpit mostra tudo na apresentação.
+	 */
+	public record Mail(@NotBlank String from, List<String> skipDomains) {
 	}
 
 	/** apiKey vazio = envio de logs desligado (útil em testes) */

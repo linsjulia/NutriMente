@@ -1,5 +1,6 @@
 package br.com.nutrimente.api.auth;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -7,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import com.jayway.jsonpath.JsonPath;
 
 import br.com.nutrimente.api.IntegrationTest;
 
@@ -66,6 +69,9 @@ class AuthIntegrationTest extends IntegrationTest {
 		String cpf = randomCpf();
 		postJson("/api/auth/register/patient", patientJson(email, cpf)).andExpect(status().isCreated());
 		track(email);
+		// Duplicidade vale para contas confirmadas (as pendentes são liberadas: ver pendingSignupIsReleased)
+		postJson("/api/auth/verify-email", "{\"token\": \"%s\"}".formatted(capturedVerificationToken(email)))
+				.andExpect(status().isOk());
 
 		postJson("/api/auth/register/patient", patientJson(email, randomCpf()))
 				.andExpect(status().isConflict())
@@ -73,6 +79,88 @@ class AuthIntegrationTest extends IntegrationTest {
 		postJson("/api/auth/register/patient", patientJson(uniqueEmail(), cpf))
 				.andExpect(status().isConflict())
 				.andExpect(jsonPath("$.errors.cpf").value("Este CPF já está cadastrado"));
+	}
+
+	@Test
+	@DisplayName("cadastro que nunca confirmou o e-mail não prende o CPF nem o e-mail")
+	void pendingSignupIsReleased() throws Exception {
+		String cpf = randomCpf();
+		String firstEmail = uniqueEmail();
+		postJson("/api/auth/register/patient", patientJson(firstEmail, cpf)).andExpect(status().isCreated());
+		Long first = track(firstEmail);
+
+		// Desistiu de confirmar e se cadastrou de novo com outro e-mail e o mesmo CPF
+		String secondEmail = uniqueEmail();
+		postJson("/api/auth/register/patient", patientJson(secondEmail, cpf)).andExpect(status().isCreated());
+		track(secondEmail);
+		// O cadastro antigo foi anonimizado (como na exclusão de conta)
+		assertThat(jdbc.queryForObject("SELECT email FROM users WHERE id = ?", String.class, first))
+				.startsWith("removido-");
+		assertThat(jdbc.queryForObject("SELECT cpf_hash FROM users WHERE id = ?", String.class, first)).isNull();
+
+		// O mesmo vale para o e-mail: refazer o cadastro com ele (ex.: outra senha) funciona
+		postJson("/api/auth/register/patient", patientJson(secondEmail, randomCpf())).andExpect(status().isCreated());
+		track(secondEmail);
+		assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM users WHERE email = ?", Integer.class, secondEmail))
+				.isEqualTo(1);
+
+		// Profissional pendente libera também o número do conselho
+		String proEmail = uniqueEmail();
+		String proCpf = randomCpf();
+		String document = randomDocument();
+		postJson("/api/auth/register/professional", professionalJson(proEmail, proCpf, "NUTRICIONISTA", document))
+				.andExpect(status().isCreated());
+		track(proEmail);
+		String proEmail2 = uniqueEmail();
+		postJson("/api/auth/register/professional", professionalJson(proEmail2, proCpf, "NUTRICIONISTA", document))
+				.andExpect(status().isCreated());
+		track(proEmail2);
+	}
+
+	@Test
+	@DisplayName("confirmar o e-mail já abre a sessão")
+	void verifyEmailStartsSession() throws Exception {
+		String email = uniqueEmail();
+		postJson("/api/auth/register/patient", patientJson(email, randomCpf())).andExpect(status().isCreated());
+		track(email);
+
+		String body = postJson("/api/auth/verify-email", "{\"token\": \"%s\"}".formatted(capturedVerificationToken(email)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value(containsString("confirmado")))
+				.andExpect(jsonPath("$.user.role").value("PATIENT"))
+				.andReturn().getResponse().getContentAsString();
+		String token = JsonPath.read(body, "$.accessToken");
+		getAs("/api/me", token).andExpect(status().isOk()).andExpect(jsonPath("$.email").value(email));
+	}
+
+	@Test
+	@DisplayName("ticket do cadastro: espera a confirmação e então abre a sessão uma única vez")
+	void registrationTicket() throws Exception {
+		String email = uniqueEmail();
+		String body = postJson("/api/auth/register/patient", patientJson(email, randomCpf()))
+				.andExpect(status().isCreated())
+				.andReturn().getResponse().getContentAsString();
+		track(email);
+		String ticket = JsonPath.read(body, "$.registrationTicket");
+		String ticketJson = "{\"ticket\": \"%s\"}".formatted(ticket);
+
+		// Ainda não confirmou: 204 (a tela pergunta de novo depois)
+		postJson("/api/auth/registration-session", ticketJson).andExpect(status().isNoContent());
+
+		postJson("/api/auth/verify-email", "{\"token\": \"%s\"}".formatted(capturedVerificationToken(email)))
+				.andExpect(status().isOk());
+
+		postJson("/api/auth/registration-session", ticketJson)
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.accessToken").value(notNullValue()))
+				.andExpect(jsonPath("$.user.role").value("PATIENT"));
+		// Uso único
+		postJson("/api/auth/registration-session", ticketJson)
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.code").value("INVALID_TOKEN"));
+		// Ticket inventado
+		postJson("/api/auth/registration-session", "{\"ticket\": \"nao-existe\"}")
+				.andExpect(status().isBadRequest());
 	}
 
 	@Test

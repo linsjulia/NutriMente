@@ -21,6 +21,8 @@ const day = (iso: string) => iso.split("-").reverse().slice(0, 2).join("/");
 export default async function PlanPage({ params }: PageProps<"/plans/[id]">) {
   const session = await verifySession();
   const { id } = await params;
+  // Só números: "/plans/abc" é página inexistente, não erro de formulário
+  if (!/^\d+$/.test(id)) notFound();
   const result = await api<PlanDetail>(`/api/plans/${Number(id)}`, { token: session.token });
   if (!result.ok) {
     if (result.error.status === 404) notFound();

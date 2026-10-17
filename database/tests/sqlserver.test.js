@@ -81,7 +81,7 @@ test("todas as 29 tabelas foram criadas", async () => {
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar", "V009__documentos_e_endereco"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar", "V009__documentos_e_endereco", "V010__ticket_de_cadastro"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -388,4 +388,14 @@ test("documentos do profissional (V009): só tipos de arquivo aceitos", () =>
              VALUES (${professional}, 'REGISTRO_CONSELHO', 'x.bin', '${type}')`);
     await assertFails(insert("application/zip"), /ck_prof_docs_content_type/);
     await insert("application/pdf");
+  }));
+
+test("ticket de cadastro (V010): user_tokens aceita REGISTRATION e nada inventado", () =>
+  inTransaction(async (query) => {
+    const { patient } = await createPatientAndProfessional(query);
+    const insert = (purpose, hash) =>
+      query(`INSERT INTO user_tokens (user_id, purpose, token_hash, expires_at)
+             VALUES (${patient}, '${purpose}', '${hash}', DATEADD(HOUR, 24, SYSUTCDATETIME()))`);
+    await insert("REGISTRATION", "a".repeat(64));
+    await assertFails(insert("QUALQUER_COISA", "b".repeat(64)), /ck_user_tokens_purpose/);
   }));

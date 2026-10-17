@@ -291,19 +291,25 @@ O script `deploy/backup.sh` salva o SQL Server, o MongoDB e as **fotos do diári
 bash deploy/backup.sh
 ```
 
-Para rodar **todo dia às 3h**:
+Para rodar **todo dia**, use o `deploy/backup-se-atrasado.sh` **de hora em hora**: ele só faz o backup quando o último tem mais de 23 horas. Um horário fixo (ex.: 3h) perde o dia em que a máquina está desligada nesse horário, o que acontece com VM Spot.
 
 ```bash
 crontab -e
 ```
 
-Acrescente a linha:
+Acrescente a linha (troque o caminho do `BACKUP_DIR` se quiser):
 
 ```
-0 3 * * * cd /opt/nutrimente && bash deploy/backup.sh >> /var/log/nutrimente-backup.log 2>&1
+0 * * * * cd /opt/nutrimente && BACKUP_DIR=$HOME/backups-nutrimente bash deploy/backup-se-atrasado.sh >> $HOME/backup-nutrimente.log 2>&1
 ```
 
-> 💾 Backup no mesmo servidor não protege se o VPS for perdido. Copie os arquivos para fora de tempos em tempos (ex.: `scp root@203.0.113.10:/root/backups-nutrimente/* .` no seu PC). Ative também os **backups semanais/snapshots do VPS** no hPanel.
+> 💾 **Cópia fora do servidor.** Backup só no servidor não protege se a máquina for perdida. No seu PC (Git Bash), de tempos em tempos (ex.: toda semana):
+>
+> ```bash
+> bash deploy/baixar-backup.sh            # copia o backup mais recente para ~/backups-nutrimente
+> ```
+>
+> Os arquivos têm dados pessoais (parte cifrada): guarde num disco com criptografia e não compartilhe.
 
 **Restaurar o SQL Server** a partir de um `.bak`:
 
@@ -316,6 +322,19 @@ docker compose start api
 ```
 
 (o comando pede a senha `MSSQL_SA_PASSWORD`)
+
+### Dados de demonstração em produção (profissionais para testes)
+
+O mesmo script do PC (`database/demo/seed-demo.mjs`) cria 8 profissionais aprovados, pacientes de exemplo, consultas e avaliações, todos com e-mail `@nutrimente.demo` e senha `Demo1234`. Em produção ele roda **dentro do servidor**, num contêiner na rede do compose (senhas e banco não saem da máquina):
+
+```bash
+cd /opt/nutrimente
+sudo docker run --rm --network nutrimente_default --env-file .env   -e API_URL=http://api:8080 -e DB_HOST=sqlserver -e MSSQL_PORT=1433   -v "$PWD":/repo -w /repo/database/demo node:24-alpine   sh -c "npm ci --silent && node seed-demo.mjs"
+```
+
+- Pode rodar de novo quando quiser: ele apaga só as contas `@nutrimente.demo` (e o que depende delas) e recria.
+- Essas contas **não recebem e-mail** em produção (`MAIL_SKIP_DOMAINS=nutrimente.demo`, padrão do `docker-compose.prod.yml`).
+- Logins prontos: `ana@nutrimente.demo` (paciente) e `camila@nutrimente.demo` (nutricionista), senha `Demo1234`.
 
 ## 11. Comandos do dia a dia
 

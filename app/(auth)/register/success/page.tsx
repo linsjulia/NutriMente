@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MailCheck } from "lucide-react";
 import ResendVerification from "@/app/components/auth/ResendVerification";
+import RegistrationWatcher from "./RegistrationWatcher";
 
 export const metadata: Metadata = { title: "Confirme seu e-mail | NutriMente" };
 
@@ -23,6 +24,7 @@ export default async function RegisterSuccessPage({ searchParams }: PageProps<"/
           seu perfil enquanto isso.
         </p>
       )}
+      <RegistrationWatcher />
       <p className="text-sm text-gray-700">Não chegou em alguns minutos? Confira a caixa de spam ou de promoções.</p>
       {process.env.NODE_ENV !== "production" && (
         <p className="text-sm text-gray-700">

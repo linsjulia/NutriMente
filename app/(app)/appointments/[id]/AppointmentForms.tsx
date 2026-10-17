@@ -26,6 +26,21 @@ function TextArea({ name, label, hint, error, defaultValue, rows = 3, max }: {
 /** Confirmar / concluir (um clique) e cancelar (com motivo, confirmação na própria tela) */
 export function AppointmentActions({ appointment: a, isPatient }: { appointment: Appointment; isPatient: boolean }) {
   const [state, action, pending] = useActionState<FormState, FormData>(appointmentAction, {});
+  // Paciente com consulta marcada para daqui a menos de 24 h: a API não deixa
+  // mais cancelar pelo site. Sem este aviso, o botão só "sumia" sem explicação.
+  const lateForPatient =
+    isPatient && !a.canCancel && (a.status === "SCHEDULED" || a.status === "CONFIRMED") && new Date(a.startsAt) > new Date();
+  if (lateForPatient) {
+    return (
+      <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">
+        <FormAlert ok={state.ok} message={state.message} />
+        <p className="rounded-xl bg-blue3 p-4 text-sm">
+          Faltam menos de 24 horas para a consulta, então o cancelamento e a remarcação pelo site não estão mais
+          disponíveis. Se precisar desmarcar, fale com {a.professional.name}.
+        </p>
+      </div>
+    );
+  }
   if (!a.canConfirm && !a.canComplete && !a.canCancel) return state.message ? <FormAlert ok={state.ok} message={state.message} /> : null;
   return (
     <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">

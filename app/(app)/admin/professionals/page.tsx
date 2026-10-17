@@ -4,6 +4,7 @@ import { Check, X } from "lucide-react";
 import { reviewProfessional } from "@/app/actions/account";
 import { api } from "@/app/lib/api";
 import { requireRole } from "@/app/lib/dal";
+import CouncilCheck from "./CouncilCheck";
 import { COUNCIL, PROFESSION_LABELS, STATUS_LABELS, type Page, type ProfessionalForReview, type VerificationStatus } from "@/app/lib/types";
 
 export const metadata: Metadata = { title: "Verificação de profissionais | NutriMente" };
@@ -72,6 +73,9 @@ export default async function AdminProfessionalsPage({ searchParams }: PageProps
                   {PROFESSION_LABELS[p.type]} · <strong>{COUNCIL[p.type]} {p.document}</strong>
                 </p>
                 <p className="text-sm text-gray-600">Cadastro em {new Date(p.createdAt + "Z").toLocaleDateString("pt-BR")}</p>
+                <div className="mt-3">
+                  <CouncilCheck type={p.type} document={p.document} name={p.name} />
+                </div>
               </div>
               {/* Cada botão é um formulário: funciona até sem JavaScript */}
               <div className="flex flex-wrap gap-2">

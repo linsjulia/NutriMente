@@ -18,8 +18,15 @@ export const metadata: Metadata = { title: "Início | NutriMente" };
  * - PROFESSIONAL: situação da verificação + bio, valor da consulta e especialidades
  * - ADMIN: vai direto para a fila de aprovação
  */
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: PageProps<"/dashboard">) {
   const me = await getMe();
+  const { emailConfirmado } = await searchParams;
+  // Veio do link de confirmação (ou a aba do cadastro entrou sozinha)
+  const welcome = emailConfirmado ? (
+    <p role="status" className="rounded-xl border border-green-600 bg-green-50 p-4 text-green-900">
+      E-mail confirmado! Bem-vindo ao NutriMente.
+    </p>
+  ) : null;
   if (me.role === "ADMIN") redirect("/admin/professionals");
 
   const firstName = me.name.split(" ")[0];
@@ -35,6 +42,7 @@ export default async function DashboardPage() {
     ]);
     return (
       <div className="flex flex-col gap-8">
+        {welcome}
         <div>
           <h1 className="font-fraunces text-3xl font-medium sm:text-4xl">Olá, {firstName}!</h1>
           <p className="mt-2 text-gray-700">
@@ -97,6 +105,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      {welcome}
       <div>
         <h1 className="font-fraunces text-3xl font-medium sm:text-4xl">Olá, {firstName}!</h1>
         <p className="mt-2 text-gray-700">Que bom ter você aqui. Por onde quer começar?</p>

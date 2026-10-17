@@ -71,6 +71,31 @@ export async function deleteSession() {
   (await cookies()).delete(SESSION_COOKIE);
 }
 
+/**
+ * Ticket do cadastro (vem da API no cadastro). Fica só neste navegador, num
+ * cookie que o JavaScript da página não lê: a tela "Confirme seu e-mail" usa
+ * para entrar sozinha quando a pessoa confirmar o e-mail (mesmo pelo celular).
+ */
+export const REGISTRATION_COOKIE = "nutrimente_registration";
+
+export async function saveRegistrationTicket(ticket: string) {
+  (await cookies()).set(REGISTRATION_COOKIE, ticket, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 24 * 60 * 60,
+  });
+}
+
+export async function getRegistrationTicket() {
+  return (await cookies()).get(REGISTRATION_COOKIE)?.value;
+}
+
+export async function deleteRegistrationTicket() {
+  (await cookies()).delete(REGISTRATION_COOKIE);
+}
+
 /** Página inicial de cada papel depois do login */
 export function homeFor(role: Role) {
   return role === "ADMIN" ? "/admin/professionals" : "/dashboard";

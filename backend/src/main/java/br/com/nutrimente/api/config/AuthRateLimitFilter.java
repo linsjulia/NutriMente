@@ -46,6 +46,12 @@ public class AuthRateLimitFilter extends OncePerRequestFilter {
 
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
+		// A tela "Confirme seu e-mail" pergunta a cada poucos segundos se a
+		// confirmação já aconteceu; o ticket é aleatório (256 bits), não há o
+		// que adivinhar, e contar essas consultas gastaria o limite do login.
+		if (request.getRequestURI().equals("/api/auth/registration-session")) {
+			return true;
+		}
 		return !("POST".equals(request.getMethod()) && request.getRequestURI().startsWith("/api/auth/"));
 	}
 

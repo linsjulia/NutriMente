@@ -2,6 +2,7 @@ package br.com.nutrimente.api.auth;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -78,8 +79,9 @@ public class AuthService {
 	// Cadastro
 	// =========================================================
 
+	/** Devolve o ticket de cadastro (ver {@link #registrationSession}) */
 	@Transactional
-	public void registerPatient(RegisterPatientRequest request, String ip) {
+	public String registerPatient(RegisterPatientRequest request, String ip) {
 		String email = normalizeEmail(request.email());
 		String cpf = Digits.only(request.cpf());
 		String cpfHash = cipher.blindIndex(cpf);
@@ -91,11 +93,12 @@ public class AuthService {
 		patients.save(new Patient(user));
 
 		saveConsents(user, ip, true);
-		afterRegister(user);
+		return afterRegister(user);
 	}
 
+	/** Devolve o ticket de cadastro (ver {@link #registrationSession}) */
 	@Transactional
-	public void registerProfessional(RegisterProfessionalRequest request, String ip) {
+	public String registerProfessional(RegisterProfessionalRequest request, String ip) {
 		String email = normalizeEmail(request.email());
 		String cpf = Digits.only(request.cpf());
 		String document = CouncilNumber.normalize(request.professionalType(), request.documentProfessional())
@@ -115,16 +118,43 @@ public class AuthService {
 		professionals.save(new Professional(user, request.professionalType(), document, Digits.trimToNull(request.bio())));
 
 		saveConsents(user, ip, false);
-		afterRegister(user);
+		return afterRegister(user);
 	}
 
+	/**
+	 * E-mail e CPF não podem se repetir. A exceção é o cadastro que ficou
+	 * esperando a confirmação do e-mail: quem desistiu dele (por exemplo, para
+	 * usar outro e-mail) ficava com o CPF "preso" e não conseguia se cadastrar
+	 * de novo. Essa conta nunca entrou no sistema (sem confirmação não há
+	 * login), então não tem dados além do cadastro: é anonimizada, como na
+	 * exclusão de conta, e o cadastro novo segue.
+	 */
 	private void ensureUnique(String email, String cpfHash) {
-		if (users.existsByEmail(email)) {
+		User byEmail = users.findByEmail(email).orElse(null);
+		if (byEmail != null && !releaseIfPending(byEmail)) {
 			throw ApiException.conflict("email", "Este e-mail já está cadastrado");
 		}
-		if (users.existsByCpfHash(cpfHash)) {
+		User byCpf = users.findByCpfHash(cpfHash).orElse(null);
+		if (byCpf != null && !releaseIfPending(byCpf)) {
 			throw ApiException.conflict("cpf", "Este CPF já está cadastrado");
 		}
+	}
+
+	/** Anonimiza a conta se ela nunca confirmou o e-mail; devolve se liberou */
+	private boolean releaseIfPending(User user) {
+		if (user.getRole() == Role.ADMIN || user.isEmailVerified()) {
+			return false;
+		}
+		professionals.findById(user.getId()).ifPresent(professional -> professional.anonymize());
+		for (TokenPurpose purpose : TokenPurpose.values()) {
+			tokens.invalidateAll(user, purpose);
+		}
+		user.anonymize();
+		// Grava já: o INSERT do cadastro novo (mesmo e-mail/CPF) vem logo depois
+		users.flush();
+		Long id = user.getId();
+		AfterCommit.run(() -> logClient.audit(id, user.getRole().name(), "ANONYMIZE_PENDING", "users", id, null));
+		return true;
 	}
 
 	private void saveConsents(User user, String ip, boolean healthData) {
@@ -135,12 +165,13 @@ public class AuthService {
 		}
 	}
 
-	private void afterRegister(User user) {
+	private String afterRegister(User user) {
 		String token = createToken(user, TokenPurpose.EMAIL_VERIFICATION);
 		AfterCommit.run(() -> {
 			emailService.sendEmailVerification(user.getEmail(), user.getName(), token);
 			logClient.audit(user.getId(), user.getRole().name(), "CREATE", "users", user.getId(), user.getId());
 		});
+		return createToken(user, TokenPurpose.REGISTRATION);
 	}
 
 	// =========================================================
@@ -179,8 +210,12 @@ public class AuthService {
 					"Confirme seu e-mail para entrar. Procure a mensagem que enviamos para " + user.getEmail() + ".");
 		}
 
-		user.registerSuccessfulLogin();
 		logClient.access("LOGIN", true, user.getId(), email, ip, null);
+		return startSession(user);
+	}
+
+	private LoginResponse startSession(User user) {
+		user.registerSuccessfulLogin();
 		JwtService.IssuedToken token = jwtService.issue(user);
 		return new LoginResponse(token.value(), token.expiresAt(),
 				new SessionUser(user.getId(), user.getName(), user.getRole()));
@@ -195,10 +230,40 @@ public class AuthService {
 	// Confirmação de e-mail
 	// =========================================================
 
+	/**
+	 * Confirma o e-mail e já abre a sessão: quem clicou no link provou que é
+	 * dono do e-mail (como no "esqueci a senha"), então não precisa digitar a
+	 * senha de novo. O link é de uso único e vence em 24 horas.
+	 */
 	@Transactional
-	public void verifyEmail(String rawToken) {
-		UserToken token = consume(rawToken, TokenPurpose.EMAIL_VERIFICATION);
-		token.getUser().verifyEmail();
+	public LoginResponse verifyEmail(String rawToken, String ip) {
+		User user = consume(rawToken, TokenPurpose.EMAIL_VERIFICATION).getUser();
+		user.verifyEmail();
+		AfterCommit.run(() -> logClient.access("LOGIN_EMAIL_VERIFICATION", true, user.getId(), user.getEmail(), ip, null));
+		return startSession(user);
+	}
+
+	/**
+	 * Ticket de cadastro: a tela "Confirme seu e-mail" pergunta de tempos em
+	 * tempos se a confirmação já aconteceu (por exemplo, pelo celular). Se
+	 * ainda não, devolve vazio. Se sim, gasta o ticket e abre a sessão naquele
+	 * navegador. O ticket fica num cookie só do navegador que fez o cadastro
+	 * (e que acabou de digitar a senha).
+	 */
+	@Transactional
+	public Optional<LoginResponse> registrationSession(String rawTicket, String ip) {
+		UserToken ticket = tokens.findByHash(SecureTokens.hash(rawTicket), TokenPurpose.REGISTRATION)
+				.filter(t -> t.isUsable())
+				.filter(t -> t.getUser().canLogin())
+				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "INVALID_TOKEN",
+						"Este cadastro expirou. Entre com seu e-mail e senha."));
+		User user = ticket.getUser();
+		if (!user.isEmailVerified()) {
+			return Optional.empty();
+		}
+		ticket.markUsed();
+		AfterCommit.run(() -> logClient.access("LOGIN_REGISTRATION_TICKET", true, user.getId(), user.getEmail(), ip, null));
+		return Optional.of(startSession(user));
 	}
 
 	/**

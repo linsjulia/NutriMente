@@ -12,18 +12,7 @@ export default function VerifyEmailForm({ token }: { token: string }) {
   const resultRef = useRef<HTMLDivElement>(null);
   useFocusOnError(resultRef, state);
 
-  if (state.ok) {
-    return (
-      <div className="flex flex-col gap-6">
-        <h1 className="font-fraunces text-4xl font-medium">E-mail confirmado!</h1>
-        <FormAlert ok message={state.message} />
-        <Link href="/login" className="btn-primary self-start">
-          Entrar
-        </Link>
-      </div>
-    );
-  }
-
+  // Se der certo, a ação já entra na conta e leva para o início (não volta para cá)
   return (
     <div ref={resultRef} className="flex flex-col gap-6">
       <h1 className="font-fraunces text-4xl font-medium">Confirmar e-mail</h1>

@@ -26,6 +26,8 @@ export const metadata: Metadata = { title: "Consulta | NutriMente" };
 export default async function AppointmentPage({ params, searchParams }: PageProps<"/appointments/[id]">) {
   const session = await verifySession();
   const { id } = await params;
+  // Só números: "/appointments/abc" é página inexistente, não erro de formulário
+  if (!/^\d+$/.test(id)) notFound();
   const { agendada } = await searchParams;
   const result = await api<Appointment>(`/api/appointments/${Number(id)}`, { token: session.token });
   if (!result.ok) {

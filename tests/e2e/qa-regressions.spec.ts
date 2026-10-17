@@ -89,6 +89,20 @@ test.describe("com back-end", () => {
     await deleteAccountViaApi(email);
   });
 
+  test("área logada: item inexistente ou de outra conta mostra 404 com um só cabeçalho", async ({ page }) => {
+    const email = uniqueEmail("naoencontrado");
+    await registerPatient(page, email);
+    await confirmEmail(page, email, { stayLoggedIn: true });
+    for (const path of ["/plans/abc", "/appointments/999999", "/plans/999999"]) {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { name: "Não encontramos esta página" })).toBeVisible();
+      // Antes vinha o cabeçalho do site público junto (dois "Sair")
+      await expect(page.getByRole("button", { name: "Sair" })).toHaveCount(1);
+      await expect(page.getByText("Revise os campos destacados")).toHaveCount(0);
+    }
+    await deleteAccountViaApi(email);
+  });
+
   test("login não redireciona para fora do site (?next=//site-falso)", async ({ page }) => {
     const email = uniqueEmail("redirect");
     await registerPatient(page, email);

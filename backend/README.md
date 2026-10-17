@@ -27,7 +27,8 @@ Todo mundo precisa **confirmar o e-mail** antes do primeiro login.
 |---|---|---|
 | POST | `/api/auth/register/patient` | Cadastro de cliente |
 | POST | `/api/auth/register/professional` | Cadastro de profissional |
-| POST | `/api/auth/verify-email` | Confirma o e-mail (`{"token": "..."}` do link) |
+| POST | `/api/auth/verify-email` | Confirma o e-mail (`{"token": "..."}` do link) e já devolve a sessão |
+| POST | `/api/auth/registration-session` | Troca o ticket do cadastro por uma sessão quando o e-mail for confirmado (204 enquanto não) |
 | POST | `/api/auth/resend-verification` | Reenvia o e-mail de confirmação |
 | POST | `/api/auth/login` | Login: devolve o token JWT |
 | POST | `/api/auth/forgot-password` | Envia o link de redefinição de senha |

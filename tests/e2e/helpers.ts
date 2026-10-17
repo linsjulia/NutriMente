@@ -93,11 +93,17 @@ export async function registerPatient(page: Page, email: string, name = "Ana Pac
   await expect(page.getByRole("heading", { name: "Confirme seu e-mail" })).toBeVisible();
 }
 
-/** Abre o link do e-mail e confirma */
-export async function confirmEmail(page: Page, email: string) {
+/**
+ * Abre o link do e-mail e confirma. A confirmação já entra na conta e leva
+ * para o início; por padrão saímos em seguida (limpando os cookies), para o
+ * teste seguir pelo login como antes.
+ */
+export async function confirmEmail(page: Page, email: string, { stayLoggedIn = false } = {}) {
   await page.goto(await linkFromEmail(email, "/verify-email"));
   await page.getByRole("button", { name: "Confirmar meu e-mail" }).click();
-  await expect(page.getByRole("heading", { name: "E-mail confirmado!" })).toBeVisible();
+  await expect(page).toHaveURL(/\?emailConfirmado=1$/);
+  await expect(page.getByRole("status").filter({ hasText: "E-mail confirmado!" })).toBeVisible();
+  if (!stayLoggedIn) await page.context().clearCookies();
 }
 
 /** Limpeza: exclui a conta pela API (os dados pessoais são anonimizados) */

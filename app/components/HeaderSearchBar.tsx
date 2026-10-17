@@ -20,7 +20,7 @@ export default function HeaderSearchBar() {
                 <label htmlFor="busca">O que você procura?</label>
                 <input type="text" placeholder="Nome, área de atuação, tipo de profissional" className="outline-none w-78"/>
             </div>
-            <Link href="/" className="button bg-green-600 rounded-lg p-3 px-5 text-white font-bold transition hover:bg-green-600/80">Buscar</Link>
+            <Link href="/" className="button bg-green-500 rounded-lg p-3 px-5 text-white font-bold transition hover:bg-green-500/80">Buscar</Link>
             </div>
           </div>
         </form>

@@ -9,8 +9,10 @@ import {
 
 } from "@/components/ui/accordion";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Slider } from "@/components/ui/slider";
 import Checkbox from "../inputs/Checkbox";
 import Link from "next/link";
+import { useState } from "react";
 
 const area = [
     { label: 'Psicologia'},
@@ -44,8 +46,9 @@ const perfilProfissional = [
     { label: 'Masculino'},
 ]
 
-export default function Filtros() {
-  return (
+export default function SearchProfessionalFilter() {
+    const [value, setValue] = useState([0])
+    return (
     <aside className="w-full shrink-0 rounded-2xl bg-white p-10 shadow-sm md:w-64 md:self-start lg:w-72 overflow-y-auto">
       <div className="mb-4 flex items-baseline justify-between">
         <h2 className="text-lg font-bold text-blue-900">Filtros</h2>
@@ -91,13 +94,16 @@ export default function Filtros() {
 
             <AccordionItem value="preco-consulta">
                 <AccordionTrigger>Preço da Consulta</AccordionTrigger>
-                <AccordionContent>
-                    <div className="relative w-fit">
-                    <input type="range"/>
-                    </div>
+                <AccordionContent className="p-2">
+                    <Slider
+                        value={value}
+                        onValueChange={(value) => setValue(value as number[])}
+                        min={60}
+                        max={250}
+                    />
                     <div className="flex justify-between pt-2 text-xs font-semibold text-slate-700">
-                    <span>R$ 80</span>
-                    <span>R$ 300</span>
+                        <span>R$60</span>
+                        <span>R${value}</span>
                     </div>
                 </AccordionContent>
             </AccordionItem>

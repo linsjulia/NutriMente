@@ -8,8 +8,9 @@ import {
  AccordionContent 
 
 } from "@/components/ui/accordion";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Checkbox from "../inputs/Checkbox";
-
+import Link from "next/link";
 
 const area = [
     { label: 'Psicologia'},
@@ -68,7 +69,9 @@ export default function Filtros() {
             <AccordionContent>
                 <div className="flex items-center rounded-md border border-slate-300 px-2 py-1.5">
                     <input type="text" placeholder="Buscar tema..." className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400"/>
-                        <FontAwesomeIcon icon={faSearch} className="h-4 w-4 text-blue-700" />
+                        <Link href="">
+                            <FontAwesomeIcon icon={faSearch} className="h-4 w-4" />
+                        </Link>
                 </div>
                 {tema.map((l, index) => (
                     <Checkbox key={index} label={l.label}/>
@@ -105,7 +108,11 @@ export default function Filtros() {
                     {horarioDisponivel.map((l, index) => (
                         <Checkbox key={index} label={l.label}/>
                     ))}
-                    <Segmentos opcoes={["Manhã", "Tarde", "Noite"]} inicial="Tarde" />
+                    <ToggleGroup multiple>
+                        <ToggleGroupItem value="manha">Manhã</ToggleGroupItem>
+                        <ToggleGroupItem value="tarde">Tarde</ToggleGroupItem>
+                        <ToggleGroupItem value="noite">Noite</ToggleGroupItem>
+                    </ToggleGroup>
                     <button type="button" className="flex items-center gap-2 pt-1 text-xs font-semibold text-green-600">
                         <FontAwesomeIcon icon={faCalendar} /> 
                         Selecionar data
@@ -116,7 +123,11 @@ export default function Filtros() {
         <AccordionItem value="duracao-consulta">
                 <AccordionTrigger>Duração da Consulta</AccordionTrigger>
                 <AccordionContent>
-                    <Segmentos opcoes={["Até 30 min", "Até 60 min", "Mais de 60 min"]} inicial="Até 60 min" />
+                    <ToggleGroup multiple>
+                        <ToggleGroupItem value="trinta-min">Até 30 min</ToggleGroupItem>
+                        <ToggleGroupItem value="sessenta-min">Até 60 min</ToggleGroupItem>
+                        <ToggleGroupItem value="mais-sessenta-min">Mais de 60 min</ToggleGroupItem>
+                    </ToggleGroup>
                 </AccordionContent>
         </AccordionItem>
 

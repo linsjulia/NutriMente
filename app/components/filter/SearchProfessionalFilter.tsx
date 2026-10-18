@@ -21,7 +21,7 @@ import { useState } from "react";
 const area = [
     { id: 'psicologia', label: 'Psicologia'},
     { id: 'nutricao', label: 'Nutrição'},
-    { id: 'psicologia-nutricional', label: 'Psicologia nutricional'},
+    { id: 'psiconutricao', label: 'Psiconutrição'},
 ];
 
 const tema = [

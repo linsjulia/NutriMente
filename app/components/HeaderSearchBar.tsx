@@ -18,7 +18,7 @@ export default function HeaderSearchBar() {
           <div className="flex bg-white rounded-lg gap-10 p-2 px-4 shadow-md">
             <div className="flex flex-col">
                 <label htmlFor="busca">O que você procura?</label>
-                <input type="text" placeholder="Nome, área de atuação, tipo de profissional" className="outline-none w-78"/>
+                <input type="text" placeholder="Nome, área de atuação, tipo de profissional" className="focus:outline-none! w-78"/>
             </div>
             <Link href="/" className="button bg-green-500 rounded-lg p-3 px-5 text-white font-bold transition hover:bg-green-500/80">Buscar</Link>
             </div>

@@ -766,6 +766,22 @@ button{
   cursor: pointer;
 }
 
+/* SearchProfessionalsFilter */
+
+.toggle-group{
+  @apply my-3
+}
+
+.toggle-item:hover{
+  background-color: var(--color-green-100);
+  color: var(--color-green-800)
+}
+
+.toggle-item[data-pressed]{
+  @apply bg-green-100 text-green-800 border-green-600
+}
+
+
 /* =============================================================
    ACESSIBILIDADE
    Cada bloco abaixo corresponde a um botão do menu de acessibilidade

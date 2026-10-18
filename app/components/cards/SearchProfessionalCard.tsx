@@ -18,14 +18,14 @@ export default function CardProfissional({ p }: { p: Profissional }) {
   const iniciais = p.nome.split(" ").map((parte) => parte[0]).slice(0, 2).join("");
 
   return (
-    <article className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:justify-between">
+    <article className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:justify-between">
       {/* esquerda: foto, nome e áreas */}
-      <div className="flex gap-4">
+      <div className="flex justify-center gap-6">
         {p.foto ? (
           <Image
             src={p.foto}
-            width={56}
-            height={56}
+            width={60}
+            height={60}
             alt={p.nome}
             className="shrink-0 rounded-full object-cover ring-2 ring-blue-900"
           />
@@ -74,7 +74,7 @@ export default function CardProfissional({ p }: { p: Profissional }) {
         <p className="text-[11px] text-slate-500">por consulta</p>
         <button
           type="button"
-          className="mt-2 w-full rounded-full bg-linear-to-r bg-green-500 px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
+          className="mt-2 w-full rounded-full bg-linear-to-r bg-green-500 px-4 py-2 text-xs font-semibold text-white transition duration-200 hover:opacity-80"
         >
           Agendar Consulta
         </button>

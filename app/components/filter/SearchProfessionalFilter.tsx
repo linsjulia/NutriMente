@@ -92,6 +92,7 @@ export default function SearchProfessionalFilter() {
 
     // Checkbox states organizados por categoria usando Set (performance e boas práticas do shadcn)
     const [areasSelecionadas, setAreasSelecionadas] = useState<Set<string>>(new Set());
+    const [tipoConsultaSelecionado, setTipoConsultaSelecionado] = useState("")
     const [temasSelecionados, setTemasSelecionados] = useState<Set<string>>(new Set());
     const [publicoSelecionado, setPublicoSelecionado] = useState<Set<string>>(new Set());
     const [horarioSelecionado, setHorarioSelecionado] = useState<Set<string>>(new Set());
@@ -129,7 +130,7 @@ export default function SearchProfessionalFilter() {
         </button>
       </div>
 
-        <Accordion defaultValue={["area", "tema", "publico", "preco-consulta", "horario-disponivel", "duracao-consulta", "perfil-profissional"]} multiple>
+        <Accordion defaultValue={["area", "tipo-consulta", "tema", "publico", "preco-consulta", "horario-disponivel", "duracao-consulta", "perfil-profissional"]} multiple>
             {/* ÁREA */}
             <AccordionItem value="area">
                 <AccordionTrigger className="accordion-trigger-filter">Área</AccordionTrigger>
@@ -149,11 +150,17 @@ export default function SearchProfessionalFilter() {
             </AccordionItem>
                 
             {/* TIPO CONSULTA */}
-            <AccordionItem>
+            <AccordionItem value="tipo-consulta">
                 <AccordionTrigger className="accordion-trigger-filter">Tipo de Consulta</AccordionTrigger>
                 <AccordionContent>
                     <label className="flex cursor-pointer items-center gap-2 text-sm">
-                        <Checkbox/>
+                        <Checkbox
+                            id="online"
+                            checked={tipoConsultaSelecionado === "online"}
+                            onCheckedChange={(checked) => {
+                                setTipoConsultaSelecionado(checked ? "online" : "");
+                            }}
+                        />
                         Online
                     </label>
                 </AccordionContent>

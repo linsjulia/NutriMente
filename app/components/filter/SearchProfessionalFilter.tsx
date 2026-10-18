@@ -66,7 +66,6 @@ const publico = [
 const horarioDisponivel = [
     { id: 'hoje', label: 'Hoje'},
     { id: 'amanha', label: 'Amanhã'},
-    { id: 'fim-de-semana', label: 'Fim de semana'},
 ];
 
 const perfilProfissional = [

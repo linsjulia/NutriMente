@@ -57,7 +57,7 @@ export default function SearchProfessionalFilter() {
         </button>
       </div>
 
-        <Accordion defaultValue={["area"]} multiple>
+        <Accordion defaultValue={["area", "tema", "publico", "preco-consulta", "horario-disponivel", "duracao-consulta", "perfil-profissional"]} multiple>
             <AccordionItem value="area">
                 <AccordionTrigger>Área</AccordionTrigger>
                 <AccordionContent>
@@ -137,7 +137,7 @@ export default function SearchProfessionalFilter() {
                     </AccordionContent>
             </AccordionItem>
 
-            <AccordionItem>
+            <AccordionItem value="perfil-profissional">
                 <AccordionTrigger>Perfil do Profissional</AccordionTrigger>
                 <AccordionContent>
                     {perfilProfissional.map((l, index) => (

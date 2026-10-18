@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/accordion";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Slider } from "@/components/ui/slider";
-import Checkbox from "../inputs/Checkbox";
+import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link";
 import { useState } from "react";
 

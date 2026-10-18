@@ -1,3 +1,8 @@
+//? Em vez de usar arrays comuns para guardar múltiplos itens selecionados, o código utiliza a classe nativa do JavaScript Set combinada com o useState
+//  O Set garante alta performance (O(1)) ao verificar se um item já está selecionado através do .has(id), 
+// o que evita lentidão na interface quando o usuário clica nos checkboxes
+// Na função handleCheckboxChange, o código manipula o estado de forma imutável criando uma cópia do Set atual (new Set(currentSet)), adicionando ou removendo o item, e enviando o novo conjunto para a função atualizadora (setter).
+
 "use client";
 import { faSearch, faCalendar } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

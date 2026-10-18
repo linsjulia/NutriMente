@@ -74,7 +74,7 @@ export default function CardProfissional({ p }: { p: Profissional }) {
         <p className="text-[11px] text-slate-500">por consulta</p>
         <button
           type="button"
-          className="mt-2 w-full rounded-full bg-linear-to-r bg-green-500 px-4 py-2 text-xs font-semibold text-white hover:opacity-90"
+          className="mt-2 w-full rounded-full bg-linear-to-r bg-green-500 px-4 py-2 text-xs font-semibold text-white transition duration-200 hover:opacity-80"
         >
           Agendar Consulta
         </button>

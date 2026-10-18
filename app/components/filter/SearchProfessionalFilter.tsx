@@ -76,6 +76,19 @@ const perfilProfissional = [
 ];
 
 export default function SearchProfessionalFilter() {
+    // Função para limpar todos os filtros
+    const handleClearFilters = () => {
+        setSliderValue([60]); // Ou [0], dependendo do min do seu slider
+        setAreasSelecionadas(new Set());
+        setTemasSelecionados(new Set());
+        setPublicoSelecionado(new Set());
+        setHorarioSelecionado(new Set());
+        setPeriodoSelecionado([]);
+        setDuracaoSelecionado([]);
+        setPerfilSelecionado(new Set());
+        setMostrarTodosTemas(false); // Fecha a lista de temas extras se estiver aberta
+   
+    };
     // Slider state
     const [sliderValue, setSliderValue] = useState([0]);
 
@@ -113,7 +126,7 @@ export default function SearchProfessionalFilter() {
     <aside className="w-full shrink-0 rounded-2xl bg-white p-10 shadow-sm md:w-64 md:self-start lg:w-72 overflow-y-auto">
       <div className="mb-4 flex items-baseline justify-between">
         <h2 className="text-lg font-bold text-blue-900">Filtros</h2>
-        <button type="button" className="text-xs font-semibold text-green-600">
+        <button type="button" onClick={handleClearFilters} className="text-xs font-semibold text-green-600">
           Limpar filtros
         </button>
       </div>

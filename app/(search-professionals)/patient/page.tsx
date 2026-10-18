@@ -1,74 +1,77 @@
+// API
+import { api } from "@/app/lib/api";
+import { PROFESSION_LABELS, type page, type PublicProfessional } from "@/app/lib/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight, faChevronDown, faClose, } from "@fortawesome/free-solid-svg-icons";
 import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard"
 import SearchProfessionalFilter from "../../components/filter/SearchProfessionalFilter";
 
-type Profissional = {
-  id: number;
-  titulo: string;
-  nome: string;
-  nota: number;
-  avaliacoes: number;
-  areas: string[];
-  horarios: string[];
-  preco: number;
-  foto?: string; // se não vier foto, mostra as iniciais
-};
+// type Profissional = {
+//   id: number;
+//   titulo: string;
+//   nome: string;
+//   nota: number;
+//   avaliacoes: number;
+//   areas: string[];
+//   horarios: string[];
+//   preco: number;
+//   foto?: string; // se não vier foto, mostra as iniciais
+// };
 
 const filtrosAtivos = ["Psicologia nutricional", "Ansiedade", "Comer emocional"];
 
-const profissionais: Profissional[] = [
-  {
-    id: 1,
-    titulo: "Psicólogo(a)",
-    nome: "Nayara Santos",
-    nota: 5.0,
-    avaliacoes: 15,
-    areas: ["Psicologia nutricional", "Ansiedade", "Comer emocional"],
-    horarios: ["10:30", "12:00", "14:00", "15:00"],
-    preco: 150,
-  },
-  {
-    id: 2,
-    titulo: "Nutricionista",
-    nome: "Rafael Mota",
-    nota: 4.8,
-    avaliacoes: 94,
-    areas: ["Psicologia nutricional", "Compulsão alimentar"],
-    horarios: ["14:00", "15:00", "16:30", "18:00"],
-    preco: 160,
-  },
-  {
-    id: 3,
-    titulo: "Psicólogo(a)",
-    nome: "Aline Souza",
-    nota: 4.9,
-    avaliacoes: 61,
-    areas: ["Imagem corporal", "Ansiedade", "Comer emocional"],
-    horarios: ["11:00", "14:30", "16:00", "17:00"],
-    preco: 180,
-  },
-   {
-    id: 4,
-    titulo: "Psicólogo(a)",
-    nome: "Aline Souza",
-    nota: 4.9,
-    avaliacoes: 61,
-    areas: ["Imagem corporal", "Ansiedade", "Comer emocional"],
-    horarios: ["11:00", "14:30", "16:00", "17:00"],
-    preco: 180,
-  },
-   {
-    id: 5,
-    titulo: "Psicólogo(a)",
-    nome: "Aline Souza",
-    nota: 4.9,
-    avaliacoes: 61,
-    areas: ["Imagem corporal", "Ansiedade", "Comer emocional"],
-    horarios: ["11:00", "14:30", "16:00", "17:00"],
-    preco: 180,
-  },
-];
+// const profissionais: Profissional[] = [
+//   {
+//     id: 1,
+//     titulo: "Psicólogo(a)",
+//     nome: "Nayara Santos",
+//     nota: 5.0,
+//     avaliacoes: 15,
+//     areas: ["Psicologia nutricional", "Ansiedade", "Comer emocional"],
+//     horarios: ["10:30", "12:00", "14:00", "15:00"],
+//     preco: 150,
+//   },
+//   {
+//     id: 2,
+//     titulo: "Nutricionista",
+//     nome: "Rafael Mota",
+//     nota: 4.8,
+//     avaliacoes: 94,
+//     areas: ["Psicologia nutricional", "Compulsão alimentar"],
+//     horarios: ["14:00", "15:00", "16:30", "18:00"],
+//     preco: 160,
+//   },
+//   {
+//     id: 3,
+//     titulo: "Psicólogo(a)",
+//     nome: "Aline Souza",
+//     nota: 4.9,
+//     avaliacoes: 61,
+//     areas: ["Imagem corporal", "Ansiedade", "Comer emocional"],
+//     horarios: ["11:00", "14:30", "16:00", "17:00"],
+//     preco: 180,
+//   },
+//    {
+//     id: 4,
+//     titulo: "Psicólogo(a)",
+//     nome: "Aline Souza",
+//     nota: 4.9,
+//     avaliacoes: 61,
+//     areas: ["Imagem corporal", "Ansiedade", "Comer emocional"],
+//     horarios: ["11:00", "14:30", "16:00", "17:00"],
+//     preco: 180,
+//   },
+//    {
+//     id: 5,
+//     titulo: "Psicólogo(a)",
+//     nome: "Aline Souza",
+//     nota: 4.9,
+//     avaliacoes: 61,
+//     areas: ["Imagem corporal", "Ansiedade", "Comer emocional"],
+//     horarios: ["11:00", "14:30", "16:00", "17:00"],
+//     preco: 180,
+//   },
+// ];
 
 
 

@@ -145,7 +145,7 @@ export default function SearchProfessionalFilter() {
                         <input 
                             type="text" 
                             placeholder="Buscar tema..." 
-                            className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400 focus:outline-none focus:ring-0"
+                            className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400 focus:outline-none! focus:ring-0"
                         />
                         <Link href="">
                             <FontAwesomeIcon icon={faSearch} className="h-4 w-4" />

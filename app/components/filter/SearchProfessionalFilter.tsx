@@ -32,6 +32,31 @@ const tema = [
     { id: 'ansiedade', label: 'Ansiedade'},
 ];
 
+const temasAdicionais = [
+    { id: 'depressao', label: 'Depressão'},
+    { id: 'estresse-burnout', label: 'Estresse e burnout'},
+    { id: 'transtorno-panico', label: 'Transtorno do pânico'},
+    { id: 'fobias', label: 'Fobias'},
+    { id: 'toc', label: 'TOC'},
+    { id: 'tdah', label: 'TDAH'},
+    { id: 'transtorno-bipolar', label: 'Transtorno bipolar'},
+    { id: 'luto', label: 'Luto e perdas'},
+    { id: 'emagrecimento', label: 'Emagrecimento'},
+    { id: 'reeducacao-alimentar', label: 'Reeducação alimentar'},
+    { id: 'ganho-massa', label: 'Ganho de massa muscular'},
+    { id: 'nutricao-esportiva', label: 'Nutrição esportiva'},
+    { id: 'vegetarianismo-veganismo', label: 'Vegetarianismo e veganismo'},
+    { id: 'diabetes', label: 'Diabetes'},
+    { id: 'hipertensao-colesterol', label: 'Hipertensão e colesterol'},
+    { id: 'saude-intestinal', label: 'Saúde intestinal'},
+    { id: 'mindful-eating', label: 'Alimentação consciente (mindful eating)'},
+    { id: 'dietas-restritivas', label: 'Dietas restritivas e efeito sanfona'},
+    { id: 'culpa-alimentar', label: 'Culpa alimentar'},
+    { id: 'fome-emocional', label: 'Fome emocional e fome física'},
+    { id: 'ortorexia', label: 'Ortorexia'},
+    { id: 'vigorexia', label: 'Vigorexia'},
+];
+
 const publico = [
     { id: 'crianca', label: 'Criança'},
     { id: 'adolescente', label: 'Adolescente'},
@@ -60,6 +85,13 @@ export default function SearchProfessionalFilter() {
     const [publicoSelecionado, setPublicoSelecionado] = useState<Set<string>>(new Set());
     const [horarioSelecionado, setHorarioSelecionado] = useState<Set<string>>(new Set());
     const [perfilSelecionado, setPerfilSelecionado] = useState<Set<string>>(new Set());
+
+    // Toggles states
+    const [periodoSelecionado, setPeriodoSelecionado] = useState<string[]>([]);
+    const [duracaoSelecionado, setDuracaoSelecionado] = useState<string[]>([])
+
+    // Ver mais temas state
+    const [mostrarTodosTemas, setMostrarTodosTemas] = useState(false);
 
     // Função genérica para alternar itens no Set
     const handleCheckboxChange = (
@@ -130,8 +162,20 @@ export default function SearchProfessionalFilter() {
                             {l.label}
                         </label>
                     ))}
-                    <button type="button" className="pt-1 text-xs font-semibold text-green-600 text-left">
-                        Ver todos os temas
+
+                    {mostrarTodosTemas && temasAdicionais.map((l) => (
+                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                            <Checkbox 
+                                checked={temasSelecionados.has(l.id)}
+                                onCheckedChange={(checked) => 
+                                    handleCheckboxChange(l.id, checked === true, setTemasSelecionados, temasSelecionados)
+                                }
+                            />
+                            {l.label}
+                        </label>
+                    ))}
+                    <button type="button" onClick={() => setMostrarTodosTemas(!mostrarTodosTemas)} className="pt-1 text-xs font-semibold text-green-600 text-left">
+                        {mostrarTodosTemas ? "Ver todos os temas" : "Ver todos os temas" }
                     </button>
                 </AccordionContent>
             </AccordionItem>
@@ -186,7 +230,7 @@ export default function SearchProfessionalFilter() {
                             {l.label}
                         </label>
                     ))}
-                    <ToggleGroup size="sm" variant="outline" className="toggle-group mt-2" multiple>
+                    <ToggleGroup size="sm" variant="outline" value={periodoSelecionado} onValueChange={(novoValor) => {setPeriodoSelecionado(novoValor);}} className="toggle-group mt-2" multiple>
                         <ToggleGroupItem value="manha" className="toggle-item">Manhã</ToggleGroupItem>
                         <ToggleGroupItem value="tarde" className="toggle-item">Tarde</ToggleGroupItem>
                         <ToggleGroupItem value="noite" className="toggle-item">Noite</ToggleGroupItem>
@@ -202,10 +246,10 @@ export default function SearchProfessionalFilter() {
             <AccordionItem value="duracao-consulta">
                 <AccordionTrigger>Duração da Consulta</AccordionTrigger>
                 <AccordionContent>
-                    <ToggleGroup size="sm" variant="outline" orientation="vertical" className="toggle-group" multiple>
+                    <ToggleGroup size="sm" variant="outline" value={duracaoSelecionado} onValueChange={(novoValor) => {setDuracaoSelecionado(novoValor);}} orientation="vertical" className="toggle-group" multiple>
                         <ToggleGroupItem value="trinta-min" className="toggle-item">Até 30 min</ToggleGroupItem>
                         <ToggleGroupItem value="sessenta-min" className="toggle-item">Até 60 min</ToggleGroupItem>
-                        <ToggleGroupItem value="mais-sessenta-min" className="toggle-item">Mais de 60 min</ToggleGroupItem>
+                        <ToggleGroupItem value="acima-sessenta-min" className="toggle-item">Acima de 60 min</ToggleGroupItem>
                     </ToggleGroup>
                 </AccordionContent>
             </AccordionItem>

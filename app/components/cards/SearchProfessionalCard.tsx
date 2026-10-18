@@ -18,14 +18,14 @@ export default function CardProfissional({ p }: { p: Profissional }) {
   const iniciais = p.nome.split(" ").map((parte) => parte[0]).slice(0, 2).join("");
 
   return (
-    <article className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:justify-between">
+    <article className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:justify-between">
       {/* esquerda: foto, nome e áreas */}
-      <div className="flex gap-4">
+      <div className="flex justify-center gap-6">
         {p.foto ? (
           <Image
             src={p.foto}
-            width={56}
-            height={56}
+            width={60}
+            height={60}
             alt={p.nome}
             className="shrink-0 rounded-full object-cover ring-2 ring-blue-900"
           />

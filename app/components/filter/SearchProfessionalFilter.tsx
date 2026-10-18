@@ -124,7 +124,7 @@ export default function SearchProfessionalFilter() {
     return (
     <aside className="w-full shrink-0 rounded-2xl bg-white p-10 shadow-sm md:w-64 md:self-start lg:w-72 overflow-y-auto">
       <div className="mb-4 flex items-baseline justify-between">
-        <h2 className="text-lg font-bold text-blue-900">Filtros</h2>
+        <h2 className="text-lg font-extrabold text-blue-900">Filtros</h2>
         <button type="button" onClick={handleClearFilters} className="text-xs font-semibold text-green-600">
           Limpar filtros
         </button>
@@ -133,10 +133,10 @@ export default function SearchProfessionalFilter() {
         <Accordion defaultValue={["area", "tema", "publico", "preco-consulta", "horario-disponivel", "duracao-consulta", "perfil-profissional"]} multiple>
             {/* ÁREA */}
             <AccordionItem value="area">
-                <AccordionTrigger>Área</AccordionTrigger>
+                <AccordionTrigger className="accordion-trigger-filter">Área</AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2">
                     {area.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
                             <Checkbox 
                                 checked={areasSelecionadas.has(l.id)}
                                 onCheckedChange={(checked) => 
@@ -148,10 +148,21 @@ export default function SearchProfessionalFilter() {
                     ))}
                 </AccordionContent>
             </AccordionItem>
+                
+            {/* TIPO CONSULTA */}
+            <AccordionItem>
+                <AccordionTrigger className="accordion-trigger-filter">Tipo de Consulta</AccordionTrigger>
+                <AccordionContent>
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                        <Checkbox/>
+                        Online
+                    </label>
+                </AccordionContent>
+            </AccordionItem>
 
             {/* TEMA */}
             <AccordionItem value="tema">
-                <AccordionTrigger>Tema</AccordionTrigger>
+                <AccordionTrigger className="accordion-trigger-filter">Tema</AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2">
                     <div className="flex items-center rounded-md border border-slate-300 px-2 py-1.5">
                         <input 
@@ -164,7 +175,7 @@ export default function SearchProfessionalFilter() {
                         </Link>
                     </div>
                         {tema.map((l) => (
-                            <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                            <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
                                 <Checkbox 
                                     checked={temasSelecionados.has(l.id)}
                                     onCheckedChange={(checked) => 
@@ -201,10 +212,10 @@ export default function SearchProfessionalFilter() {
 
             {/* PÚBLICO */}
             <AccordionItem value="publico">
-                <AccordionTrigger>Público</AccordionTrigger>
+                <AccordionTrigger className="accordion-trigger-filter">Público</AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2">
                     {publico.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
                             <Checkbox 
                                 checked={publicoSelecionado.has(l.id)}
                                 onCheckedChange={(checked) => 
@@ -219,7 +230,7 @@ export default function SearchProfessionalFilter() {
 
             {/* PREÇO DA CONSULTA */}
             <AccordionItem value="preco-consulta">
-                <AccordionTrigger>Preço da Consulta</AccordionTrigger>
+                <AccordionTrigger className="accordion-trigger-filter">Preço da Consulta</AccordionTrigger>
                 <AccordionContent className="p-2">
                     <Slider
                         value={sliderValue}
@@ -227,7 +238,7 @@ export default function SearchProfessionalFilter() {
                         min={60}
                         max={250}
                     />
-                    <div className="flex justify-between pt-2 text-xs font-semibold text-slate-700">
+                    <div className="flex justify-between pt-2 text-xs font-semibold">
                         <span>R$60</span>
                         <span>R${sliderValue}</span>
                     </div>
@@ -236,10 +247,10 @@ export default function SearchProfessionalFilter() {
 
             {/* HORÁRIO DISPONÍVEL */}
             <AccordionItem value="horario-disponivel">
-                <AccordionTrigger>Horário Disponível</AccordionTrigger>
+                <AccordionTrigger className="accordion-trigger-filter">Horário Disponível</AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2">
                     {horarioDisponivel.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
                             <Checkbox 
                                 checked={horarioSelecionado.has(l.id)}
                                 onCheckedChange={(checked) => 
@@ -263,7 +274,7 @@ export default function SearchProfessionalFilter() {
 
             {/* DURAÇÃO DA CONSULTA */}
             <AccordionItem value="duracao-consulta">
-                <AccordionTrigger>Duração da Consulta</AccordionTrigger>
+                <AccordionTrigger className="accordion-trigger-filter">Duração da Consulta</AccordionTrigger>
                 <AccordionContent>
                     <ToggleGroup size="sm" variant="outline" value={duracaoSelecionado} onValueChange={(novoValor) => {setDuracaoSelecionado(novoValor);}} orientation="vertical" className="toggle-group" multiple>
                         <ToggleGroupItem value="trinta-min" className="toggle-item">Até 30 min</ToggleGroupItem>
@@ -275,10 +286,10 @@ export default function SearchProfessionalFilter() {
 
             {/* PERFIL DO PROFISSIONAL */}
             <AccordionItem value="perfil-profissional">
-                <AccordionTrigger>Perfil do Profissional</AccordionTrigger>
+                <AccordionTrigger className="accordion-trigger-filter">Perfil do Profissional</AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2">
                     {perfilProfissional.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
                             <Checkbox 
                                 checked={perfilSelecionado.has(l.id)}
                                 onCheckedChange={(checked) => 

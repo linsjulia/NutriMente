@@ -781,6 +781,9 @@ button{
   @apply bg-green-100 text-green-800 border-green-600
 }
 
+.accordion-trigger-filter{
+  font-weight: 700;
+}
 
 /* =============================================================
    ACESSIBILIDADE

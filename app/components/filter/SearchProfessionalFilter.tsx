@@ -163,7 +163,7 @@ export default function SearchProfessionalFilter() {
                             </label>
                         ))}
 
-                    <div className={`grid gap-2 transition-all duration-300 ease-in-out ${
+                    <div className={`grid gap-2 transition-all duration-400 ease-in-out ${
                             /* 2. Se for TRUE (Aberto), o CSS Grid calcula a altura total (1fr) e mostra (opacity) */
                             mostrarTodosTemas 
                                 ? "grid-rows-[1fr] opacity-100" 

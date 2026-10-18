@@ -76,9 +76,10 @@ const perfilProfissional = [
 export default function SearchProfessionalFilter() {
     // Função para limpar todos os filtros
     const handleClearFilters = () => {
-        setSliderValue([60]); // Ou [0], dependendo do min do seu slider
+        setSliderValue([60]); // depende do min do slider
         setAreasSelecionadas(new Set());
         setTemasSelecionados(new Set());
+        setTipoConsultaSelecionado("");
         setPublicoSelecionado(new Set());
         setHorarioSelecionado(new Set());
         setPeriodoSelecionado([]);

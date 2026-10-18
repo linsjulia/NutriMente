@@ -25,7 +25,6 @@ const area = [
 ];
 
 const tema = [
-    { id: 'comer-emocional', label: 'Comer emocional'},
     { id: 'compulsao-alimentar', label: 'Compulsão alimentar'},
     { id: 'anorexia-bulimia', label: 'Anorexia e bulimia'},
     { id: 'imagem-corporal', label: 'Imagem corporal'},

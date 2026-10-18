@@ -151,29 +151,36 @@ export default function SearchProfessionalFilter() {
                             <FontAwesomeIcon icon={faSearch} className="h-4 w-4" />
                         </Link>
                     </div>
-                    {tema.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
-                            <Checkbox 
-                                checked={temasSelecionados.has(l.id)}
-                                onCheckedChange={(checked) => 
+                        {tema.map((l) => (
+                            <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                                <Checkbox 
+                                    checked={temasSelecionados.has(l.id)}
+                                    onCheckedChange={(checked) => 
                                     handleCheckboxChange(l.id, checked === true, setTemasSelecionados, temasSelecionados)
-                                }
-                            />
-                            {l.label}
-                        </label>
-                    ))}
+                                    }
+                                />
+                                {l.label}
+                            </label>
+                        ))}
 
-                    {mostrarTodosTemas && temasAdicionais.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
-                            <Checkbox 
-                                checked={temasSelecionados.has(l.id)}
-                                onCheckedChange={(checked) => 
-                                    handleCheckboxChange(l.id, checked === true, setTemasSelecionados, temasSelecionados)
-                                }
-                            />
-                            {l.label}
-                        </label>
-                    ))}
+                    <div className={`grid gap-2 transition-all duration-300 ease-in-out ${
+                            /* 2. Se for TRUE (Aberto), o CSS Grid calcula a altura total (1fr) e mostra (opacity) */
+                            mostrarTodosTemas 
+                                ? "grid-rows-[1fr] opacity-100" 
+                                : "grid-rows-[0fr] opacity-0" /* 3. Se for FALSE (Fechado), a altura é 0 e fica invisível */
+                            }`}>
+                        {mostrarTodosTemas && temasAdicionais.map((l) => (
+                            <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                                <Checkbox 
+                                    checked={temasSelecionados.has(l.id)}
+                                    onCheckedChange={(checked) => 
+                                        handleCheckboxChange(l.id, checked === true, setTemasSelecionados, temasSelecionados)
+                                    }
+                                />
+                                {l.label}
+                            </label>
+                        ))}
+                    </div>
                     <button type="button" onClick={() => setMostrarTodosTemas(!mostrarTodosTemas)} className="pt-1 text-xs font-semibold text-green-600 text-left">
                         {mostrarTodosTemas ? "Ver todos os temas" : "Ver todos os temas" }
                     </button>

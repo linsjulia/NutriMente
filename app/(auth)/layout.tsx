@@ -29,7 +29,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           {/* "fill" exige um pai com position relative/absolute/fixed; o sticky
               acima mantém a foto parada na rolagem, este div serve de moldura */}
           <div className="relative h-full w-full">
-            <Image src="/doctor/profissionais.jpg" alt="" fill sizes="50vw" loading="eager" className="rounded-2xl object-cover" />
+            <Image src="/doctor/profissionais.webp" alt="" fill sizes="50vw" loading="eager" className="rounded-2xl object-cover" />
           </div>
         </div>
       </div>

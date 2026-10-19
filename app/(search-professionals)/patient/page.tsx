@@ -75,8 +75,6 @@ const filtrosAtivos = ["Psicologia nutricional", "Ansiedade", "Comer emocional"]
 // ];
 
 
-
-
 /* ---------- página ---------- */
 export default async function BuscaProfissionais({ searchParams }: PageProps<"/patient">) {
   const { type, speciality, minPrice, maxPrice, online, sort, page } = await searchParams;

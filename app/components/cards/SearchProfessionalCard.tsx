@@ -9,7 +9,7 @@ type Profissional = {
   avaliacoes: number;
   areas: string[];
   horarios: string[];
-  preco: number;
+  preco: number | null;
   foto?: string; // se não vier foto, mostra as iniciais
 };
 

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import CategoryBadge from "../badge/CategoryBagde";
+import CategoryBadge from "../badge/SpecialityBadge";
+import SpecialityBadge from "../badge/SpecialityBadge";
 
 interface Props {
   titulo: string;
@@ -12,7 +13,7 @@ interface Props {
   img: string;
 }
 
-export default function CardProfi({
+export default function HomeProfessionalCard({
   titulo,
   tipoProfissional,
   documento,
@@ -45,8 +46,8 @@ export default function CardProfi({
       </p>
 
       <div className="flex flex-col gap-3 font-medium">
-        <CategoryBadge categoria={categoria} />
-        <CategoryBadge categoria={segundaCategoria} />
+        <SpecialityBadge speciality={categoria}/>
+        <SpecialityBadge speciality={segundaCategoria} />
       </div>
 
       <div className="flex flex-wrap gap-3">

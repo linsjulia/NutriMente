@@ -55,11 +55,7 @@ export const SuccessCard: React.FC = () => {
 
       {/* Ações */}
       <div className="flex flex-col sm:flex-row gap-3 w-full">
-        <button className="flex-1 py-3 px-4 border border-blue-800 text-blue-900 rounded-xl font-bold text-sm hover:bg-blue-50 transition-colors flex items-center justify-center space-x-2">
-          <span>📅</span>
-          <span>Adicionar ao calendário</span>
-        </button>
-        <button className="flex-1 py-3 px-4 bg-blue-800 text-white rounded-xl font-bold text-sm hover:bg-blue-900 transition-colors">
+        <button className="flex-1 py-3 px-4 bg-blue-800 text-white rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors">
           Ver minhas consultas
         </button>
       </div>

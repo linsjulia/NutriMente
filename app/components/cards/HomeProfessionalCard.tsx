@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import CategoryBadge from "../badge/SpecialityBadge";
 import SpecialityBadge from "../badge/SpecialityBadge";
 
 interface Props {

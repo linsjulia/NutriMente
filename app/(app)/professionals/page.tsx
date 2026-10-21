@@ -1,159 +1,150 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+// API
 import { api } from "@/app/lib/api";
-import {
-  COUNCIL,
-  PROFESSION_LABELS,
-  type Page,
-  type ProfessionalType,
-  type PublicProfessional,
-  type Specialty,
-} from "@/app/lib/types";
+import { PROFESSION_LABELS, type Page, type PublicProfessional, type Specialty } from "@/app/lib/types";
+import { SlotDay } from "@/app/lib/agenda";
+import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faArrowRight, faChevronDown, faClose } from "@fortawesome/free-solid-svg-icons";
+import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard";
+import SearchProfessionalFilter from "../../components/filter/SearchProfessionalFilter";
 
-export const metadata: Metadata = { title: "Profissionais | NutriMente" };
+const filtrosAtivos = ["Psicologia nutricional", "Ansiedade", "Comer emocional"];
 
-const FILTERS: { value?: ProfessionalType; label: string }[] = [
-  { label: "Todos" },
-  { value: "NUTRICIONISTA", label: "Nutricionistas" },
-  { value: "PSICOLOGO", label: "Psicólogos" },
-];
+/* ---------- página ---------- */
+export default async function BuscaProfissionais({ searchParams }: PageProps<"/patient">) {
+  const { type: typeParam, specialty: specialtyParam, minPrice, maxPrice, online, sort, page: pageParam } = await searchParams;
 
-const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
-
-// Lista pública: só profissionais APROVADOS pelo admin (a API já filtra).
-export default async function ProfessionalsPage({ searchParams }: PageProps<"/professionals">) {
-  const { type: typeParam, specialty: specialtyParam, page: pageParam } = await searchParams;
   const type = typeParam === "NUTRICIONISTA" || typeParam === "PSICOLOGO" ? typeParam : undefined;
   const specialty = Number(specialtyParam) > 0 ? Number(specialtyParam) : undefined;
   const page = Math.max(Number(pageParam) || 0, 0);
 
-  // Filtros atuais, reaproveitados nos links de paginação
+  // Filtros atuais, reaproveitados nos links de paginação e query da API
   const filters: Record<string, string> = {};
   if (type) filters.type = type;
   if (specialty) filters.specialty = String(specialty);
+  if (typeof minPrice === "string") filters.minPrice = minPrice;
+  if (typeof maxPrice === "string") filters.maxPrice = maxPrice;
+  if (online === "true") filters.online = "true";
+  if (typeof sort === "string") filters.sort = sort;
 
-  const query = new URLSearchParams({ ...filters, page: String(page), size: "12" });
-  // As duas consultas à API saem ao mesmo tempo (Promise.all), não uma depois da outra
+  const query = new URLSearchParams({ ...filters, page: String(page), size: "10" });
+
+  // Consultas à API em paralelo (Promise.all) para profissionais e especialidades
   const [result, specialties] = await Promise.all([
     api<Page<PublicProfessional>>(`/api/professionals?${query}`),
     api<Specialty[]>(type ? `/api/specialties?type=${type}` : "/api/specialties"),
   ]);
+
+  const items = result.ok ? result.data.items : [];
   const specialtyOptions = specialties.ok ? specialties.data : [];
   const specialtyName = specialtyOptions.find((s) => s.id === specialty)?.name;
 
-  const pageLink = (p: number) => `/professionals?${new URLSearchParams({ ...filters, page: String(p) })}`;
+  const hoje = new Date().toISOString().slice(0, 10);
+  
+  // Busca os horários e formata os dados para o card
+  const profissionais = await Promise.all(
+    items.map(async (p) => {
+      const slots = await api<SlotDay[]>(`/api/professionals/${p.id}/slots?from=${hoje}&days=1`);
+      const horarios = slots.ok ? (slots.data[0]?.slots.map((s) => s.time) ?? []) : [];
+      return {
+        id: p.id,
+        titulo: PROFESSION_LABELS[p.type],
+        nome: p.name,
+        nota: p.ratingAverage,
+        avaliacoes: p.ratingCount,
+        areas: p.specialties.map((s) => s.name),
+        horarios: horarios.slice(0, 4),
+        preco: p.consultationPrice,
+      };
+    }),
+  );
+
+  const pageLink = (p: number) => `/patient?${new URLSearchParams({ ...filters, page: String(p) })}`;
 
   return (
-    <main id="conteudo" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
-      <h1 className="font-fraunces text-3xl font-medium sm:text-4xl">Profissionais</h1>
-      <p className="mt-2 text-gray-700">Todos com registro no conselho verificado pela nossa equipe.</p>
+    <div className="bg-sky-50">
+      <div className="min-h-screen text-slate-800"> 
+        <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:flex-row md:px-8">
+          <SearchProfessionalFilter />
+          <section className="min-w-0 flex-1">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {filtrosAtivos.map((f) => (
+                  <span
+                    key={f}
+                    className="flex items-center gap-2 rounded-full border border-green-600 bg-emerald-50 px-3 py-1 text-xs text-slate-700"
+                  >
+                    {f}
+                    <button type="button" aria-label={`Remover ${f}`}>
+                      <FontAwesomeIcon icon={faClose} className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                <button type="button" className="text-xs font-semibold text-green-600">
+                  Limpar tudo
+                </button>
+              </div>
 
-      <nav aria-label="Filtrar por profissão" className="mt-6">
-        <ul className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <li key={f.label}>
-              {/* Trocar de profissão limpa a especialidade (cada uma é de uma profissão) */}
-              <Link
-                href={f.value ? `/professionals?type=${f.value}` : "/professionals"}
-                aria-current={f.value === type ? "page" : undefined}
-                className={`chip-link ${f.value === type ? "chip-link-active" : ""}`}
-              >
-                {f.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+              <button type="button" className="flex items-center gap-1 text-xs text-slate-600">
+                Ordenar: Mais relevantes
+                <FontAwesomeIcon icon={faChevronDown} />
+              </button>
+            </div>
 
-      {/* Formulário GET: muda o endereço (?specialty=3), então o filtro funciona
-          sem JavaScript, pode ser compartilhado e o "voltar" do navegador funciona */}
-      {specialtyOptions.length > 0 && (
-        <form method="get" action="/professionals" className="mt-4 mb-6 flex flex-wrap items-end gap-3">
-          {type && <input type="hidden" name="type" value={type} />}
-          <div className="flex min-w-0 flex-col gap-1.5">
-            <label htmlFor="specialty" className="font-semibold">
-              Especialidade
-            </label>
-            <select id="specialty" name="specialty" defaultValue={specialty ?? ""} className="form-input max-w-full sm:w-80">
-              <option value="">Todas</option>
-              {type
-                ? specialtyOptions.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))
-                : (["NUTRICIONISTA", "PSICOLOGO"] as const).map((t) => (
-                    <optgroup key={t} label={PROFESSION_LABELS[t]}>
-                      {specialtyOptions
-                        .filter((s) => s.type === t)
-                        .map((s) => (
-                          <option key={s.id} value={s.id}>
-                            {s.name}
-                          </option>
-                        ))}
-                    </optgroup>
+            {!result.ok ? (
+              <p role="alert" className="card border-red-300 text-red-800 p-4 bg-white rounded-md">
+                {result.error.detail}
+              </p>
+            ) : profissionais.length === 0 ? (
+              <p className="card p-4 bg-white rounded-md">
+                {specialtyName
+                  ? `Ainda não há profissionais aprovados com a especialidade "${specialtyName}".`
+                  : "Ainda não há profissionais aprovados nesta categoria."}
+              </p>
+            ) : (
+              <>
+                {/* lista */}
+                <div className="space-y-4">
+                  {profissionais.map((p) => (
+                    <SearchProfessionalCard key={p.id} p={p} />
                   ))}
-            </select>
-          </div>
-          <button type="submit" className="btn-secondary">
-            Filtrar
-          </button>
-        </form>
-      )}
+                </div>
 
-      {!result.ok ? (
-        <p role="alert" className="card border-red-300 text-red-800">
-          {result.error.detail}
-        </p>
-      ) : result.data.items.length === 0 ? (
-        <p className="card">
-          {specialtyName
-            ? `Ainda não há profissionais aprovados com a especialidade "${specialtyName}".`
-            : "Ainda não há profissionais aprovados nesta categoria."}
-        </p>
-      ) : (
-        <>
-          <p className="mb-4 text-gray-700">
-            {result.data.totalItems === 1 ? "1 profissional encontrado" : `${result.data.totalItems} profissionais encontrados`}
-            {specialtyName ? ` em "${specialtyName}"` : ""}.
-          </p>
-          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {result.data.items.map((p) => (
-              <li key={p.id} className="card flex flex-col gap-3">
-                <h2 className="text-lg font-bold">
-                  <Link href={`/professionals/${p.id}`} className="underline-offset-4 hover:underline">{p.name}</Link>
-                </h2>
-                <p className="text-gray-700">
-                  {PROFESSION_LABELS[p.type]} · {COUNCIL[p.type]} {p.document}
-                </p>
-                {p.specialties.length > 0 && (
-                  <ul aria-label="Especialidades" className="flex flex-wrap gap-1.5">
-                    {p.specialties.map((s) => (
-                      <li key={s.id} className="specialty-tag">
-                        {s.name}
-                      </li>
-                    ))}
-                  </ul>
+                {/* paginação */}
+                {result.data.totalPages > 1 && (
+                  <nav className="mt-6 flex items-center justify-between text-sm">
+                    {page > 0 ? (
+                      <Link
+                        href={pageLink(page - 1)}
+                        className="flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 hover:bg-slate-50"
+                      >
+                        <FontAwesomeIcon icon={faArrowLeft} /> Voltar
+                      </Link>
+                    ) : (
+                      <span />
+                    )}
+                    
+                    <span className="text-xs text-slate-500">
+                      Página {page + 1} de {result.data.totalPages}
+                    </span>
+
+                    {page + 1 < result.data.totalPages ? (
+                      <Link
+                        href={pageLink(page + 1)}
+                        className="flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 hover:bg-slate-50"
+                      >
+                        Próximo <FontAwesomeIcon icon={faArrowRight} />
+                      </Link>
+                    ) : (
+                      <span />
+                    )}
+                  </nav>
                 )}
-                <p className="flex-1">{p.bio ?? "Este profissional ainda não escreveu uma apresentação."}</p>
-                <p className="font-semibold">{p.consultationPrice != null ? `${brl.format(p.consultationPrice)} por consulta` : "Valor a combinar"}</p>
-                <Link href={`/professionals/${p.id}`} className="btn-secondary self-start" aria-label={`Ver perfil e agendar com ${p.name}`}>
-                  Ver perfil e agendar
-                </Link>
-              </li>
-            ))}
-          </ul>
-          {result.data.totalPages > 1 && (
-            <nav aria-label="Paginação" className="mt-8 flex items-center justify-center gap-4">
-              {page > 0 && <Link href={pageLink(page - 1)} className="btn-secondary">Anterior</Link>}
-              <span>
-                Página {page + 1} de {result.data.totalPages}
-              </span>
-              {page + 1 < result.data.totalPages && <Link href={pageLink(page + 1)} className="btn-secondary">Próxima</Link>}
-            </nav>
-          )}
-        </>
-      )}
-    </main>
+              </>
+            )}
+          </section>
+        </main>
+      </div>
+    </div>
   );
 }

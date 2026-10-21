@@ -29,7 +29,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           { href: "/appointments", label: session.role === "PATIENT" ? "Consultas" : "Agenda" },
           ...(session.role === "PROFESSIONAL" ? [{ href: "/patients", label: "Pacientes" }] : []),
           { href: "/plans", label: "Planos" },
-          ...(session.role === "PATIENT" ? [{ href: "/professionals", label: "Profissionais" },{ href: "/diary", label: "Diário" }] : []),
+          ...(session.role === "PATIENT" ? [{ href: "/search-professionals", label: "Profissionais" },{ href: "/diary", label: "Diário" }] : []),
           { href: "/account", label: "Minha conta" },
         ];
 

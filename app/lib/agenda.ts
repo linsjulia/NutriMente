@@ -1,7 +1,7 @@
 // Tipos e textos da agenda (consultas, horários, avaliações, triagem e
 // registro da consulta). Espelham os DTOs da API Java (docs/API.md).
 
-import type { ProfessionalType } from "./types";
+import type { Audience, ProfessionalType } from "./types";
 
 export type Modality = "ONLINE" | "PRESENCIAL";
 export type AppointmentStatus = "SCHEDULED" | "CONFIRMED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED" | "RESCHEDULED" | "NO_SHOW";
@@ -67,6 +67,8 @@ export type ProfessionalProfile = {
   offersInPerson: boolean;
   officeCity: string | null;
   officeState: string | null;
+  consultationMinutes: number;
+  audiences: Audience[];
 };
 
 export const STATUS_TEXT: Record<AppointmentStatus, string> = {

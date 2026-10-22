@@ -6,7 +6,7 @@ import { MapPin, Star, Video } from "lucide-react";
 import { api } from "@/app/lib/api";
 import { getSession } from "@/app/lib/session";
 import { formatBRL } from "@/app/lib/money";
-import { PROFESSION_LABELS, type Page, formatCouncilNumber } from "@/app/lib/types";
+import { AUDIENCE_LABELS, PROFESSION_LABELS, type Page, formatCouncilNumber } from "@/app/lib/types";
 import { formatDate, type ProfessionalProfile, type PublicReview, type SlotDay } from "@/app/lib/agenda";
 import BookingForm from "./BookingForm";
 
@@ -95,7 +95,13 @@ export default async function ProfessionalPage({ params }: PageProps<"/professio
           <p>{p.bio ?? "Este profissional ainda não escreveu uma apresentação."}</p>
           <p className="text-lg font-semibold">
             {p.consultationPrice != null ? `R$ ${formatBRL(p.consultationPrice)} por consulta` : "Valor a combinar"}
+            <span className="font-normal text-gray-700"> · {p.consultationMinutes} minutos</span>
           </p>
+          {p.audiences.length > 0 && (
+            <p className="text-gray-700">
+              Atende: {p.audiences.map((a) => AUDIENCE_LABELS[a].toLowerCase()).join(", ")}
+            </p>
+          )}
         </div>
       </section>
 

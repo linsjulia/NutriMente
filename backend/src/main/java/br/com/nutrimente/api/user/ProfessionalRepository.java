@@ -1,6 +1,7 @@
 package br.com.nutrimente.api.user;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -14,38 +15,54 @@ public interface ProfessionalRepository extends JpaRepository<Professional, Long
 	boolean existsByTypeAndDocument(ProfessionalType type, String document);
 
 	/**
-	 * Lista pública: só profissionais APROVADOS, com e-mail confirmado e
-	 * conta ativa. "JOIN FETCH" traz o usuário na mesma consulta (evita uma
-	 * consulta extra por profissional, o famoso problema "N+1").
-	 * type = null -> todas as profissões.
-	 * specialtyId = null -> qualquer especialidade; senão, só quem a marcou
-	 * (o EXISTS olha a tabela de ligação professional_specialties).
-	 * minPrice/maxPrice = faixa de preço da consulta (null = sem limite).
+	 * Busca pública. Cada filtro desligado (any* = false) não restringe nada;
+	 * as listas vêm com um valor qualquer nesse caso (o IN vazio não é válido).
+	 * - specialtyIds: quem marcou PELO MENOS UMA das especialidades (temas)
+	 * - audiences: quem atende pelo menos um dos públicos
+	 * - genders: gênero informado no cadastro
+	 * - upTo30/upTo60/over60: faixas de duração da consulta (somam entre si)
 	 * Com faixa de preço, quem deixou "valor a combinar" (preço vazio) não aparece.
-	 * onlineOnly = true -> só quem atende online (declarou e-Psi / e-Nutricionista).
 	 */
 	@Query(value = """
 			SELECT p FROM Professional p JOIN FETCH p.user u
 			WHERE p.verificationStatus = br.com.nutrimente.api.user.VerificationStatus.APPROVED
 			  AND u.active = true AND u.emailVerified = true
 			  AND (:type IS NULL OR p.type = :type)
-			  AND (:specialtyId IS NULL OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id = :specialtyId))
+			  AND (:anySpecialty = false OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id IN :specialtyIds))
 			  AND (:minPrice IS NULL OR p.consultationPrice >= :minPrice)
 			  AND (:maxPrice IS NULL OR p.consultationPrice <= :maxPrice)
 			  AND (:onlineOnly = false OR p.telehealthRegistered = true)
+			  AND (:anyAudience = false OR EXISTS (SELECT 1 FROM p.audiences a WHERE a IN :audiences))
+			  AND (:anyGender = false OR u.gender IN :genders)
+			  AND (:anyDuration = false
+			       OR (:upTo30 = true AND p.consultationMinutes <= 30)
+			       OR (:upTo60 = true AND p.consultationMinutes <= 60)
+			       OR (:over60 = true AND p.consultationMinutes > 60))
 			""", countQuery = """
 			SELECT COUNT(p) FROM Professional p JOIN p.user u
 			WHERE p.verificationStatus = br.com.nutrimente.api.user.VerificationStatus.APPROVED
 			  AND u.active = true AND u.emailVerified = true
 			  AND (:type IS NULL OR p.type = :type)
-			  AND (:specialtyId IS NULL OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id = :specialtyId))
+			  AND (:anySpecialty = false OR EXISTS (SELECT 1 FROM p.specialties s WHERE s.id IN :specialtyIds))
 			  AND (:minPrice IS NULL OR p.consultationPrice >= :minPrice)
 			  AND (:maxPrice IS NULL OR p.consultationPrice <= :maxPrice)
 			  AND (:onlineOnly = false OR p.telehealthRegistered = true)
+			  AND (:anyAudience = false OR EXISTS (SELECT 1 FROM p.audiences a WHERE a IN :audiences))
+			  AND (:anyGender = false OR u.gender IN :genders)
+			  AND (:anyDuration = false
+			       OR (:upTo30 = true AND p.consultationMinutes <= 30)
+			       OR (:upTo60 = true AND p.consultationMinutes <= 60)
+			       OR (:over60 = true AND p.consultationMinutes > 60))
 			""")
-	Page<Professional> findPublic(@Param("type") ProfessionalType type, @Param("specialtyId") Integer specialtyId,
+	Page<Professional> findPublic(@Param("type") ProfessionalType type,
+			@Param("anySpecialty") boolean anySpecialty, @Param("specialtyIds") Collection<Integer> specialtyIds,
 			@Param("minPrice") BigDecimal minPrice, @Param("maxPrice") BigDecimal maxPrice,
-			@Param("onlineOnly") boolean onlineOnly, Pageable pageable);
+			@Param("onlineOnly") boolean onlineOnly,
+			@Param("anyAudience") boolean anyAudience, @Param("audiences") Collection<Audience> audiences,
+			@Param("anyGender") boolean anyGender, @Param("genders") Collection<Gender> genders,
+			@Param("anyDuration") boolean anyDuration, @Param("upTo30") boolean upTo30,
+			@Param("upTo60") boolean upTo60, @Param("over60") boolean over60,
+			Pageable pageable);
 
 	@Query("""
 			SELECT p FROM Professional p JOIN FETCH p.user u

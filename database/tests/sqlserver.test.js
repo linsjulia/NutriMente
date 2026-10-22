@@ -73,15 +73,15 @@ async function createPatientAndProfessional(query) {
 
 // 24 dos scripts iniciais + schema_migrations (controle) + appointment_records (V002)
 // + patient_intakes e appointment_screenings (V005) + meal_logs (V008)
-test("todas as 29 tabelas foram criadas", async () => {
+test("todas as 30 tabelas foram criadas (29 + professional_audiences da V011)", async () => {
   const { recordset } = await pool.query("SELECT COUNT(*) AS total FROM sys.tables");
-  assert.equal(recordset[0].total, 29);
+  assert.equal(recordset[0].total, 30);
 });
 
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar", "V009__documentos_e_endereco", "V010__ticket_de_cadastro"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar", "V009__documentos_e_endereco", "V010__ticket_de_cadastro", "V011__filtros_da_busca"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então
@@ -398,4 +398,24 @@ test("ticket de cadastro (V010): user_tokens aceita REGISTRATION e nada inventad
              VALUES (${patient}, '${purpose}', '${hash}', DATEADD(HOUR, 24, SYSUTCDATETIME()))`);
     await insert("REGISTRATION", "a".repeat(64));
     await assertFails(insert("QUALQUER_COISA", "b".repeat(64)), /ck_user_tokens_purpose/);
+  }));
+
+test("filtros da busca (V011): duração 15-180, público válido e temas nas duas profissões", () =>
+  inTransaction(async (query) => {
+    const { professional } = await createPatientAndProfessional(query);
+    await assertFails(query(`UPDATE professionals SET consultation_minutes = 5 WHERE user_id = ${professional}`), /ck_professionals_minutes/);
+    await query(`UPDATE professionals SET consultation_minutes = 90 WHERE user_id = ${professional}`);
+    const addAudience = (a) => query(`INSERT INTO professional_audiences (professional_id, audience) VALUES (${professional}, '${a}')`);
+    await addAudience("ADULTO");
+    await addAudience("IDOSO");
+    await assertFails(addAudience("BEBE"), /ck_prof_audience/);
+    // Some junto com o profissional (CASCADE)
+    await query(`DELETE FROM professionals WHERE user_id = ${professional}`);
+    const { recordset: left } = await query(`SELECT COUNT(*) AS total FROM professional_audiences WHERE professional_id = ${professional}`);
+    assert.equal(left[0].total, 0);
+    // Psiconutrição existe para as duas profissões; temas novos sem duplicar
+    const { recordset } = await query(`SELECT professional_type FROM specialties WHERE name = N'Psiconutrição' ORDER BY professional_type`);
+    assert.deepEqual(recordset.map((r) => r.professional_type), ["NUTRICIONISTA", "PSICOLOGO"]);
+    const { recordset: dup } = await query(`SELECT COUNT(*) AS total FROM specialties GROUP BY name, professional_type HAVING COUNT(*) > 1`);
+    assert.equal(dup.length, 0);
   }));

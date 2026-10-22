@@ -56,7 +56,7 @@ const PROFESSIONALS = [
   {
     key: "camila", name: "Camila Rocha", type: "NUTRICIONISTA", gender: "FEMALE", photo: "/doctor/nutricionista3.jpg", price: 180,
     bio: "Nutricionista com foco em comportamento alimentar. Ajudo você a fazer as pazes com a comida, sem dietas restritivas e com metas que cabem na sua rotina.",
-    specialties: ["Nutrição Comportamental", "Emagrecimento"],
+    specialties: ["Nutrição Comportamental", "Emagrecimento", "Psiconutrição", "Compulsão alimentar"], minutes: 60, audiences: ["ADOLESCENTE", "ADULTO"],
     windows: weekdays([1, 2, 3, 4, 5], [["08:00", "12:00"], ["14:00", "18:00"]]),
     reviews: [
       [5, "A Camila é muito acolhedora. Pela primeira vez não me senti julgada pelo que como."],
@@ -67,7 +67,7 @@ const PROFESSIONALS = [
   {
     key: "rafael", name: "Rafael Costa", type: "NUTRICIONISTA", gender: "MALE", photo: "/doctor/pfp.png", price: 150,
     bio: "Nutrição esportiva para quem treina: hipertrofia, emagrecimento e desempenho em corrida, com plano ajustado à sua rotina de treinos.",
-    specialties: ["Nutrição Esportiva", "Nutrição Clínica"],
+    specialties: ["Nutrição Esportiva", "Nutrição Clínica", "Ganho de massa muscular"], minutes: 45, audiences: ["ADOLESCENTE", "ADULTO"],
     windows: [...weekdays([1, 2, 3, 4, 5], [["07:00", "11:00"]]), ...weekdays([6], [["08:00", "12:00"]])],
     reviews: [
       [5, "Melhorei meu rendimento na corrida em poucas semanas."],
@@ -77,7 +77,7 @@ const PROFESSIONALS = [
   {
     key: "larissa", name: "Larissa Santos", type: "NUTRICIONISTA", gender: "FEMALE", photo: "/doctor/nayara-profile.png", price: 130,
     bio: "Atendo gestantes, crianças e famílias vegetarianas e veganas. Alimentação equilibrada em todas as fases da vida.",
-    specialties: ["Vegetarianismo e Veganismo", "Nutrição Materno-Infantil"],
+    specialties: ["Vegetarianismo e Veganismo", "Nutrição Materno-Infantil", "Reeducação alimentar"], minutes: 50, audiences: ["CRIANCA", "ADULTO"],
     windows: [...weekdays([2, 4], [["13:00", "19:00"]]), ...weekdays([6], [["09:00", "13:00"]])],
     reviews: [
       [5, "Me ajudou a montar uma alimentação vegana completa durante a gravidez."],
@@ -87,7 +87,7 @@ const PROFESSIONALS = [
   {
     key: "helena", name: "Helena Martins", type: "NUTRICIONISTA", gender: "FEMALE", photo: "/doctor/nutricionista.jpg", price: 220,
     bio: "Mais de 20 anos de experiência em nutrição clínica: diabetes, hipertensão, colesterol e reeducação alimentar.",
-    specialties: ["Nutrição Clínica", "Emagrecimento"],
+    specialties: ["Nutrição Clínica", "Emagrecimento", "Diabetes", "Hipertensão e colesterol"], minutes: 60, audiences: ["ADULTO", "IDOSO"],
     windows: weekdays([1, 3, 5], [["09:00", "17:00"]]),
     reviews: [
       [5, "Meus exames melhoraram muito depois do acompanhamento."],
@@ -98,7 +98,7 @@ const PROFESSIONALS = [
   {
     key: "mariana", name: "Mariana Ribeiro", type: "PSICOLOGO", gender: "FEMALE", photo: "/doctor/pfp2.png", price: 200,
     bio: "Psicóloga clínica com abordagem cognitivo-comportamental. Trabalho com ansiedade, estresse e organização da rotina.",
-    specialties: ["Ansiedade", "Terapia Cognitivo-Comportamental"],
+    specialties: ["Ansiedade", "Terapia Cognitivo-Comportamental", "Psiconutrição", "Fome emocional e fome física"], minutes: 50, audiences: ["ADULTO"],
     windows: weekdays([1, 2, 3, 4, 5], [["09:00", "12:00"], ["15:00", "20:00"]]),
     reviews: [
       [5, "As técnicas que aprendi nas sessões mudaram meu dia a dia."],
@@ -108,7 +108,7 @@ const PROFESSIONALS = [
   {
     key: "lucas", name: "Lucas Ferreira", type: "PSICOLOGO", gender: "MALE", photo: "/doctor/doctor-pfp.png", price: 160, online: false, // sem cadastro no e-Psi: só presencial
     bio: "Psicólogo especializado em transtornos alimentares e imagem corporal. Atendo adolescentes e adultos, em parceria com nutricionistas.",
-    specialties: ["Transtornos Alimentares", "Autoestima e Imagem Corporal"],
+    specialties: ["Transtornos Alimentares", "Autoestima e Imagem Corporal", "Compulsão alimentar"], minutes: 90, audiences: ["ADOLESCENTE", "ADULTO"],
     windows: weekdays([1, 3, 5], [["14:00", "21:00"]]),
     reviews: [
       [5, "Foi essencial no meu tratamento junto com a nutricionista."],
@@ -118,14 +118,14 @@ const PROFESSIONALS = [
   {
     key: "juliana", name: "Juliana Alves", type: "PSICOLOGO", gender: "FEMALE", photo: "/doctor/psicologo2.jpg", price: 180,
     bio: "Psicologia da saúde: acompanhamento de pessoas com doenças crônicas, depressão e mudanças de hábitos.",
-    specialties: ["Depressão", "Psicologia da Saúde"],
+    specialties: ["Depressão", "Psicologia da Saúde", "Luto e perdas"], minutes: 50, audiences: ["ADULTO", "IDOSO"],
     windows: weekdays([2, 4], [["08:00", "18:00"]]),
     reviews: [[5, "Me senti acolhida desde a primeira sessão."]],
   },
   {
     key: "beatriz", name: "Beatriz Lima", type: "PSICOLOGO", gender: "FEMALE", photo: "/doctor/psicologo3.jpg", price: 140, office: null, // sem consultório: só online
     bio: "Atendimento à noite para quem trabalha durante o dia. Ansiedade, autoestima e relacionamento com o corpo.",
-    specialties: ["Ansiedade", "Autoestima e Imagem Corporal"],
+    specialties: ["Ansiedade", "Autoestima e Imagem Corporal", "Estresse e burnout"], minutes: 30, audiences: ["ADULTO"],
     windows: weekdays([1, 2, 3, 4], [["18:00", "22:00"]]),
     reviews: [
       [4, "Horário à noite salvou minha rotina."],
@@ -333,7 +333,7 @@ async function createProfessionals(db, specialtyIdByName) {
       body: {
         name: p.name, email, password: PASSWORD, cpf: randomCpf(), birthDate: "1984-03-10",
         telephone: randomPhone(), professionalType: p.type, documentProfessional: randomCouncil(p.type),
-        bio: p.bio, acceptTerms: true,
+        bio: p.bio, gender: p.gender, acceptTerms: true,
       },
     });
     const id = await verifyAndSetPhoto(db, email, p.photo);
@@ -344,6 +344,9 @@ async function createProfessionals(db, specialtyIdByName) {
         body: {
           bio: p.bio,
           consultationPrice: p.price,
+          // Duração e público: filtros da busca (V011)
+          consultationMinutes: p.minutes ?? 50,
+          audiences: p.audiences ?? ["ADULTO"],
           // Cadastro no e-Psi / e-Nutricionista: sem ele, só consulta presencial
           telehealthRegistered: p.online ?? true,
           // Consultório: sem ele, só consulta online

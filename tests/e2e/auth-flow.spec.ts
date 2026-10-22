@@ -134,6 +134,15 @@ test("desistiu antes de confirmar: dá para se cadastrar de novo com o mesmo CPF
   await confirmEmail(page, second);
 });
 
+test("link de confirmação inválido: a página tenta sozinha e explica o que fazer", async ({ page }) => {
+  await page.goto("/verify-email?token=link-que-nao-existe");
+  await expect(page.getByRole("heading", { name: "Não deu para confirmar" })).toBeVisible();
+  await expect(page.getByText("Este link é inválido ou expirou")).toBeVisible();
+  await expect(page.getByRole("link", { name: /receber um novo link/ })).toBeVisible();
+  // Link gasto não tem o que "tentar de novo"
+  await expect(page.getByRole("button", { name: /Tentar de novo|Confirmar meu e-mail/ })).toHaveCount(0);
+});
+
 test("cadastro mostra os erros da API no campo certo", async ({ page }) => {
   await page.goto("/register/patient");
   await page.getByLabel("Nome completo").fill("Ana Paciente");

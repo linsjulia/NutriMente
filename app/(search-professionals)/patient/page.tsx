@@ -77,11 +77,13 @@ const filtrosAtivos = ["Psicologia nutricional", "Ansiedade", "Comer emocional"]
 
 /* ---------- página ---------- */
 export default async function BuscaProfissionais({ searchParams }: PageProps<"/patient">) {
-  const { type, speciality, minPrice, maxPrice, online, sort, page } = await searchParams;
+  const { type, specialty, speciality, minPrice, maxPrice, online, sort, page } = await searchParams;
+  // A API espera "specialty" (antes ia "speciality" e o filtro era ignorado sem erro)
+  const specialtyId = specialty ?? speciality;
 
   const query = new URLSearchParams();
   if(type === "NUTRICIONISTA" || type === "PSICOLOGO") query.set("type", type);
-  if(Number(speciality) > 0) query.set("speciality", String(speciality));
+  if(Number(specialtyId) > 0) query.set("specialty", String(specialtyId));
   if(typeof minPrice === "string") query.set("minPrice", minPrice);
   if(typeof maxPrice === "string") query.set("maxPrice", maxPrice);
   if(online === "true") query.set("online", "true");

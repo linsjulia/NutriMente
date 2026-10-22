@@ -99,8 +99,8 @@ export async function registerPatient(page: Page, email: string, name = "Ana Pac
  * teste seguir pelo login como antes.
  */
 export async function confirmEmail(page: Page, email: string, { stayLoggedIn = false } = {}) {
+  // A página confirma sozinha ao abrir o link (sem clicar)
   await page.goto(await linkFromEmail(email, "/verify-email"));
-  await page.getByRole("button", { name: "Confirmar meu e-mail" }).click();
   await expect(page).toHaveURL(/\?emailConfirmado=1$/);
   await expect(page.getByRole("status").filter({ hasText: "E-mail confirmado!" })).toBeVisible();
   if (!stayLoggedIn) await page.context().clearCookies();

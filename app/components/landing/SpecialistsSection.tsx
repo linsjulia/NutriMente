@@ -43,7 +43,7 @@ export default function SpecialistsSection() {
               descricao="Psicóloga com atuação clínica em sofrimento psíquico relacionado à alimentação, ansiedade, imagem corporal e processos de autocuidado. Realiza acompanhamento individual com foco em avaliação, formulação clínica e plano terapêutico personalizado."
               categoria="Psicologia Clínica e Nutricional"
               segundaCategoria="Ansiedade associada ao comportamento alimentar"
-              img="/doctor/pfp3.png"
+              img="/doctor/nayara-profile.png"
             />
           </div>
 

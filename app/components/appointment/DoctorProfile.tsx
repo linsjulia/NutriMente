@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { COUNCIL, PROFESSION_LABELS } from '@/app/lib/types';
+import { PROFESSION_LABELS, formatCouncilNumber } from '@/app/lib/types';
 import type { ProfessionalProfile } from '@/app/lib/agenda';
 import { initials } from './DoctorSummaryCard';
 
@@ -45,7 +45,7 @@ export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile: p, price,
               <div className="space-y-1">
                 <h2 id="perfil-nome" className="text-xl font-extrabold text-blue-900">{p.name}</h2>
                 <p className="text-sm text-gray-600">
-                  {PROFESSION_LABELS[p.type]} · {COUNCIL[p.type]} {p.document}
+                  {PROFESSION_LABELS[p.type]} · {formatCouncilNumber(p.type, p.document)}
                 </p>
                 <ul aria-label="Especialidades e atendimento" className="flex flex-wrap gap-2 pt-1">
                   {p.specialties.map((s) => (

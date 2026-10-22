@@ -14,6 +14,10 @@ import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { API_URL, PASSWORD, backendIsUp, deleteAccountViaApi, linkFromEmail, login, randomCpf, randomCrn, uniqueEmail } from "./helpers";
 
+// Fluxos inteiros com 2 ou 3 contas (e espera do limite de logins da API):
+// passam dos 30 s padrão quando a máquina está carregada.
+test.describe.configure({ timeout: 90_000 });
+
 const adminEmail = process.env.ADMIN_EMAIL;
 const adminPassword = process.env.ADMIN_PASSWORD;
 const created: string[] = [];
@@ -249,6 +253,7 @@ test("agendamento em etapas (/appointment): visitante entra e o paciente agenda 
   await visitor.goto(`/appointment?professional=${pro.id}`);
   await expect(visitor.getByRole("heading", { level: 1 })).toContainText("Renata");
   await expect(visitor.getByText("Dra. Marina Alves")).toHaveCount(0); // nada de dado de exemplo
+  await expect(visitor.getByText(/CRN-\d+ \d+/)).toBeVisible(); // registro no formato oficial
   await expectAccessible(visitor);
   await visitor.getByRole("button", { name: "Escolher data e horário" }).click();
   await visitor.locator("fieldset").first().getByRole("button").first().click();

@@ -5,6 +5,8 @@
 // ele não volte. Os que dependem do back-end são pulados se a API estiver fora.
 // =============================================================
 
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import path from "node:path";
 import { test, expect } from "@playwright/test";
 import {
   backendIsUp,
@@ -18,6 +20,30 @@ import {
   reloadAndSettle,
   uniqueEmail,
 } from "./helpers";
+
+/** Todos os arquivos de código (recursivo) de uma pasta */
+function sourceFiles(dir: string, exts = [".ts", ".tsx", ".mjs", ".css"]): string[] {
+  return readdirSync(dir).flatMap((name) => {
+    const full = path.join(dir, name);
+    if (name === "node_modules" || name.startsWith(".")) return [];
+    if (statSync(full).isDirectory()) return sourceFiles(full, exts);
+    return exts.some((e) => name.endsWith(e)) ? [full] : [];
+  });
+}
+
+// Em 10/2026 imagens foram renomeadas/convertidas em public/ e o código
+// continuou apontando para o nome antigo (foto quebrada na home, na página
+// Sobre e nos perfis da demonstração). Este teste não precisa de navegador.
+test("toda imagem citada no código existe em public/", () => {
+  const ref = /["'`(](\/(?:doctor|patient|icons|logo|background|images?)\/[^"'`)\s]+\.(?:png|jpe?g|webp|svg|gif|avif))/g;
+  const missing: string[] = [];
+  for (const file of [...sourceFiles("app"), ...sourceFiles("database/demo")]) {
+    for (const [, img] of readFileSync(file, "utf8").matchAll(ref)) {
+      if (!existsSync(path.join("public", img))) missing.push(`${img} (em ${file})`);
+    }
+  }
+  expect(missing).toEqual([]);
+});
 
 test.describe("sem back-end", () => {
   for (const width of [414, 1024]) {

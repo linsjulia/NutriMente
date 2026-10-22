@@ -75,7 +75,7 @@ const PROFESSIONALS = [
     ],
   },
   {
-    key: "larissa", name: "Larissa Santos", type: "NUTRICIONISTA", gender: "FEMALE", photo: "/doctor/pfp3.png", price: 130,
+    key: "larissa", name: "Larissa Santos", type: "NUTRICIONISTA", gender: "FEMALE", photo: "/doctor/nayara-profile.png", price: 130,
     bio: "Atendo gestantes, crianças e famílias vegetarianas e veganas. Alimentação equilibrada em todas as fases da vida.",
     specialties: ["Vegetarianismo e Veganismo", "Nutrição Materno-Infantil"],
     windows: [...weekdays([2, 4], [["13:00", "19:00"]]), ...weekdays([6], [["09:00", "13:00"]])],
@@ -153,7 +153,7 @@ const PENDING = {
 };
 
 const PATIENTS = [
-  { key: "ana", name: "Ana Souza", gender: "FEMALE", birthDate: "1995-04-12", phone: "11987651234", photo: "/patient/paciente2.png" },
+  { key: "ana", name: "Ana Souza", gender: "FEMALE", birthDate: "1995-04-12", phone: "11987651234", photo: "/patient/paciente.jpg" },
   { key: "pedro", name: "Pedro Henrique Lima", gender: "MALE", birthDate: "1988-09-30", phone: "21998762345" },
   { key: "fernanda", name: "Fernanda Oliveira", gender: "FEMALE", birthDate: "1992-01-18", phone: "31997653456" },
   { key: "gustavo", name: "Gustavo Pereira", gender: "MALE", birthDate: "1985-06-05", phone: "41996544567" },

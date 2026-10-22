@@ -15,7 +15,7 @@ export default function AboutPage() {
 
           <div className="relative h-60 overflow-hidden rounded-2xl md:h-100">
             <Image
-              src="/patient/consulta-paciente-profissional.png"
+              src="/patient/consulta-paciente-profissional.jpg"
               width={1300}
               height={1300}
               alt="Duas mulheres conversando durante uma consulta"

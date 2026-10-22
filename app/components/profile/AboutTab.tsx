@@ -1,6 +1,5 @@
 import { Clock, DollarSign, HeartPulse } from "lucide-react";
 import Card from "./Card";
-import Tag from "./Tag";
 import type { Profissional } from "./Types";
 import CategoryBadge from "../badge/SpecialityBadge";
 

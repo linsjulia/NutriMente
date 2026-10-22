@@ -28,14 +28,22 @@ test.afterAll(async () => {
 });
 
 async function apiCall(method: string, path: string, token?: string, body?: unknown) {
-  const res = await fetch(`${API_URL}${path}`, {
-    method,
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  const text = await res.text();
-  if (!res.ok) throw new Error(`${method} ${path}: ${res.status} ${text}`);
-  return text ? JSON.parse(text) : null;
+  // A API limita tentativas em /api/auth/* (30/min por IP). Com muitos testes
+  // seguidos, espera o tempo que ela pedir (Retry-After) e tenta de novo.
+  for (let attempt = 0; ; attempt++) {
+    const res = await fetch(`${API_URL}${path}`, {
+      method,
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    if (res.status === 429 && attempt < 3) {
+      await new Promise((r) => setTimeout(r, (Number(res.headers.get("Retry-After")) || 5) * 1000 + 500));
+      continue;
+    }
+    const text = await res.text();
+    if (!res.ok) throw new Error(`${method} ${path}: ${res.status} ${text}`);
+    return text ? JSON.parse(text) : null;
+  }
 }
 
 const apiLogin = async (email: string, password = PASSWORD) =>
@@ -56,7 +64,8 @@ async function createVerified(kind: "patient" | "professional", name: string) {
   created.push(email);
   const link = await linkFromEmail(email, "/verify-email");
   await apiCall("POST", "/api/auth/verify-email", undefined, { token: new URL(link, "http://x").searchParams.get("token") });
-  return { email, token: await apiLogin(email), id: (await apiCall("GET", "/api/me", await apiLogin(email))).id as number };
+  const token = await apiLogin(email);
+  return { email, token, id: (await apiCall("GET", "/api/me", token)).id as number };
 }
 
 /** Nutricionista aprovada, que atende online e presencial, com agenda aberta todos os dias */
@@ -228,4 +237,44 @@ test("paciente com consulta em menos de 24 h vê por que não pode mais cancelar
   await carla.goto(`/professionals/${pro.id}`);
   await settle(carla);
   await expect(carla.getByText("até 24 horas antes da consulta")).toBeVisible();
+});
+
+test("agendamento em etapas (/appointment): visitante entra e o paciente agenda com dados reais", async ({ browser }) => {
+  const suffix = letters();
+  const pro = await readyProfessional(`Renata ${suffix[0].toUpperCase()}${suffix.slice(1)}`);
+  const patient = await createVerified("patient", "Lia Paciente");
+
+  // Visitante: vê o perfil real e, ao confirmar, é mandado para o login
+  const visitor = await (await browser.newContext()).newPage();
+  await visitor.goto(`/appointment?professional=${pro.id}`);
+  await expect(visitor.getByRole("heading", { level: 1 })).toContainText("Renata");
+  await expect(visitor.getByText("Dra. Marina Alves")).toHaveCount(0); // nada de dado de exemplo
+  await expectAccessible(visitor);
+  await visitor.getByRole("button", { name: "Escolher data e horário" }).click();
+  await visitor.locator("fieldset").first().getByRole("button").first().click();
+  await visitor.locator("fieldset").nth(1).getByRole("button").first().click();
+  await visitor.getByRole("button", { name: "Continuar" }).click();
+  await expect(visitor.getByRole("link", { name: "Entrar para agendar" })).toHaveAttribute("href", /\/login\?next=.*startsAt/);
+  await expect(visitor.getByLabel(/número do cartão/i)).toHaveCount(0); // sem formulário de cartão
+
+  // Paciente: escolhe dia, horário e presencial, conta o motivo e confirma
+  const lia = await (await browser.newContext()).newPage();
+  await login(lia, patient.email);
+  await expect(lia).toHaveURL(/\/dashboard$/);
+  await lia.goto(`/appointment?professional=${pro.id}`);
+  await lia.getByRole("button", { name: "Escolher data e horário" }).click();
+  await lia.locator("fieldset").first().getByRole("button").nth(1).click();
+  const time = lia.locator("fieldset").nth(1).getByRole("button").first();
+  const chosen = (await time.innerText()).trim();
+  await time.click();
+  await expect(time).toHaveAttribute("aria-pressed", "true");
+  await lia.getByLabel("Presencial").check();
+  await expectAccessible(lia);
+  await lia.getByRole("button", { name: "Continuar" }).click();
+  await expect(lia.getByRole("complementary", { name: "Resumo do agendamento" })).toContainText(chosen);
+  await lia.getByLabel(/Motivo da consulta/).fill("Quero ajuda com a rotina.");
+  await lia.getByRole("button", { name: "Confirmar agendamento" }).click();
+  await expect(lia).toHaveURL(/\/appointments\/\d+\?agendada=1$/);
+  await expect(lia.getByRole("status")).toContainText("Consulta agendada!");
+  await expect(lia.getByText("Rua das Flores, 100 - Centro, São Paulo/SP")).toBeVisible();
 });

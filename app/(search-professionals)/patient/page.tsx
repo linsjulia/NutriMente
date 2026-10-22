@@ -96,7 +96,7 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
   const profissionais = await Promise.all(
     items.map(async (p) => {
       const slots = await api<SlotDay[]>(`/api/professionals/${p.id}/slots?from=${hoje}&days=1`);
-      const horarios = slots.ok ? (slots.data[0]?.slots.map((s) => s.time) ?? []) : [];
+      const horarios = slots.ok ? (slots.data[0]?.slots.map((s) => ({ time: s.time, startsAt: s.startsAt })) ?? []) : [];
       return {
         id: p.id,
         titulo: PROFESSION_LABELS[p.type],

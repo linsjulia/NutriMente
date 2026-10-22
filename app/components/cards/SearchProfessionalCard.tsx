@@ -1,5 +1,5 @@
-"use client"
 import Image from "next/image"
+import Link from "next/link"
 
 type Profissional = {
   id: number;
@@ -8,7 +8,8 @@ type Profissional = {
   nota: number;
   avaliacoes: number;
   areas: string[];
-  horarios: string[];
+  /** Horários livres de hoje (time "14:00", startsAt ISO para já chegar escolhido) */
+  horarios: { time: string; startsAt: string }[];
   preco: number | null;
   foto?: string; // se não vier foto, mostra as iniciais
 };
@@ -37,7 +38,9 @@ export default function CardProfissional({ p }: { p: Profissional }) {
 
         <div>
           <p className="text-sm font-semibold text-sky-500">{p.titulo}</p>
-          <h3 className="font-bold text-slate-900">{p.nome}</h3>
+          <h3 className="font-bold text-slate-900">
+            <Link href={`/professionals/${p.id}`} className="underline-offset-4 hover:underline">{p.nome}</Link>
+          </h3>
           <p className="text-xs text-slate-500">
             <span className="text-yellow-400">★</span> {p.nota.toFixed(1)} ({p.avaliacoes})
           </p>
@@ -58,26 +61,30 @@ export default function CardProfissional({ p }: { p: Profissional }) {
 
       {/* direita: horários, preço e botão */}
       <div className="sm:w-44 sm:shrink-0 sm:text-right">
-        <p className="mb-2 text-sm font-semibold text-sky-500">Hoje</p>
+        <p className="mb-2 text-sm font-semibold text-sky-700">{p.horarios.length > 0 ? "Hoje" : "Sem horário hoje"}</p>
         <div className="grid grid-cols-2 gap-2">
           {p.horarios.map((h) => (
-            <button
-              key={h}
-              type="button"
-              className="rounded bg-sky-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-sky-200"
+            <Link
+              key={h.startsAt}
+              href={`/appointment?professional=${p.id}&startsAt=${encodeURIComponent(h.startsAt)}`}
+              aria-label={`Agendar hoje às ${h.time} com ${p.nome}`}
+              className="flex min-h-8 items-center justify-center rounded bg-sky-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-sky-200"
             >
-              {h}
-            </button>
+              {h.time}
+            </Link>
           ))}
         </div>
-        <p className="mt-3 text-sm font-bold text-slate-900">R$ {p.preco}</p>
-        <p className="text-[11px] text-slate-500">por consulta</p>
-        <button
-          type="button"
-          className="mt-2 w-full rounded-full bg-linear-to-r bg-green-400 px-4 py-2 text-xs font-semibold text-white transition duration-200 hover:opacity-80"
+        <p className="mt-3 text-sm font-bold text-slate-900">
+          {p.preco != null ? p.preco.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "Valor a combinar"}
+        </p>
+        <p className="text-[11px] text-slate-600">por consulta</p>
+        <Link
+          href={`/appointment?professional=${p.id}`}
+          aria-label={`Agendar consulta com ${p.nome}`}
+          className="mt-2 flex min-h-11 w-full items-center justify-center rounded-full bg-green1 px-4 py-2 text-xs font-semibold text-blue2 transition duration-200 hover:bg-green3"
         >
           Agendar Consulta
-        </button>
+        </Link>
       </div>
     </article>
   );

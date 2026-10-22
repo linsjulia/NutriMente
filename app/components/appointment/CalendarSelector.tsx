@@ -1,100 +1,109 @@
 "use client"
-import React, { useState } from 'react';
+import React from 'react';
+import type { SlotDay } from '@/app/lib/agenda';
 
-export const CalendarSelector: React.FC = () => {
-  const [selectedDay, setSelectedDay] = useState<number>(23);
-  const [selectedTime, setSelectedTime] = useState<string>('14:00');
+interface CalendarSelectorProps {
+  /** Dias com horários livres (GET /api/professionals/{id}/slots) */
+  days: SlotDay[];
+  selectedDate: string | null;
+  selectedStartsAt: string | null;
+  onSelectDate: (date: string) => void;
+  onSelectSlot: (startsAt: string) => void;
+}
 
-  const availableTimes = [
-    '09:00', '10:00', '11:00', '14:00',
-    '15:00', '16:00', '17:00', '18:00',
-  ];
+export const dayLabel = (date: string) => {
+  const d = new Date(`${date}T12:00:00`);
+  return {
+    weekday: d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', ''),
+    day: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+    long: d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }),
+  };
+};
 
-  const highlightedDays = [21, 22, 23, 26, 27, 28, 29, 30];
+// Escolha de dia e horário com os horários REAIS da agenda do profissional
+export const CalendarSelector: React.FC<CalendarSelectorProps> = ({
+  days,
+  selectedDate,
+  selectedStartsAt,
+  onSelectDate,
+  onSelectSlot,
+}) => {
+  const day = days.find((d) => d.date === selectedDate) ?? null;
+
+  if (days.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        <p className="text-gray-700">Este profissional não tem horários livres nas próximas duas semanas.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Seção Calendário */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-blue-900 text-lg">Outubro 2026</h3>
-          <div className="flex space-x-2 text-gray-400 text-sm">
-            <button className="hover:text-gray-600">&lt;</button>
-            <button className="hover:text-gray-600">&gt;</button>
-          </div>
-        </div>
-
-        {/* Cabeçalho de Dias */}
-        <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-400 mb-2">
-          {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, i) => (
-            <div key={i}>{day}</div>
-          ))}
-        </div>
-
-        {/* Grade de Dias */}
-        <div className="grid grid-cols-7 gap-1 text-center text-sm">
-          {/* Espaçadores de início do mês */}
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={`empty-${i}`} />
-          ))}
-
-          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => {
-            const isAvailable = highlightedDays.includes(day);
-            const isSelected = selectedDay === day;
-
+      {/* Dias */}
+      <fieldset>
+        <legend className="font-bold text-blue-900 text-lg mb-4">Escolha o dia</legend>
+        <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 text-center text-sm">
+          {days.map((d) => {
+            const label = dayLabel(d.date);
+            const isSelected = selectedDate === d.date;
             return (
               <button
-                key={day}
-                disabled={!isAvailable}
-                onClick={() => setSelectedDay(day)}
-                className={`h-9 w-full rounded-lg flex items-center justify-center font-medium transition-all ${
-                  isSelected
-                    ? 'bg-blue-900 text-white font-bold'
-                    : isAvailable
-                    ? 'bg-sky-100 text-blue-900 hover:bg-sky-200'
-                    : 'text-gray-300 cursor-not-allowed'
+                key={d.date}
+                type="button"
+                onClick={() => onSelectDate(d.date)}
+                aria-pressed={isSelected}
+                aria-label={`${label.long}, ${d.slots.length} horários`}
+                className={`min-h-11 rounded-lg flex flex-col items-center justify-center py-1 font-medium transition-all ${
+                  isSelected ? 'bg-blue-900 text-white font-bold' : 'bg-sky-100 text-blue-900 hover:bg-sky-200'
                 }`}
               >
-                {day}
+                <span className="text-xs capitalize">{label.weekday}</span>
+                <span>{label.day}</span>
               </button>
             );
           })}
         </div>
-      </div>
+      </fieldset>
 
-      {/* Seção de Horários */}
-      <div className="flex flex-col justify-between">
+      {/* Horários do dia */}
+      <fieldset className="flex flex-col justify-between">
         <div>
-          <h4 className="font-bold text-blue-900 text-base mb-1">
-            Sex, {selectedDay} de outubro
-          </h4>
-          <p className="text-xs text-gray-400 mb-4">Horário de Brasília (GMT-3)</p>
+          <legend className="font-bold text-blue-900 text-base mb-1 first-letter:uppercase">
+            {day ? dayLabel(day.date).long : 'Escolha um dia'}
+          </legend>
+          <p className="text-xs text-gray-600 mb-4">Horário de Brasília</p>
 
-          <div className="grid grid-cols-4 gap-2">
-            {availableTimes.map((time) => {
-              const isSelected = selectedTime === time;
-              return (
-                <button
-                  key={time}
-                  onClick={() => setSelectedTime(time)}
-                  className={`py-2 text-xs font-semibold rounded-xl border transition-all ${
-                    isSelected
-                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700 ring-1 ring-emerald-500'
-                      : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  {time}
-                </button>
-              );
-            })}
-          </div>
+          {day && (
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              {day.slots.map((slot) => {
+                const isSelected = selectedStartsAt === slot.startsAt;
+                return (
+                  <button
+                    key={slot.startsAt}
+                    type="button"
+                    onClick={() => onSelectSlot(slot.startsAt)}
+                    aria-pressed={isSelected}
+                    className={`min-h-11 text-sm font-semibold rounded-xl border transition-all ${
+                      isSelected
+                        ? 'border-emerald-600 bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600'
+                        : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                    }`}
+                  >
+                    {slot.time}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <p className="text-xs text-gray-400 mt-6 flex items-center">
-          <span className="w-1.5 h-1.5 bg-gray-400 rounded-full inline-block mr-2" />
-          8 horários disponíveis
-        </p>
-      </div>
+        {day && (
+          <p className="text-xs text-gray-600 mt-6">
+            {day.slots.length} {day.slots.length === 1 ? 'horário disponível' : 'horários disponíveis'}
+          </p>
+        )}
+      </fieldset>
     </div>
   );
 };

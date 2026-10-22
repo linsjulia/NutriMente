@@ -297,6 +297,7 @@ Todos precisam do back-end ligado (`docker compose up -d`).
 | `node: bad option: --env-file` ao rodar testes | Node antigo | Instale o Node 22 LTS |
 | Alterei uma tabela (`.sql`) e nada mudou | Os scripts só rodam quando o banco é criado | `docker compose down -v` e `docker compose up -d --build` (apaga os dados locais) |
 | Testar pelo celular na mesma rede | O Next bloqueia endereços que não conhece | Coloque o IP de "Network:" do `npm run dev` em `ALLOWED_DEV_ORIGINS` no `.env` e reinicie o `npm run dev` |
+| `additional privileges requested: pass "--allow=fs.read=...Dockerfile"` ao rodar `docker compose up -d --build` | Bug do buildx 0.37.2 com o "Bake" do Compose | Confira se o seu `.env` tem a linha `COMPOSE_BAKE=false` (veio no `.env.example`); se não tiver, acrescente e rode de novo |
 | Espaço em disco acabando | Imagens e caches antigos do Docker | `docker system prune` (não apaga os dados do banco) |
 
 | VS Code marca erros em todo o código Java (`release 25 is not found`) | A extensão Java não encontrou o JDK 25 | Veja a seção 11 |

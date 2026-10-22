@@ -7,7 +7,7 @@ import { FormAlert, SubmitButton } from "@/app/components/form/FormParts";
 import type { FormState } from "@/app/lib/form";
 import { formatBRL } from "@/app/lib/money";
 import { useFocusOnError } from "@/app/components/form/useFocusOnError";
-import type { Specialty } from "@/app/lib/types";
+import { AUDIENCE_LABELS, CONSULTATION_MINUTES, type Audience, type Specialty } from "@/app/lib/types";
 import SpecialtyPicker from "./SpecialtyPicker";
 
 type Props = {
@@ -18,11 +18,13 @@ type Props = {
   specialtyIds: number[];
   telehealthRegistered: boolean;
   office: { address: string | null; city: string | null; state: string | null };
+  consultationMinutes: number;
+  audiences: Audience[];
 };
 
 const UFS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
 
-export default function ProfessionalProfileForm({ bio, consultationPrice, specialtyOptions, specialtyIds, telehealthRegistered, office }: Props) {
+export default function ProfessionalProfileForm({ bio, consultationPrice, specialtyOptions, specialtyIds, telehealthRegistered, office, consultationMinutes, audiences }: Props) {
   const [state, action, pending] = useActionState<FormState, FormData>(updateProfessionalProfile, {});
   const resultRef = useRef<HTMLFormElement>(null);
   useFocusOnError(resultRef, state);
@@ -70,6 +72,49 @@ export default function ProfessionalProfileForm({ bio, consultationPrice, specia
       ) : (
         <p className="text-sm text-gray-700">Não conseguimos carregar as especialidades agora. Tente de novo em instantes.</p>
       )}
+      {/* Duração e público: aparecem nos filtros da busca dos pacientes */}
+      <fieldset className="flex flex-col gap-4">
+        <legend className="mb-1 text-lg font-bold">Sua consulta</legend>
+        <input type="hidden" name="consultShown" value="1" />
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="consultationMinutes" className="font-semibold">Duração da consulta</label>
+          <select
+            id="consultationMinutes"
+            name="consultationMinutes"
+            defaultValue={values?.consultationMinutes ?? String(consultationMinutes)}
+            aria-describedby="consultationMinutes-hint"
+            className="form-input max-w-xs"
+          >
+            {/* Mantém um valor salvo que não esteja na lista (a API aceita de 15 a 180) */}
+            {[...new Set([...CONSULTATION_MINUTES, consultationMinutes])].sort((a, b) => a - b).map((m) => (
+              <option key={m} value={m}>{m} minutos</option>
+            ))}
+          </select>
+          <p id="consultationMinutes-hint" className="text-sm text-gray-600">
+            Sua agenda passa a oferecer horários com essa duração.
+          </p>
+          {state.errors?.consultationMinutes && <p className="text-sm font-semibold text-red-700">{state.errors.consultationMinutes}</p>}
+        </div>
+        <fieldset className="flex flex-col gap-2">
+          <legend className="font-semibold">Público que você atende</legend>
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            {(Object.keys(AUDIENCE_LABELS) as Audience[]).map((a) => (
+              <label key={a} className="flex min-h-11 cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="audiences"
+                  value={a}
+                  defaultChecked={values?.audiences != null ? values.audiences.split(",").includes(a) : audiences.includes(a)}
+                  className="h-5 w-5"
+                />
+                {AUDIENCE_LABELS[a]}
+              </label>
+            ))}
+          </div>
+          {state.errors?.audiences && <p className="text-sm font-semibold text-red-700">{state.errors.audiences}</p>}
+        </fieldset>
+      </fieldset>
+
       <fieldset className="flex flex-col gap-4">
         <legend className="mb-1 text-lg font-bold">Como você atende</legend>
         <input type="hidden" name="attendanceShown" value="1" />

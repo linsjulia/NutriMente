@@ -11,6 +11,7 @@ import br.com.nutrimente.api.common.validation.Celular;
 import br.com.nutrimente.api.common.validation.FullName;
 import br.com.nutrimente.api.common.validation.StrongPassword;
 import br.com.nutrimente.api.specialty.SpecialtyDto;
+import br.com.nutrimente.api.user.Audience;
 import br.com.nutrimente.api.user.Gender;
 import br.com.nutrimente.api.user.Professional;
 import br.com.nutrimente.api.user.ProfessionalType;
@@ -20,6 +21,8 @@ import br.com.nutrimente.api.user.VerificationStatus;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -77,14 +80,19 @@ public final class AccountDtos {
 			/** Endereço do consultório (null = não atende presencialmente) */
 			String officeAddress,
 			String officeCity,
-			String officeState) {
+			String officeState,
+			/** Duração de cada consulta, em minutos */
+			int consultationMinutes,
+			/** Público atendido, em ordem fixa (criança, adolescente, adulto, idoso) */
+			List<Audience> audiences) {
 
 		static ProfessionalProfile of(Professional p) {
 			return new ProfessionalProfile(p.getType(), p.getDocument(), p.getBio(), p.getConsultationPrice(),
 					p.getVerificationStatus(), p.getSpecialties().stream().map(SpecialtyDto::of).toList(),
 					p.offersOnline(), p.getTelehealthDeclaredAt() == null ? null
 							: p.getTelehealthDeclaredAt().toInstant(ZoneOffset.UTC),
-					p.getOfficeAddress(), p.getOfficeCity(), p.getOfficeState());
+					p.getOfficeAddress(), p.getOfficeCity(), p.getOfficeState(), p.getConsultationMinutes(),
+					p.getAudiences().stream().sorted().toList());
 		}
 	}
 
@@ -129,7 +137,16 @@ public final class AccountDtos {
 			@Size(max = 100, message = "A cidade pode ter até 100 caracteres") String officeCity,
 
 			@Pattern(regexp = "^$|^(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)$",
-					message = "Escolha a UF") String officeState) {
+					message = "Escolha a UF") String officeState,
+
+			/** null = não muda */
+			@Min(value = 15, message = "A consulta precisa ter pelo menos 15 minutos")
+			@Max(value = 180, message = "A consulta pode ter no máximo 180 minutos")
+			Integer consultationMinutes,
+
+			/** null = não muda; lista vazia = nenhum público marcado */
+			@Size(max = 4, message = "Escolha no máximo 4 públicos")
+			List<Audience> audiences) {
 
 		/** Limite para o perfil continuar objetivo para o paciente */
 		public static final int MAX_SPECIALTIES = 5;

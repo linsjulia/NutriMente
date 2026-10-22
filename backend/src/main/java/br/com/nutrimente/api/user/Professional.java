@@ -11,7 +11,9 @@ import org.hibernate.annotations.BatchSize;
 
 import br.com.nutrimente.api.common.Clock;
 import br.com.nutrimente.api.specialty.Specialty;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -51,6 +53,20 @@ public class Professional {
 
 	@Column(name = "consultation_price")
 	private BigDecimal consultationPrice;
+
+	public static final int DEFAULT_MINUTES = 50;
+
+	/** Duração de cada consulta, em minutos (15 a 180). A agenda usa esta duração */
+	@Column(name = "consultation_minutes", nullable = false)
+	private int consultationMinutes = DEFAULT_MINUTES;
+
+	/** Público atendido (criança, adolescente, adulto, idoso), para os filtros da busca */
+	@ElementCollection(fetch = FetchType.LAZY)
+	@BatchSize(size = 50)
+	@CollectionTable(name = "professional_audiences", joinColumns = @JoinColumn(name = "professional_id"))
+	@Enumerated(EnumType.STRING)
+	@Column(name = "audience", nullable = false)
+	private Set<Audience> audiences = new HashSet<>();
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "verification_status", nullable = false)
@@ -121,6 +137,28 @@ public class Professional {
 	public void updateProfile(String bio, BigDecimal consultationPrice) {
 		this.bio = bio;
 		this.consultationPrice = consultationPrice;
+	}
+
+	public void updateConsultationMinutes(int minutes) {
+		this.consultationMinutes = minutes;
+	}
+
+	public int getConsultationMinutes() {
+		return consultationMinutes;
+	}
+
+	/** Duração da consulta deste profissional (a agenda e o agendamento usam) */
+	public java.time.Duration consultationDuration() {
+		return java.time.Duration.ofMinutes(consultationMinutes);
+	}
+
+	public void replaceAudiences(java.util.Collection<Audience> audiences) {
+		this.audiences.clear();
+		this.audiences.addAll(audiences);
+	}
+
+	public Set<Audience> getAudiences() {
+		return audiences;
 	}
 
 	/**

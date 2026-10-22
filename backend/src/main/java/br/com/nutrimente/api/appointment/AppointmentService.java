@@ -100,7 +100,7 @@ public class AppointmentService {
 		}
 
 		LocalDateTime startsAt = toUtc(request.startsAt());
-		LocalDateTime endsAt = startsAt.plus(rules.duration());
+		LocalDateTime endsAt = startsAt.plus(professional.consultationDuration());
 		checkPatientFree(patientId, startsAt, endsAt);
 
 		// Online só com quem declarou o cadastro no conselho (e-Psi / e-Nutricionista);
@@ -212,7 +212,7 @@ public class AppointmentService {
 		appointments.flush();
 
 		LocalDateTime startsAt = toUtc(newStartsAt);
-		LocalDateTime endsAt = startsAt.plus(rules.duration());
+		LocalDateTime endsAt = startsAt.plus(original.getProfessional().consultationDuration());
 		checkPatientFree(userId, startsAt, endsAt);
 		Appointment created = save(new Appointment(original.getPatient(), original.getProfessional(), startsAt, endsAt,
 				original.getModality(), videoUrlFor(original.getModality()), original.getPrice(), original.getNotes(),

@@ -99,6 +99,19 @@ Body `{ "ticket": "..." }`. A tela "Confirme seu e-mail" chama a cada poucos seg
 
 Essa rota não conta no limite de tentativas de `/api/auth/*`.
 
+## 🆕 Duração da consulta e público atendido (filtros da busca)
+
+`PUT /api/me/professional-profile` aceita mais dois campos (os dois opcionais; ausente = não muda):
+
+| Campo | Tipo | Regra |
+|---|---|---|
+| `consultationMinutes` | número | 15 a 180. **A agenda passa a usar essa duração** (horários livres e fim da consulta). Padrão: 50 |
+| `audiences` | lista | `CRIANCA`, `ADOLESCENTE`, `ADULTO`, `IDOSO` (lista vazia = nenhum) |
+
+Os dois aparecem em `GET /api/me` (`professional.consultationMinutes`, `professional.audiences`) e no perfil público (`GET /api/professionals` e `/{id}`).
+
+**Temas novos** (V011) como especialidades: Psiconutrição, Compulsão alimentar, Anorexia e bulimia, Imagem corporal, Alimentação consciente, Dietas restritivas e efeito sanfona, Culpa alimentar, Fome emocional e fome física, Ortorexia e Vigorexia (nas **duas** profissões); Estresse e burnout, Transtorno do pânico, Fobias, TOC, TDAH, Transtorno bipolar e Luto e perdas (psicologia); Reeducação alimentar, Ganho de massa muscular, Diabetes, Hipertensão e colesterol e Saúde intestinal (nutrição).
+
 ## Profissionais (públicas, sem login)
 
 ### `GET /api/professionals`: busca
@@ -113,6 +126,12 @@ Lista **paginada** só com profissionais **aprovados** pelo admin, sem dados pes
 | 🆕 `maxPrice` | número (reais) | `maxPrice=200` | Valor máximo da consulta |
 | 🆕 `online` | `true` | `online=true` | Só quem **atende online** (`offersOnline`) |
 | 🆕 `sort` | `RELEVANCE` \| `PRICE_ASC` \| `PRICE_DESC` \| `NAME` | `sort=PRICE_ASC` | Ordenação. Padrão: `RELEVANCE` (melhor avaliados primeiro) |
+| 🆕 `specialties` | ids separados por vírgula | `specialties=3,8,41` | **Vários temas:** quem tem pelo menos um. Temas das duas profissões (ex.: Psiconutrição) têm um id para cada. Busque pelo nome em `GET /api/specialties` e mande todos os ids |
+| 🆕 `duration` | `UP_TO_30`, `UP_TO_60`, `OVER_60` | `duration=UP_TO_30,OVER_60` | Faixas de duração da consulta (somam entre si) |
+| 🆕 `audience` | `CRIANCA`, `ADOLESCENTE`, `ADULTO`, `IDOSO` | `audience=CRIANCA` | Público atendido (pelo menos um) |
+| 🆕 `gender` | `FEMALE`, `MALE` | `gender=FEMALE` | Gênero do profissional (informado no cadastro) |
+| 🆕 `available` | `TODAY`, `TOMORROW` | `available=TODAY` | Tem horário livre nesse dia |
+| 🆕 `period` | `MORNING`, `AFTERNOON`, `EVENING` | `period=EVENING` | Horário livre nesse período (manhã: antes de 12h; tarde: 12h–17h59; noite: 18h em diante, horário de Brasília). Sem `available`, olha as próximas 2 semanas |
 | `page` | número | `page=0` | Página, começando em 0 |
 | `size` | número (1 a 50) | `size=12` | Itens por página (padrão 12) |
 
@@ -144,7 +163,9 @@ Resposta:
       "offersOnline": true,
       "offersInPerson": true,
       "officeCity": "São Paulo",
-      "officeState": "SP"
+      "officeState": "SP",
+      "consultationMinutes": 50,
+      "audiences": ["ADULTO", "IDOSO"]
     }
   ],
   "page": 0,

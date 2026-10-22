@@ -29,7 +29,12 @@ export async function updateProfessionalProfile(_state: FormState, formData: For
   const session = await requireRole("PROFESSIONAL");
   // Várias caixas marcadas = vários "specialtyIds" no formulário (getAll)
   const specialtyIds = formData.getAll("specialtyIds").map(Number).filter(Number.isInteger);
-  const values = { ...formValues(formData, "specialtyIds"), specialtyIds: specialtyIds.join(",") };
+  const audiences = formData.getAll("audiences").map(String);
+  const values = {
+    ...formValues(formData, "specialtyIds", "audiences"),
+    specialtyIds: specialtyIds.join(","),
+    audiences: audiences.join(","),
+  };
   const price = parseBRL(text(formData, "consultationPrice"));
   if (!price.ok) {
     return {
@@ -47,6 +52,10 @@ export async function updateProfessionalProfile(_state: FormState, formData: For
       consultationPrice: price.value,
       // Só envia se a lista apareceu na tela; senão a API mantém as atuais
       ...(formData.has("specialtiesShown") ? { specialtyIds } : {}),
+      // Duração e público (filtros da busca)
+      ...(formData.has("consultShown")
+        ? { consultationMinutes: Number(text(formData, "consultationMinutes")) || null, audiences }
+        : {}),
       // Atendimento online e consultório: os três campos do endereço vão juntos
       // (vazios = apagar o endereço; a API exige os três preenchidos ou nenhum)
       ...(formData.has("attendanceShown")

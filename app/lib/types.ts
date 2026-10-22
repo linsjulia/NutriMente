@@ -32,8 +32,24 @@ export type Me = {
     officeAddress: string | null;
     officeCity: string | null;
     officeState: string | null;
+    /** Duração de cada consulta, em minutos (a agenda usa) */
+    consultationMinutes: number;
+    audiences: Audience[];
   } | null;
 };
+
+/** Público que o profissional atende (filtro da busca) */
+export type Audience = "CRIANCA" | "ADOLESCENTE" | "ADULTO" | "IDOSO";
+
+export const AUDIENCE_LABELS: Record<Audience, string> = {
+  CRIANCA: "Crianças",
+  ADOLESCENTE: "Adolescentes",
+  ADULTO: "Adultos",
+  IDOSO: "Idosos",
+};
+
+/** Durações oferecidas no perfil (a API aceita de 15 a 180 minutos) */
+export const CONSULTATION_MINUTES = [30, 40, 45, 50, 60, 75, 90, 120];
 
 export type PublicProfessional = {
   id: number;
@@ -45,6 +61,8 @@ export type PublicProfessional = {
   ratingAverage: number;
   ratingCount: number;
   specialties: Specialty[];
+  consultationMinutes?: number;
+  audiences?: Audience[];
 };
 
 export type ProfessionalForReview = {

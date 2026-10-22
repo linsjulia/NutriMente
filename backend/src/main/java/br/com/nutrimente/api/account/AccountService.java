@@ -88,6 +88,12 @@ public class AccountService {
 		if (request.telehealthRegistered() != null) {
 			professional.declareTelehealth(request.telehealthRegistered());
 		}
+		if (request.consultationMinutes() != null) {
+			professional.updateConsultationMinutes(request.consultationMinutes());
+		}
+		if (request.audiences() != null) {
+			professional.replaceAudiences(request.audiences().stream().filter(java.util.Objects::nonNull).toList());
+		}
 		updateOffice(professional, request);
 		audit(user, "UPDATE", "professionals");
 		return meResponse(user, professional);

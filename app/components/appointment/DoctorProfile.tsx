@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { COUNCIL, PROFESSION_LABELS } from '@/app/lib/types';
+import { AUDIENCE_LABELS, PROFESSION_LABELS, formatCouncilNumber } from '@/app/lib/types';
 import type { ProfessionalProfile } from '@/app/lib/agenda';
 import { initials } from './DoctorSummaryCard';
 
@@ -45,7 +45,7 @@ export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile: p, price,
               <div className="space-y-1">
                 <h2 id="perfil-nome" className="text-xl font-extrabold text-blue-900">{p.name}</h2>
                 <p className="text-sm text-gray-600">
-                  {PROFESSION_LABELS[p.type]} · {COUNCIL[p.type]} {p.document}
+                  {PROFESSION_LABELS[p.type]} · {formatCouncilNumber(p.type, p.document)}
                 </p>
                 <ul aria-label="Especialidades e atendimento" className="flex flex-wrap gap-2 pt-1">
                   {p.specialties.map((s) => (
@@ -80,8 +80,12 @@ export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile: p, price,
               <h3 className="font-bold text-blue-900 text-base">Como funciona</h3>
               <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <li className="bg-sky-50 rounded-xl p-4 border border-sky-100">
-                  <span className="font-bold text-blue-900 text-sm block">{modalities.join(' ou ') || 'A combinar'}</span>
-                  <span className="text-xs text-gray-600">Você escolhe ao agendar</span>
+                  <span className="font-bold text-blue-900 text-sm block">{p.consultationMinutes} min · {modalities.join(' ou ') || 'A combinar'}</span>
+                  <span className="text-xs text-gray-600">
+                    {p.audiences.length > 0
+                      ? `Atende ${p.audiences.map((a) => AUDIENCE_LABELS[a].toLowerCase()).join(', ')}`
+                      : 'Você escolhe a modalidade ao agendar'}
+                  </span>
                 </li>
                 <li className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
                   <span className="font-bold text-emerald-900 text-sm block">Triagem opcional</span>

@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
@@ -36,8 +37,9 @@ import br.com.nutrimente.api.user.ProfessionalRepository;
  * 1. Para cada dia do período, pega as janelas daquele dia da semana
  *    (ex.: segunda 08:00-12:00).
  * 2. Dentro de cada janela, gera um horário a cada "slotInterval" (1 h), desde
- *    que a consulta inteira ("duration", 50 min) caiba antes do fim da janela:
- *    08:00, 09:00, 10:00 e 11:00 (11:00 + 50 min = 11:50, cabe).
+ *    que a consulta inteira (a duração escolhida pelo profissional, padrão
+ *    50 min) caiba antes do fim da janela: 08:00, 09:00, 10:00 e 11:00
+ *    (11:00 + 50 min = 11:50, cabe).
  * 3. Tira os que já passaram ou estão perto demais ("minNotice", 2 h).
  * 4. Tira os que batem com uma consulta já marcada.
  */
@@ -60,7 +62,7 @@ public class ScheduleService {
 		this.rules = properties.appointments();
 	}
 
-	ZoneId zone() {
+	public ZoneId zone() {
 		return ZoneId.of(rules.timezone());
 	}
 
@@ -75,7 +77,9 @@ public class ScheduleService {
 	/** Troca a agenda semanal inteira de uma vez (mais simples para a tela do que editar janela por janela) */
 	@Transactional
 	public List<AvailabilityWindow> replaceWindows(Long professionalId, List<AvailabilityWindow> windows) {
-		validate(windows);
+		Duration duration = professionals.findById(professionalId).map(Professional::consultationDuration)
+				.orElse(rules.duration());
+		validate(windows, duration);
 		availability.deleteAllOf(professionalId);
 		availability.saveAll(windows.stream()
 				.map(w -> new Availability(professionalId, w.dayOfWeek(), w.startTime(), w.endTime()))
@@ -83,15 +87,15 @@ public class ScheduleService {
 		return windowsOf(professionalId);
 	}
 
-	private void validate(List<AvailabilityWindow> windows) {
+	private void validate(List<AvailabilityWindow> windows, Duration duration) {
 		for (AvailabilityWindow w : windows) {
 			if (!w.endTime().isAfter(w.startTime())) {
 				throw invalidWindows("O horário de término precisa ser depois do início (%s, %s às %s)."
 						.formatted(weekday(w.dayOfWeek()), w.startTime().format(HOUR), w.endTime().format(HOUR)));
 			}
-			if (Duration.between(w.startTime(), w.endTime()).compareTo(rules.duration()) < 0) {
+			if (Duration.between(w.startTime(), w.endTime()).compareTo(duration) < 0) {
 				throw invalidWindows("A janela precisa ter pelo menos %d minutos, a duração de uma consulta (%s, %s às %s)."
-						.formatted(rules.duration().toMinutes(), weekday(w.dayOfWeek()), w.startTime().format(HOUR),
+						.formatted(duration.toMinutes(), weekday(w.dayOfWeek()), w.startTime().format(HOUR),
 								w.endTime().format(HOUR)));
 			}
 		}
@@ -127,19 +131,56 @@ public class ScheduleService {
 		if (professional.getConsultationPrice() == null) {
 			return List.of();
 		}
-		return compute(professionalId, from, days);
+		return compute(professional, from, days);
+	}
+
+	/** Período do dia, para o filtro da busca (horário de Brasília) */
+	public enum DayPeriod {
+		/** antes do meio-dia */
+		MORNING,
+		/** 12:00 às 17:59 */
+		AFTERNOON,
+		/** 18:00 em diante */
+		EVENING;
+
+		static DayPeriod of(LocalTime time) {
+			return time.getHour() < 12 ? MORNING : time.getHour() < 18 ? AFTERNOON : EVENING;
+		}
+	}
+
+	/**
+	 * Tem pelo menos um horário livre entre "from" e "from + days", num dos
+	 * períodos pedidos (vazio = qualquer período)? Usado pelo filtro de
+	 * disponibilidade da busca. Sem valor de consulta, não aceita agendamento.
+	 */
+	@Transactional(readOnly = true)
+	public boolean hasFreeSlot(Professional professional, LocalDate from, int days, Set<DayPeriod> periods) {
+		if (professional.getConsultationPrice() == null) {
+			return false;
+		}
+		ZoneId zone = zone();
+		return compute(professional, from, days).stream()
+				.flatMap(d -> d.slots().stream())
+				.anyMatch(slot -> periods.isEmpty()
+						|| periods.contains(DayPeriod.of(slot.startsAt().atZone(zone).toLocalTime())));
 	}
 
 	/** O horário escolhido é um dos livres? (usado ao agendar e remarcar) */
 	@Transactional(readOnly = true)
 	public boolean isFree(Long professionalId, Instant startsAt) {
+		Professional professional = professionals.findById(professionalId).orElse(null);
+		if (professional == null) {
+			return false;
+		}
 		LocalDate day = startsAt.atZone(zone()).toLocalDate();
-		return compute(professionalId, day, 1).stream()
+		return compute(professional, day, 1).stream()
 				.flatMap(d -> d.slots().stream())
 				.anyMatch(slot -> slot.startsAt().equals(startsAt));
 	}
 
-	private List<SlotDay> compute(Long professionalId, LocalDate from, int days) {
+	private List<SlotDay> compute(Professional professional, LocalDate from, int days) {
+		Long professionalId = professional.getId();
+		Duration duration = professional.consultationDuration();
 		ZoneId zone = zone();
 		LocalDate today = LocalDate.now(zone);
 		LocalDate first = from == null || from.isBefore(today) ? today : from;
@@ -170,10 +211,10 @@ public class ScheduleService {
 			List<Slot> slots = new ArrayList<>();
 			for (Availability window : windowsByDay.getOrDefault(dayOfWeek, List.of())) {
 				for (LocalTime time = window.getStartTime();
-						!time.plus(rules.duration()).isAfter(window.getEndTime());
+						!time.plus(duration).isAfter(window.getEndTime());
 						time = time.plus(rules.slotInterval())) {
 					Instant startsAt = date.atTime(time).atZone(zone).toInstant();
-					Instant endsAt = startsAt.plus(rules.duration());
+					Instant endsAt = startsAt.plus(duration);
 					if (!startsAt.isBefore(earliest) && busy.stream().noneMatch(a -> overlaps(a, startsAt, endsAt))) {
 						slots.add(new Slot(startsAt, endsAt, time.format(HOUR)));
 					}

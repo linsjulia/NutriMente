@@ -212,8 +212,13 @@ test("profissional: 3 etapas -> confirmação -> em análise -> admin aprova -> 
   // Completa o perfil profissional (só PROFESSIONAL tem este formulário)
   await page.getByLabel("Bio").fill("Nutrição comportamental para adultos.");
   await page.getByLabel("Valor da consulta (R$)").fill("180,00");
+  // Duração e público (filtros da busca)
+  await page.getByLabel("Duração da consulta").selectOption("60");
+  await page.getByLabel("Adultos").check();
+  await page.getByLabel("Idosos").check();
   await page.getByRole("button", { name: "Salvar perfil" }).click();
   await expect(page.getByRole("main").getByRole("status")).toContainText("Perfil profissional atualizado");
+  await expect(page.getByText("Cada consulta dura 60 minutos")).toBeVisible();
 
   // Ainda não aparece na busca pública
   await page.goto("/professionals?type=NUTRICIONISTA");

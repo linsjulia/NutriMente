@@ -11,6 +11,9 @@ import java.util.regex.Pattern;
  * <pre>
  * CRN (nutricionista): região 1 a 11 + número       "CRN-3 12345" -> "3-12345"
  * CRP (psicólogo):     região 01 a 24 + número      "crp 6/123456" -> "06/123456"
+ *
+ * O banco guarda o número padronizado; as telas mostram no formato oficial
+ * da carteira ("CRN-3 12345", "CRP 06/123456"), ver formatCouncilNumber no front.
  * </pre>
  *
  * Antes um único formato genérico valia para os dois, e um psicólogo podia
@@ -45,7 +48,7 @@ public final class CouncilNumber {
 	/** Mensagem de erro com exemplo do formato certo */
 	public static String errorMessage(ProfessionalType type) {
 		return type == ProfessionalType.NUTRICIONISTA
-				? "CRN inválido. Informe a região (1 a 11) e o número, ex.: 3-12345"
-				: "CRP inválido. Informe a região (01 a 24) e o número, ex.: 06/123456";
+				? "CRN inválido. Informe a região (1 a 11) e o número, ex.: CRN-3 12345"
+				: "CRP inválido. Informe a região (01 a 24) e o número, ex.: CRP 06/123456";
 	}
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Copy, ExternalLink } from "lucide-react";
-import type { ProfessionalType } from "@/app/lib/types";
+import { councilRegistration, formatCouncilNumber, type ProfessionalType } from "@/app/lib/types";
 
 /**
  * Atalho para conferir o registro no site oficial do conselho. Os conselhos
@@ -13,22 +13,24 @@ const SEARCH: Record<ProfessionalType, { council: string; url: string; tip: stri
   NUTRICIONISTA: {
     council: "CFN",
     url: "https://cnn.cfn.org.br/application/index/consulta-nacional",
-    tip: "Busque pelo nome ou pelo número do CRN.",
+    tip: "Na busca, escolha a região do CRN e cole o número.",
   },
   PSICOLOGO: {
     council: "CFP",
     url: "https://cadastro.cfp.org.br/",
-    tip: "Busque pelo nome ou pelo número do CRP. Confira se a situação é \"Ativo\".",
+    tip: "Busque pelo nome ou pelo número do CRP e confira se a situação é \"Ativo\".",
   },
 };
 
 export default function CouncilCheck({ type, document, name }: { type: ProfessionalType; document: string; name: string }) {
   const [copied, setCopied] = useState(false);
   const search = SEARCH[type];
+  // A busca do conselho pede só o número; a região é escolhida à parte
+  const registration = councilRegistration(document);
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(document);
+      await navigator.clipboard.writeText(registration);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2500);
     } catch {
@@ -53,14 +55,15 @@ export default function CouncilCheck({ type, document, name }: { type: Professio
           onClick={copy}
           className="inline-flex min-h-11 items-center gap-2 rounded-full px-3 font-semibold text-blue1 hover:bg-blue3"
         >
-          <Copy aria-hidden size={16} /> Copiar número
-          <span className="sr-only"> {document}</span>
+          <Copy aria-hidden size={16} /> Copiar número ({registration})
         </button>
         <span role="status" className="text-sm text-green-800">
           {copied ? "Número copiado" : ""}
         </span>
       </div>
-      <p className="text-sm text-gray-700">{search.tip}</p>
+      <p className="text-sm text-gray-700">
+        {formatCouncilNumber(type, document)}. {search.tip}
+      </p>
     </div>
   );
 }

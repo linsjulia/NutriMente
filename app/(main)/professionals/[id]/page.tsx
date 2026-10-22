@@ -6,7 +6,7 @@ import { MapPin, Star, Video } from "lucide-react";
 import { api } from "@/app/lib/api";
 import { getSession } from "@/app/lib/session";
 import { formatBRL } from "@/app/lib/money";
-import { COUNCIL, PROFESSION_LABELS, type Page } from "@/app/lib/types";
+import { PROFESSION_LABELS, type Page, formatCouncilNumber } from "@/app/lib/types";
 import { formatDate, type ProfessionalProfile, type PublicReview, type SlotDay } from "@/app/lib/agenda";
 import BookingForm from "./BookingForm";
 
@@ -60,7 +60,7 @@ export default async function ProfessionalPage({ params }: PageProps<"/professio
         <div className="flex flex-col gap-3">
           <h1 id="perfil" className="font-fraunces text-3xl font-medium">{p.name}</h1>
           <p className="text-gray-700">
-            {PROFESSION_LABELS[p.type]} · {COUNCIL[p.type]} {p.document}
+            {PROFESSION_LABELS[p.type]} · {formatCouncilNumber(p.type, p.document)}
           </p>
           <p className="flex items-center gap-1.5">
             <Star aria-hidden size={18} className="fill-amber-400 text-amber-500" />

@@ -26,14 +26,14 @@ const PROFESSIONS: { type: ProfessionalType; label: string; description: string;
     label: "Nutricionista",
     description: "Acompanhamento alimentar e nutricional",
     image: "/doctor/nutricionista-register.png",
-    placeholder: "Ex.: 3-12345",
+    placeholder: "Ex.: CRN-3 12345",
   },
   {
     type: "PSICOLOGO",
     label: "Psicólogo(a)",
     description: "Acompanhamento psicológico",
     image: "/doctor/psicologo-register.png",
-    placeholder: "Ex.: 06/123456",
+    placeholder: "Ex.: CRP 06/123456",
   },
 ];
 

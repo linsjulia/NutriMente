@@ -2,6 +2,7 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AUDIENCE_LABELS, PROFESSION_LABELS, formatCouncilNumber } from '@/app/lib/types';
+import { PROFESSION_LABELS, formatCouncilNumber } from '@/app/lib/types';
 import type { ProfessionalProfile } from '@/app/lib/agenda';
 import { initials } from './DoctorSummaryCard';
 

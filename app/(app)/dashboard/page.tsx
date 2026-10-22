@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CalendarDays, ClipboardList, Search, UserRound, Utensils } from "lucide-react";
 import { getMe } from "@/app/lib/dal";
-import { COUNCIL, PROFESSION_LABELS, STATUS_LABELS, type Specialty } from "@/app/lib/types";
+import { PROFESSION_LABELS, STATUS_LABELS, type Specialty, formatCouncilNumber } from "@/app/lib/types";
 import { api } from "@/app/lib/api";
 import ProfessionalProfileForm from "./ProfessionalProfileForm";
 import AvailabilityEditor, { type AvailabilityWindow } from "./AvailabilityEditor";
@@ -46,7 +46,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
         <div>
           <h1 className="font-fraunces text-3xl font-medium sm:text-4xl">Olá, {firstName}!</h1>
           <p className="mt-2 text-gray-700">
-            {PROFESSION_LABELS[p.type]} · {COUNCIL[p.type]} {p.document}
+            {PROFESSION_LABELS[p.type]} · {formatCouncilNumber(p.type, p.document)}
           </p>
         </div>
 

@@ -74,6 +74,25 @@ export const PROFESSION_LABELS: Record<ProfessionalType, string> = {
 
 export const COUNCIL: Record<ProfessionalType, string> = { NUTRICIONISTA: "CRN", PSICOLOGO: "CRP" };
 
+/**
+ * Número do conselho no formato oficial, como na carteira profissional:
+ *   CRN: a API guarda "6-12345"  -> "CRN-6 12345"
+ *   CRP: a API guarda "06/12345" -> "CRP 06/12345" (região sempre com 2 dígitos)
+ */
+export function formatCouncilNumber(type: ProfessionalType, document: string): string {
+  if (type === "NUTRICIONISTA") {
+    const m = /^(\d{1,2})-(\d+)$/.exec(document);
+    return m ? `CRN-${Number(m[1])} ${m[2]}` : `CRN ${document}`;
+  }
+  const m = /^(\d{1,2})\/(\d+)$/.exec(document);
+  return m ? `CRP ${m[1].padStart(2, "0")}/${m[2]}` : `CRP ${document}`;
+}
+
+/** Só a parte do número (sem a região), para colar na busca do conselho */
+export function councilRegistration(document: string): string {
+  return document.split(/[-/]/).pop() ?? document;
+}
+
 export const STATUS_LABELS: Record<VerificationStatus, string> = {
   PENDING: "Em análise",
   APPROVED: "Aprovado",

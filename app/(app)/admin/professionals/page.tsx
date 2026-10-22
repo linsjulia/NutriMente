@@ -5,7 +5,7 @@ import { reviewProfessional } from "@/app/actions/account";
 import { api } from "@/app/lib/api";
 import { requireRole } from "@/app/lib/dal";
 import CouncilCheck from "./CouncilCheck";
-import { COUNCIL, PROFESSION_LABELS, STATUS_LABELS, type Page, type ProfessionalForReview, type VerificationStatus } from "@/app/lib/types";
+import { PROFESSION_LABELS, STATUS_LABELS, type Page, type ProfessionalForReview, type VerificationStatus, formatCouncilNumber } from "@/app/lib/types";
 
 export const metadata: Metadata = { title: "Verificação de profissionais | NutriMente" };
 
@@ -70,7 +70,7 @@ export default async function AdminProfessionalsPage({ searchParams }: PageProps
                 <p className="text-lg font-bold">{p.name}</p>
                 <p className="break-all text-gray-700">{p.email}</p>
                 <p>
-                  {PROFESSION_LABELS[p.type]} · <strong>{COUNCIL[p.type]} {p.document}</strong>
+                  {PROFESSION_LABELS[p.type]} · <strong>{formatCouncilNumber(p.type, p.document)}</strong>
                 </p>
                 <p className="text-sm text-gray-600">Cadastro em {new Date(p.createdAt + "Z").toLocaleDateString("pt-BR")}</p>
                 <div className="mt-3">

@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { api } from "@/app/lib/api";
 import {
-  COUNCIL,
   PROFESSION_LABELS,
   type Page,
   type ProfessionalType,
   type PublicProfessional,
   type Specialty,
+  formatCouncilNumber,
 } from "@/app/lib/types";
 
 export const metadata: Metadata = { title: "Profissionais | NutriMente" };
@@ -124,7 +124,7 @@ export default async function ProfessionalsPage({ searchParams }: PageProps<"/pr
                   <Link href={`/professionals/${p.id}`} className="underline-offset-4 hover:underline">{p.name}</Link>
                 </h2>
                 <p className="text-gray-700">
-                  {PROFESSION_LABELS[p.type]} · {COUNCIL[p.type]} {p.document}
+                  {PROFESSION_LABELS[p.type]} · {formatCouncilNumber(p.type, p.document)}
                 </p>
                 {p.specialties.length > 0 && (
                   <ul aria-label="Especialidades" className="flex flex-wrap gap-1.5">

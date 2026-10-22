@@ -196,7 +196,10 @@ test("profissional: 3 etapas -> confirmação -> em análise -> admin aprova -> 
   await page.getByRole("button", { name: "Continuar" }).click();
   // Etapa 3: a escolha da profissão muda o campo para CRN
   await page.getByText("Nutricionista", { exact: true }).click();
-  await page.getByLabel("Número do CRN").fill(randomCrn());
+  // Digitado no formato da carteira; a tela mostra igual (a API guarda "R-NNNNN")
+  const crn = randomCrn();
+  const [crnRegion, crnNumber] = crn.split("-");
+  await page.getByLabel("Número do CRN").fill(`CRN-${crnRegion} ${crnNumber}`);
   await page.getByLabel(/Li e aceito/).check();
   await page.getByRole("button", { name: /Concluir cadastro/ }).click();
   await expect(page.getByText("nossa equipe vai verificar")).toBeVisible();
@@ -204,6 +207,7 @@ test("profissional: 3 etapas -> confirmação -> em análise -> admin aprova -> 
   await confirmEmail(page, email);
   await login(page, email);
   await expect(page.getByRole("heading", { name: "Cadastro: Em análise" })).toBeVisible();
+  await expect(page.getByText(`CRN-${crnRegion} ${crnNumber}`)).toBeVisible();
 
   // Completa o perfil profissional (só PROFESSIONAL tem este formulário)
   await page.getByLabel("Bio").fill("Nutrição comportamental para adultos.");

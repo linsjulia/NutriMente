@@ -40,7 +40,8 @@ export default async function ProfessionalPage({ params }: PageProps<"/professio
       </main>
     );
   }
-  const p = profile.data;
+  // "?? padrão": não quebra com uma API desatualizada (sem os campos da V011)
+  const p = { ...profile.data, audiences: profile.data.audiences ?? [], consultationMinutes: profile.data.consultationMinutes ?? 50 };
   const days = slots.ok ? slots.data.filter((d) => d.slots.length > 0) : [];
 
   return (

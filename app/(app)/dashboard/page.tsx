@@ -76,14 +76,14 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
             specialtyIds={p.specialties.map((s) => s.id)}
             telehealthRegistered={p.telehealthRegistered}
             office={{ address: p.officeAddress, city: p.officeCity, state: p.officeState }}
-            consultationMinutes={p.consultationMinutes}
-            audiences={p.audiences}
+            consultationMinutes={p.consultationMinutes ?? 50}
+            audiences={p.audiences ?? []}
           />
         </section>
 
         <section aria-labelledby="horarios-title" className="card">
           <h2 id="horarios-title" className="text-xl font-bold">Meus horários</h2>
-          <p className="mb-5 text-gray-700">Janelas semanais de atendimento. Cada consulta dura {p.consultationMinutes} minutos e começa de hora em hora.</p>
+          <p className="mb-5 text-gray-700">Janelas semanais de atendimento. Cada consulta dura {p.consultationMinutes ?? 50} minutos e começa de hora em hora.</p>
           {availability.ok ? <AvailabilityEditor initial={availability.data} /> : <p role="alert" className="text-red-800">{availability.error.detail}</p>}
         </section>
 

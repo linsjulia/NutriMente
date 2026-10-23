@@ -245,11 +245,13 @@ docker compose down             # desliga o back-end (os dados continuam salvos)
 
 ### Depois de puxar alterações da equipe (`git pull`)
 
+**Regra simples: depois de todo `git pull`, rode `npm install` e `docker compose up -d --build`.** Sem o `--build`, o site fica com o código novo e a API com o antigo, e aparecem erros como `Cannot read properties of undefined` em campos que a API ainda não manda.
+
 | O que mudou | O que fazer |
 |---|---|
 | `package.json` | `npm install` |
 | Algo em `backend/` ou `services/` | `docker compose up -d --build` |
-| Algo em `database/` (tabelas) | `docker compose down -v` e `docker compose up -d --build` (⚠️ **apaga os dados locais**) |
+| Algo em `database/` (migração nova em `migrations/`) | `docker compose up -d --build`: as migrações rodam sozinhas e **os dados ficam** |
 | `.env.example` | Compare com o seu `.env` e copie as variáveis novas |
 
 ### Criando uma alteração

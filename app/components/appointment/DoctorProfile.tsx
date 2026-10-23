@@ -15,7 +15,9 @@ interface DoctorProfileProps {
 }
 
 // Etapa 1: quem é o profissional, com os dados reais do perfil público
-export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile: p, price, nextSlot, onStartBooking }) => {
+export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile, price, nextSlot, onStartBooking }) => {
+  // "?? padrão": não quebra com uma API desatualizada (sem os campos da V011)
+  const p = { ...profile, audiences: profile.audiences ?? [], consultationMinutes: profile.consultationMinutes ?? 50 };
   const modalities = [
     p.offersOnline ? 'Online' : null,
     p.offersInPerson ? `Presencial${p.officeCity ? ` em ${p.officeCity}/${p.officeState}` : ''}` : null,

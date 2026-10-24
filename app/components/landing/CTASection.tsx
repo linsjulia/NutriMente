@@ -20,7 +20,7 @@ export default function CTASection() {
                 height={1000}
                 priority
                 sizes="(min-width: 768px) 600px, 300px"
-                className="relative z-10 h-auto w-[75%] max-w-[300px] object-contain md:absolute md:-top-14 md:bottom-0 md:-left-10 md:h-[calc(100%+3.5rem)] md:w-auto md:max-w-none md:object-bottom"
+                className="relative z-10 h-auto w-[75%] max-w-75 object-contain md:absolute md:-top-14 md:bottom-0 md:-left-10 md:h-[calc(100%+3.5rem)] md:w-auto md:max-w-none md:object-bottom"
               />
               {/* floating badges */}
               <div className="absolute left-0 top-1/2 z-20 hidden animate-float items-center gap-2 rounded-2xl bg-white/95 px-3 py-2 shadow-[0_10px_30px_-8px_rgba(10,40,120,0.35)] md:flex">
@@ -62,7 +62,7 @@ export default function CTASection() {
                 <LandingButton href="/register/patient"/>
                 <a
                   href="#"
-                  className="inline-flex items-center rounded-full border border-[#d6e6ff]/40 px-7 py-4 text-base font-semibold text-white transition-colors hover:bg-[#d6e6ff]/10"
+                  className="inline-flex items-center rounded-full border-2 border-[#d6e6ff]/40 px-7 py-4 text-base font-semibold text-white transition-colors hover:bg-[#d6e6ff]/10"
                 >
                   Sou profissional
                 </a>

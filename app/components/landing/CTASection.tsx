@@ -6,7 +6,7 @@ export default function CTASection() {
   return (
     <FadeScroll>
       <section className="flex justify-center px-4 pb-16 pt-28 md:px-8 md:pb-28 md:pt-36">
-        <div className="relative flex w-full max-w-355 flex-col items-center rounded-4xl bg-linear-to-t from-green2 to-blue4 lg:min-h-[clamp(22rem,32vw,30rem)] lg:flex-row lg:justify-end">
+        <div className="relative flex w-full max-w-355 flex-col items-center rounded-4xl bg-linear-60 from-green-300 to-blue-400 lg:min-h-[clamp(22rem,32vw,30rem)] lg:flex-row lg:justify-end">
           <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-4xl">
             <Image
               src="/background/fundo-cta.png"
@@ -20,7 +20,7 @@ export default function CTASection() {
 
           {/* Texto */}
           <div className="relative order-1 flex w-full flex-col items-center gap-6 p-8 text-center md:p-12 lg:w-1/2 lg:items-start lg:gap-10 lg:p-16 xl:p-20 lg:text-left text-white">
-            <h2 className="font-fraunces text-3xl font-medium md:text-4xl">
+            <h2 className="font-fraunces text-3xl font-medium md:text-3xl">
               Pronto para transformar sua saúde mental e alimentar?
             </h2>
             <p className="text-lg">Para quem busca cuidado e para quem cuida: tudo em uma só plataforma.</p>

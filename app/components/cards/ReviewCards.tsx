@@ -53,7 +53,7 @@ export default function ReviewCard({
           <div className="flex items-center space-x-1 mt-4 md:mt-6 pt-2">
             <Image
               src="/icons/estrelas.svg"
-              width={130}
+              width={200}
               height={26}
               alt="Avaliação: 5 de 5 estrelas"
             />

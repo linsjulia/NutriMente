@@ -102,7 +102,7 @@ export default function ReviewsSection() {
   return (
     <section className="w-full bg-blue-100 py-16 px-4 flex flex-col items-center justify-center font-sans">
       <div className="text-center max-w-2xl mb-12">
-        <h2 className="text-3xl md:text-4xl font-semibold mb-3 text-slate-800">
+        <h2 className="text-3xl md:text-4xl font-semibold font-fraunces mb-3 text-slate-800">
           O que dizem sobre o NutriMente
         </h2>
         <p className="text-slate-600 text-sm md:text-base">

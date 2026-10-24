@@ -11,7 +11,7 @@ export default function Hero() {
       <section className="lg:min-h-screen">
         <div className="flex flex-col lg:min-h-screen lg:flex-row">
           {/* Conteúdo principal */}
-          <div className="relative z-10 flex w-full flex-col gap-26 overflow-hidden bg-green-100 px-6 py-10 sm:px-10 md:px-12 lg:w-1/2 lg:gap-4 lg:px-12 lg:py-6 xl:gap-10 xl:px-14 2xl:gap-6 2xl:px-20 2xl:py-12">
+          <div className="relative z-10 flex w-full flex-col gap-26 overflow-hidden bg-green-100 px-6 py-10 sm:px-10 md:px-12 lg:w-1/2 lg:gap-4 lg:px-12 lg:py-6 xl:gap-10 xl:px-20 2xl:gap-6 2xl:px-20 2xl:py-12">
             <div className="max-w-3xl">
               <Image
                 src="/logo/nutrimente-v2.png"
@@ -33,15 +33,15 @@ export default function Hero() {
               </h2>
             </div>
 
-            <div className="grid w-full max-w-xl grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+            <div className="grid w-full max-w-xl  grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               {/* Linha 1: botões */}
               <div className="*:w-full *:justify-center">
                 <LandingButton href="/register/patient" />
               </div>
 
               <Link
-                href="#"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-blue1 px-7 py-4 text-base font-semibold text-blue1 transition-colors hover:bg-blue1/10"
+                href="/register/professional"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-blue1 text-base font-semibold text-blue1 transition-colors hover:bg-blue1/10"
               >
                 <UserRoundPlus className="h-5 w-5" aria-hidden />
                 Sou profissional

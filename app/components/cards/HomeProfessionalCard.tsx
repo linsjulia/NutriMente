@@ -22,7 +22,7 @@ export default function HomeProfessionalCard({
   img,
 }: Props) {
   return (
-    <article className="flex w-full max-w-105 flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_10px_30px_rgba(16,47,66,0.08)] transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_20px_45px_rgba(16,47,66,0.16)] motion-reduce:transition-none motion-reduce:hover:transform-none sm:p-8 lg:max-w-none lg:min-w-0 lg:flex-1 lg:gap-[clamp(0.75rem,1.1vw,1rem)] lg:p-[clamp(1.25rem,2vw,2rem)]">
+    <article className="flex w-full max-w-105 flex-col gap-4 rounded-2xl border-2 border-green1 bg-white p-6 shadow-[0_10px_30px_rgba(16,47,66,0.08)] transition-[translate,box-shadow] duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0, 221, 92,0.16)] sm:p-8 lg:max-w-none lg:min-w-0 lg:flex-1 lg:gap-[clamp(0.75rem,1.1vw,1rem)] lg:p-[clamp(1.25rem,2vw,2rem)]">
       <div className="my-4 flex items-center justify-center gap-6 lg:my-[clamp(0.5rem,1vw,1rem)] lg:gap-[clamp(1rem,1.5vw,1.5rem)]">
         <Image
           src={img}

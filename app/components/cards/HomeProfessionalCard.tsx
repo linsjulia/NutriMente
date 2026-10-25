@@ -22,14 +22,14 @@ export default function HomeProfessionalCard({
   img,
 }: Props) {
   return (
-    <article className="flex w-full max-w-105 flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_10px_30px_rgba(16,47,66,0.08)] transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-2 hover:shadow-[0_20px_45px_rgba(16,47,66,0.16)] motion-reduce:transition-none motion-reduce:hover:transform-none sm:p-8 lg:max-w-none lg:min-w-0 lg:flex-1 lg:gap-[clamp(0.75rem,1.1vw,1rem)] lg:p-[clamp(1.25rem,2vw,2rem)]">
+    <article className="flex w-full max-w-105 flex-col gap-4 rounded-2xl border border-green1 bg-white p-6 shadow-[0_10px_30px_rgba(16,47,66,0.08)] transition-[translate,box-shadow] duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_20px_40px_rgba(0, 221, 92,0.16)] sm:p-8 lg:max-w-none lg:min-w-0 lg:flex-1 lg:gap-[clamp(0.75rem,1.1vw,1rem)] lg:p-[clamp(1.25rem,2vw,2rem)]">
       <div className="my-4 flex items-center justify-center gap-6 lg:my-[clamp(0.5rem,1vw,1rem)] lg:gap-[clamp(1rem,1.5vw,1.5rem)]">
         <Image
           src={img}
           alt={`Foto de ${titulo}`}
-          width={99}
+          width={100}
           height={100}
-          className="aspect-square w-20 rounded-full bg-green-700 object-cover lg:w-[clamp(4rem,6vw,5rem)]"
+          className="aspect-square w-6 rounded-full border-2 border-gray-300 bg-green-700 object-cover lg:w-[clamp(4rem,6vw,5rem)]"
         />
         <div className="min-w-0 text-sm lg:text-[clamp(0.8125rem,1vw,1rem)]">
           <h3 className="font-fraunces text-lg font-semibold lg:text-[clamp(1rem,1.35vw,1.125rem)]">
@@ -52,7 +52,7 @@ export default function HomeProfessionalCard({
       <div className="flex flex-wrap gap-3">
         <Link
           href="/register/patient"
-          className="rounded-lg bg-green1 p-2 text-base font-semibold text-blue2 shadow-md shadow-green-900/10 transition duration-300 hover:-translate-y-0.5 hover:bg-green3 hover:shadow-lg hover:shadow-green-900/20 lg:text-[clamp(0.8125rem,1vw,1rem)]"
+          className="rounded-xl border border-blue1 p-3 text-base font-semibold text-blue1 shadow-md shadow-green-900/10 transition duration-300 hover:bg-blue1/10 hover:shadow-lg hover:shadow-blue1-900/20 lg:text-[clamp(0.8125rem,1vw,1rem)]"
         >
           Ver profissional
         </Link>

@@ -44,7 +44,7 @@ export default function GettingStartedSection() {
             {steps.map((step) => (
               <div
                 key={step.number}
-                className="relative z-10 flex min-h-80 flex-col items-center rounded-3xl border-2 border-cyan-200 bg-white px-7 py-8 text-center shadow-[0_12px_35px_rgba(16,47,66,0.08)] transition duration-300 hover:-translate-y-2 hover:shadow-[0_18px_40px_rgba(16,47,66,0.14)] lg:min-h-[clamp(16rem,22vw,20rem)] lg:px-[clamp(1.25rem,2vw,1.75rem)] lg:py-[clamp(1.5rem,2.2vw,2rem)]"
+                className="relative z-10 flex min-h-80 flex-col items-center rounded-3xl border-2 border-cyan-200 bg-white px-7 py-8 text-center shadow-[0_12px_35px_rgba(16,47,66,0.08)] transition duration-300 hover:-translate-y-2 hover:shadow-[0_12px_35px_rgba(16,47,66,0.14)] lg:min-h-[clamp(16rem,22vw,20rem)] lg:px-[clamp(1.25rem,2vw,1.75rem)] lg:py-[clamp(1.5rem,2.2vw,2rem)]"
               >
                 <div className="mb-6 flex size-16 items-center justify-center rounded-full bg-linear-to-br from-green-400 to-green-600 text-3xl font-bold text-white shadow-lg shadow-green-200 lg:mb-[clamp(1rem,1.6vw,1.5rem)] lg:size-[clamp(3rem,4.3vw,4rem)] lg:text-[clamp(1.5rem,2.2vw,1.875rem)]">
                   {step.number}

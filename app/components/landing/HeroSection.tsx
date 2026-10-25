@@ -33,34 +33,30 @@ export default function Hero() {
               </h2>
             </div>
 
-            <div className="grid w-full max-w-xl  grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-              {/* Linha 1: botões */}
+            <div className="grid w-full max-w-xl grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               <div className="*:w-full *:justify-center">
                 <LandingButton href="/register/patient" />
               </div>
-
               <Link
                 href="/register/professional"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-blue1 text-base font-semibold text-blue1 transition-colors hover:bg-blue1/10"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full border-2 border-blue1 text-base font-semibold text-blue1 transition-all hover:bg-blue1/10 hover:-translate-y-0.5"
               >
                 <UserRoundPlus className="h-5 w-5" aria-hidden />
-                Sou profissional
+                Sou profissional       
               </Link>
+              <ul className="col-span-full mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-blue1/30 pt-2 pb-2 text-sm text-white md:pb-0" />
 
-              {/* Linha 2: selos, cada um embaixo do seu botão */}
-              <div className="flex items-center gap-2 font-bold text-nm-ink">
+              <div className="flex items-center justify-center gap-2 font-bold text-nm-ink">
                 <ShieldCheck className="h-6 w-6 text-blue1" aria-hidden />
                 <p>Segurança e Privacidade</p>
               </div>
 
-              <div className="flex items-center gap-2 font-bold text-nm-ink">
+              <div className="flex items-center justify-center gap-2 font-bold text-nm-ink">
                 <Clock className="h-6 w-6 text-blue1" aria-hidden />
                 <p>Rápido Atendimento</p>
               </div>
             </div>
           </div>
-
-          {/* Carrossel */}
           <div className="h-80 w-full sm:h-96 lg:h-auto lg:w-1/2 lg:flex">
             <CarouselHeroSection />
           </div>

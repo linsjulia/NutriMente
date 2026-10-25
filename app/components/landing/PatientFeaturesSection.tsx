@@ -33,8 +33,8 @@ export default function PatientFeaturesSection() {
               icone={FileText}
             />
             <CardFeatures
-              titulo="Consultas online ou presenciais"
-              descricao="Encontre horários e agende consultas com nutricionistas e psicólogos pelo aplicativo."
+              titulo="Consultas online"
+              descricao="Encontre horários e agende consultas com nutricionistas e psicólogos pelo site."
               corIcon="bg-blue-100"
               icone={LaptopMinimalCheck}
             />

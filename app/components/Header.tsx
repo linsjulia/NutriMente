@@ -7,8 +7,7 @@ import Logo from "./Logo";
 
 const NAV = [
   { href: "/", label: "Início" },
-  { href: "/professionals", label: "Profissionais" },
-  { href: "/about", label: "Sobre nós" },
+  { href: "/about", label: "Sobre nós" }
 ];
 
 type HeaderProps = {

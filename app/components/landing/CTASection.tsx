@@ -1,6 +1,6 @@
 import { Highlighter } from "@/components/ui/highlighter";
 import FadeScroll from "../fade-effect/FadeScroll";
-import { Apple, Brain, ShieldCheck, Video } from "lucide-react";
+import { Apple, Brain, ShieldCheck, UserRoundPlus, Video } from "lucide-react";
 import Image from "next/image";
 import LandingButton from "../buttons/LandingButton";
 
@@ -62,8 +62,8 @@ export default function CTASection() {
                 <LandingButton href="/register/patient"/>
                 <a
                   href="/register/professional"
-                  className="inline-flex items-center rounded-full border-2 border-[#d6e6ff]/40 px-7 py-4 text-base font-semibold text-white transition-colors hover:bg-[#d6e6ff]/10"
-                >
+                  className="inline-flex items-center rounded-full gap-2 border-2 border-[#d6e6ff]/40 px-7 py-4 text-base font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-[#d6e6ff]/10"
+                ><UserRoundPlus className="h-5 w-5" aria-hidden />
                   Sou profissional
                 </a>
               </div>

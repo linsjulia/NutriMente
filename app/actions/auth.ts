@@ -16,6 +16,7 @@ import { redirect } from "next/navigation";
 import { api } from "@/app/lib/api";
 import {
   createSession,
+  decodeSession,
   deleteRegistrationTicket,
   deleteSession,
   getRegistrationTicket,
@@ -39,6 +40,20 @@ export async function login(_state: FormState, formData: FormData): Promise<Form
     body: { email: values.email, password: formData.get("password") },
   });
   if (!result.ok) return fromApiError(result.error, values);
+
+  // A API aceitou a senha, mas o site precisa conseguir validar o token com o
+  // MESMO JWT_SECRET. Se as chaves forem diferentes (ex.: .env trocado sem
+  // recriar a API), a pessoa voltava para o login sem nenhuma mensagem.
+  if (!(await decodeSession(result.data.accessToken))) {
+    return {
+      ok: false,
+      message:
+        process.env.NODE_ENV === "production"
+          ? "Não conseguimos iniciar sua sessão agora. Tente de novo em instantes."
+          : "A senha está certa, mas o site e a API estão com JWT_SECRET diferentes. Rode docker compose up -d --build (veja Problemas comuns em docs/INSTALACAO.md).",
+      values,
+    };
+  }
 
   await createSession(result.data.accessToken, result.data.expiresAt);
   // redirect() precisa ficar FORA de try/catch: ele funciona lançando um erro especial

@@ -1,19 +1,24 @@
-import Image from "next/image";
 import Link from "next/link";
+import { CalendarCheck } from "lucide-react";
 
-// Botão "Começar agora" da landing page (leva ao cadastro de paciente).
-// O texto era "Agendar uma consulta", mas o agendamento ainda não existe:
-// prometer o que a tela seguinte não entrega frustra a pessoa.
-// É um LINK (e não <button> com router.push): navegar é papel de link.
-// Assim funciona sem JavaScript, abre em nova aba e o leitor de tela
-// anuncia corretamente como "link".
-export default function LandingButton({ href }: { href: string }) {
+type LandingButtonProps = {
+  href: string;
+  label?: string;
+  className?: string;
+};
+
+export default function LandingButton({
+  href,
+  className = "",
+}: LandingButtonProps) {
   return (
-    <div>
-      <Link href={href} className="button-test w-fit mb-10 inline-flex items-center rounded-4xl p-2 font-bold cursor-pointer">
-        <Image src="/icons/cronograma.png" alt="" width={64} height={64} className="mx-2 w-10" />
-        <span className="button__text">Começar agora</span>
-      </Link>
-    </div>
+    <Link
+      href={href}
+      // Texto azul-escuro sobre o verde (branco dava 1,76:1; o mínimo é 4,5:1)
+      className={`group inline-flex w-fit items-center gap-3 rounded-full bg-[#00e15c] px-8 py-4 text-base font-bold text-blue2 shadow-[0_10px_25px_-5px_rgba(0,225,92,0.55)] transition-all hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue1 ${className}`}
+    >
+      <CalendarCheck className="h-6 w-6" aria-hidden="true" />
+      <span>Agendar consulta</span>
+    </Link>
   );
 }

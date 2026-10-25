@@ -46,7 +46,13 @@ for (const path of PAGES) {
         .exclude(".swiper-slide-duplicate")
         .analyze();
 
-      const report = results.violations.map((v) => `${v.id} (${v.impact}): ${v.help}\n    ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join("\n    ")}`);
+      const report = results.violations.map(
+      (v) =>
+      `${v.id} (${v.impact}): ${v.help}\n    ${v.nodes
+        .slice(0, 3)
+        .map((n) => `${n.target.join(" ")}\n      ${JSON.stringify(n.any[0]?.data)}`)
+        .join("\n    ")}`,
+     );
       expect(report, report.join("\n")).toEqual([]);
     });
   }

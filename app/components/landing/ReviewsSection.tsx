@@ -112,7 +112,7 @@ export default function ReviewsSection() {
 
       <div className="w-full flex flex-col items-center">
         {/* Container principal */}
-        <div className="w-full max-w-4xl relative px-2 md:px-0">
+        <div className="w-full max-w-4xl relative px-2 md:px-0 ">
           {/* Seta esquerda no background */}
           <ArrowButton
             direction="prev"
@@ -143,7 +143,7 @@ export default function ReviewsSection() {
               pauseOnMouseEnter: true,
             }}
             /* As classes [&_.swiper-wrapper] e [&_.swiper-slide] nivelam a altura de todos os slides */
-            className="w-full rounded-3xl shadow-xl shadow-slate-200/50 [&_.swiper-wrapper]:flex [&_.swiper-slide]:h-auto"
+            className="w-full rounded-3xl shadow-xl shadow-blue-700/10 [&_.swiper-wrapper]:flex [&_.swiper-slide]:h-auto"
           >
             {testimonialsData.map((item) => (
               <SwiperSlide key={item.id} className="h-full">

@@ -17,7 +17,7 @@ export default function ReviewCard({
 }: ReviewCardProps) {
   return (
     /* h-full garante que o card ocupe exatamente a mesma altura total de todos os slides */
-    <div className="w-full h-full bg-white rounded-3xl overflow-hidden mx-auto border border-slate-100 flex flex-col justify-between">
+    <div className="w-full h-full bg-white rounded-3xl overflow-hidden mx-auto border border-slate-100 flex flex-col justify-between ">
       <div className="grid grid-cols-1 md:grid-cols-12 h-full">
         {/* Lado esquerdo (Gradiente) */}
         <div className="bg-gradient-to-br from-green-300 to-blue-400 md:col-span-5 flex flex-col items-center justify-center p-6 md:p-8 text-white">
@@ -53,7 +53,7 @@ export default function ReviewCard({
           <div className="flex items-center space-x-1 mt-4 md:mt-6 pt-2">
             <Image
               src="/icons/estrelas.svg"
-              width={130}
+              width={200}
               height={26}
               alt="Avaliação: 5 de 5 estrelas"
             />

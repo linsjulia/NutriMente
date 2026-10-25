@@ -292,6 +292,7 @@ Todos precisam do back-end ligado (`docker compose up -d`).
 | `WSL 2 installation is incomplete` (Windows) | Falta o WSL | `wsl --install` no PowerShell como administrador e reinicie |
 | `port is already allocated` / `address already in use` | Outro programa usa a porta (ex.: um SQL Server instalado no PC) | Mude a porta no `.env` (`MSSQL_PORT`, `API_PORT`, `MONGO_PORT`...) ou feche o outro programa |
 | `nutrimente-sqlserver` reiniciando sem parar | Senha `MSSQL_SA_PASSWORD` fraca, ou pouca memória | Troque a senha no `.env`, rode `docker compose down -v` e suba de novo. Feche programas pesados |
+| Login com a senha certa volta para a tela de entrada, ou aparece "o site e a API estão com JWT_SECRET diferentes" | O `.env` mudou (ex.: recriado do `.env.example`) e a API continuou com a chave antiga | `docker compose up -d --build` (recria a API com o `.env` atual) e reinicie o `npm run dev` |
 | `nutrimente-api` reiniciando | `JWT_SECRET` vazio ou com menos de 32 caracteres | Gere um novo (passo 4.2) e rode `docker compose up -d` |
 | Site mostra "Não foi possível falar com o servidor" | API desligada ou ainda subindo | `docker compose ps`; espere a API ficar *healthy* |
 | Porta 3000 ocupada ao rodar `npm run dev` | Já existe outro `npm run dev` aberto | Feche o outro terminal, ou rode `npm run dev -- -p 3001` **e** mude `FRONTEND_URL=http://localhost:3001` no `.env` (depois `docker compose up -d`) para os links dos e-mails funcionarem |

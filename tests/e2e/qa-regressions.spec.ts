@@ -129,6 +129,24 @@ test.describe("com back-end", () => {
     await deleteAccountViaApi(email);
   });
 
+  test("busca do cabeçalho filtra por nome, mostra o filtro real e não vaza no celular", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 740 });
+    await page.goto("/patient");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Encontre seu profissional");
+    // Visitante vê "Entrar" (antes aparecia o nome "Júlia" fixo para todos)
+    await expect(page.getByText("Júlia")).toHaveCount(0);
+    // Sem filtros de exemplo fixos
+    await expect(page.getByText("Comer emocional")).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+
+    await page.getByLabel("O que você procura?").fill("zzz-ninguem");
+    await page.getByRole("button", { name: "Buscar", exact: true }).click();
+    await expect(page).toHaveURL(/\/patient\?q=zzz-ninguem$/);
+    await expect(page.getByText("Nenhum profissional encontrado com esses filtros.")).toBeVisible();
+    await page.getByRole("link", { name: "Remover filtro “zzz-ninguem”" }).click();
+    await expect(page).toHaveURL(/\/patient$/);
+  });
+
   test("login não redireciona para fora do site (?next=//site-falso)", async ({ page }) => {
     const email = uniqueEmail("redirect");
     await registerPatient(page, email);

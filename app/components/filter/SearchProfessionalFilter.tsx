@@ -15,7 +15,6 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
-import Link from "next/link";
 import { useState } from "react";
 
 const area = [
@@ -126,7 +125,7 @@ export default function SearchProfessionalFilter() {
     <aside className="w-full shrink-0 rounded-2xl bg-white p-10 shadow-sm md:w-64 md:self-start lg:w-72 overflow-y-auto">
       <div className="mb-4 flex items-baseline justify-between">
         <h2 className="text-lg font-extrabold text-blue-900">Filtros</h2>
-        <button type="button" onClick={handleClearFilters} className="text-xs font-semibold text-green-600">
+        <button type="button" onClick={handleClearFilters} className="text-xs font-semibold text-green-800">
           Limpar filtros
         </button>
       </div>
@@ -137,7 +136,7 @@ export default function SearchProfessionalFilter() {
                 <AccordionTrigger className="accordion-trigger-filter">Área</AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2">
                     {area.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                        <label key={l.id} className="flex min-h-8 cursor-pointer items-center gap-2 text-sm">
                             <Checkbox 
                                 checked={areasSelecionadas.has(l.id)}
                                 onCheckedChange={(checked) => 
@@ -154,7 +153,7 @@ export default function SearchProfessionalFilter() {
             <AccordionItem value="tipo-consulta">
                 <AccordionTrigger className="accordion-trigger-filter">Tipo de Consulta</AccordionTrigger>
                 <AccordionContent>
-                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                    <label className="flex min-h-8 cursor-pointer items-center gap-2 text-sm">
                         <Checkbox
                             id="online"
                             checked={tipoConsultaSelecionado === "online"}
@@ -174,15 +173,16 @@ export default function SearchProfessionalFilter() {
                     <div className="flex items-center rounded-md border border-slate-300 px-2 py-1.5">
                         <input 
                             type="text" 
+                            aria-label="Buscar tema"
                             placeholder="Buscar tema..." 
                             className="w-full bg-transparent text-xs outline-none placeholder:text-slate-400 focus:outline-none! focus:ring-0"
                         />
-                        <Link href="">
+                        <button type="button" aria-label="Buscar tema" className="flex h-8 w-8 shrink-0 items-center justify-center">
                             <FontAwesomeIcon icon={faSearch} className="h-4 w-4" />
-                        </Link>
+                        </button>
                     </div>
                         {tema.map((l) => (
-                            <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                            <label key={l.id} className="flex min-h-8 cursor-pointer items-center gap-2 text-sm">
                                 <Checkbox 
                                     checked={temasSelecionados.has(l.id)}
                                     onCheckedChange={(checked) => 
@@ -200,7 +200,7 @@ export default function SearchProfessionalFilter() {
                                 : "grid-rows-[0fr] opacity-0" /* 3. Se for FALSE (Fechado), a altura é 0 e fica invisível */
                             }`}>
                         {mostrarTodosTemas && temasAdicionais.map((l) => (
-                            <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
+                            <label key={l.id} className="flex min-h-8 cursor-pointer items-center gap-2 text-sm text-slate-700">
                                 <Checkbox 
                                     checked={temasSelecionados.has(l.id)}
                                     onCheckedChange={(checked) => 
@@ -211,7 +211,7 @@ export default function SearchProfessionalFilter() {
                             </label>
                         ))}
                     </div>
-                    <button type="button" onClick={() => setMostrarTodosTemas(!mostrarTodosTemas)} className="pt-1 text-xs font-semibold text-green-600 text-left">
+                    <button type="button" onClick={() => setMostrarTodosTemas(!mostrarTodosTemas)} className="pt-1 text-xs font-semibold text-green-800 text-left">
                         {mostrarTodosTemas ? "Ver todos os temas" : "Ver todos os temas" }
                     </button>
                 </AccordionContent>
@@ -222,7 +222,7 @@ export default function SearchProfessionalFilter() {
                 <AccordionTrigger className="accordion-trigger-filter">Público</AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2">
                     {publico.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                        <label key={l.id} className="flex min-h-8 cursor-pointer items-center gap-2 text-sm">
                             <Checkbox 
                                 checked={publicoSelecionado.has(l.id)}
                                 onCheckedChange={(checked) => 
@@ -240,6 +240,7 @@ export default function SearchProfessionalFilter() {
                 <AccordionTrigger className="accordion-trigger-filter">Preço da Consulta</AccordionTrigger>
                 <AccordionContent className="p-2">
                     <Slider
+                        thumbLabel="Preço máximo da consulta"
                         value={sliderValue}
                         onValueChange={(value) => setSliderValue(value as number[])}
                         min={60}
@@ -257,7 +258,7 @@ export default function SearchProfessionalFilter() {
                 <AccordionTrigger className="accordion-trigger-filter">Horário Disponível</AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2">
                     {horarioDisponivel.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                        <label key={l.id} className="flex min-h-8 cursor-pointer items-center gap-2 text-sm">
                             <Checkbox 
                                 checked={horarioSelecionado.has(l.id)}
                                 onCheckedChange={(checked) => 
@@ -272,7 +273,7 @@ export default function SearchProfessionalFilter() {
                         <ToggleGroupItem value="tarde" className="toggle-item">Tarde</ToggleGroupItem>
                         <ToggleGroupItem value="noite" className="toggle-item">Noite</ToggleGroupItem>
                     </ToggleGroup>
-                    <button type="button" className="flex items-center gap-2 pt-1 text-xs font-semibold text-green-600">
+                    <button type="button" className="flex items-center gap-2 pt-1 text-xs font-semibold text-green-800">
                         <FontAwesomeIcon icon={faCalendar} /> 
                         Selecionar data
                     </button>
@@ -296,7 +297,7 @@ export default function SearchProfessionalFilter() {
                 <AccordionTrigger className="accordion-trigger-filter">Perfil do Profissional</AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-2">
                     {perfilProfissional.map((l) => (
-                        <label key={l.id} className="flex cursor-pointer items-center gap-2 text-sm">
+                        <label key={l.id} className="flex min-h-8 cursor-pointer items-center gap-2 text-sm">
                             <Checkbox 
                                 checked={perfilSelecionado.has(l.id)}
                                 onCheckedChange={(checked) => 

@@ -18,6 +18,7 @@ const PAGES = [
   "/register/professional",
   "/forgot-password",
   "/professionals",
+  "/patient", // busca nova (painel de filtros)
   "/terms",
   "/privacy",
   "/about",

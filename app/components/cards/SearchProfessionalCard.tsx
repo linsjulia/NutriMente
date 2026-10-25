@@ -37,7 +37,7 @@ export default function CardProfissional({ p }: { p: Profissional }) {
         )}
 
         <div>
-          <p className="text-sm font-semibold text-sky-500">{p.titulo}</p>
+          <p className="text-sm font-semibold text-sky-700">{p.titulo}</p>
           <h3 className="font-bold text-slate-900">
             <Link href={`/professionals/${p.id}`} className="underline-offset-4 hover:underline">{p.nome}</Link>
           </h3>

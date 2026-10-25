@@ -44,7 +44,7 @@ export default function Hero() {
                 <UserRoundPlus className="h-5 w-5" aria-hidden />
                 Sou profissional       
               </Link>
-              <ul className="col-span-full mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-blue1/30 pt-4 pb-6 text-sm text-white md:pb-0" />
+              <ul className="col-span-full mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-blue1/30 pt-2 pb-2 text-sm text-white md:pb-0" />
 
               <div className="flex items-center justify-center gap-2 font-bold text-nm-ink">
                 <ShieldCheck className="h-6 w-6 text-blue1" aria-hidden />
@@ -57,8 +57,6 @@ export default function Hero() {
               </div>
             </div>
           </div>
-
-          {/* Carrossel */}
           <div className="h-80 w-full sm:h-96 lg:h-auto lg:w-1/2 lg:flex">
             <CarouselHeroSection />
           </div>

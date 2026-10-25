@@ -23,7 +23,7 @@ export default function SpecialistsSection() {
               descricao="Nutricionista com enfoque em nutrição comportamental, adesão terapêutica e organização da rotina alimentar. Atua no desenvolvimento de estratégias sustentáveis para melhorar a relação com a comida sem prescrições rígidas ou extremismos."
               categoria="Nutrição Comportamental"
               segundaCategoria="Nutrição comportamental e alimentação consciente"
-              img="/doctor/pfp.png"
+              img="/doctor/doctor-lucas.webp"
             />
 
             <ProfessionalCards

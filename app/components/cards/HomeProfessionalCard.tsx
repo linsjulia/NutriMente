@@ -29,7 +29,7 @@ export default function HomeProfessionalCard({
           alt={`Foto de ${titulo}`}
           width={100}
           height={100}
-          className="aspect-square w-6 rounded-full bg-green-700 object-cover lg:w-[clamp(4rem,6vw,5rem)]"
+          className="aspect-square w-6 rounded-full border-2 border-gray-300 bg-green-700 object-cover lg:w-[clamp(4rem,6vw,5rem)]"
         />
         <div className="min-w-0 text-sm lg:text-[clamp(0.8125rem,1vw,1rem)]">
           <h3 className="font-fraunces text-lg font-semibold lg:text-[clamp(1rem,1.35vw,1.125rem)]">

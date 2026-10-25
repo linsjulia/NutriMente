@@ -106,7 +106,7 @@ const PROFESSIONALS = [
     ],
   },
   {
-    key: "lucas", name: "Lucas Ferreira", type: "PSICOLOGO", gender: "MALE", photo: "/doctor/doctor-pfp.png", price: 160, online: false, // sem cadastro no e-Psi: só presencial
+    key: "lucas", name: "Lucas Ferreira", type: "PSICOLOGO", gender: "MALE", photo: "/doctor/doctor-lucas.webp", price: 160, online: false, // sem cadastro no e-Psi: só presencial
     bio: "Psicólogo especializado em transtornos alimentares e imagem corporal. Atendo adolescentes e adultos, em parceria com nutricionistas.",
     specialties: ["Transtornos Alimentares", "Autoestima e Imagem Corporal", "Compulsão alimentar"], minutes: 90, audiences: ["ADOLESCENTE", "ADULTO"],
     windows: weekdays([1, 3, 5], [["14:00", "21:00"]]),

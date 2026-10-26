@@ -10,7 +10,6 @@ export default function CTASection() {
       <section className="relative mx-auto max-w-6xl pt-8 md:pt-12">
         <div className="relative rounded-[2rem] bg-[linear-gradient(135deg,#0a4cc4_0%,#1f6ff2_50%,#45a9f7_100%)] shadow-[0_25px_60px_-15px_rgba(30,100,220,0.45)]">
           <div className="relative grid items-center gap-4 md:grid-cols-[5fr_7fr] md:gap-8">
-            {/* image column */}
             <div className="relative order-2 flex justify-center md:order-1 md:self-stretch">
               <div className="absolute bottom-0 left-1/2 h-52 w-52 -translate-x-1/2 rounded-full bg-[#d6e6ff]/15 md:h-72 md:w-72" />
               <Image
@@ -39,8 +38,6 @@ export default function CTASection() {
                 <span className="text-sm font-semibold text-[#0b2545]">Nutrição</span>
               </div>
             </div>
-
-            {/* text column */}
             <div className="relative z-20 order-1 px-6 pt-8 md:order-2 md:px-10 md:py-10 lg:pr-14">
               <h2 className="font-display text-2xl font-semibold leading-tight text-white font-fraunces sm:text-3xl md:text-4xl">
                 Pronto para transformar sua saúde{" "}

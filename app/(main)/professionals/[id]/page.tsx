@@ -52,7 +52,7 @@ export default async function ProfessionalPage({ params }: PageProps<"/professio
 
       <section aria-labelledby="perfil" className="card flex flex-col gap-5 sm:flex-row">
         {p.photoUrl ? (
-          <Image src={p.photoUrl} alt="" width={128} height={128} className="h-32 w-32 shrink-0 rounded-2xl object-cover" />
+          <Image src={p.photoUrl} alt="" width={128} height={128} className="h-32 w-32 shrink-0 rounded-full object-cover border border-gray-400" />
         ) : (
           <div aria-hidden className="flex h-32 w-32 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-4xl font-bold text-blue1">
             {p.name[0]}

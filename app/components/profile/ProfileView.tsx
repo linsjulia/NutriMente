@@ -11,7 +11,7 @@ import type { Profissional } from "./Types";
 
 type Aba = "sobre" | "horarios" | "avaliacoes";
 
-// Animação usada ao trocar de aba (a mesma para o conteúdo e para a coluna da direita)
+// Animação usada ao trocar de aba
 const animacao = {
   initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },

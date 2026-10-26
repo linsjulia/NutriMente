@@ -48,23 +48,26 @@ export default function BookingForm({ professionalId, days, offersOnline, offers
       </div>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 font-semibold">Horário</legend>
-        <div className="flex flex-wrap gap-2">
-          {day.slots.map((s) => (
-            <label key={s.startsAt} className="chip-link cursor-pointer has-checked:bg-blue1 has-checked:text-white has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-blue1">
-              <input
-                type="radio"
-                name="startsAt"
-                value={s.startsAt}
-                defaultChecked={values?.startsAt === s.startsAt}
-                className="sr-only"
-              />
-              {s.time}
-            </label>
-          ))}
-        </div>
-        {state.errors?.startsAt && <p className="text-sm font-semibold text-red-700">{state.errors.startsAt}</p>}
-      </fieldset>
+  <legend className="mb-2 font-semibold">Horário</legend>
+  <div className="flex flex-wrap gap-2">
+    {day.slots.map((s) => (
+      <label 
+        key={s.startsAt} 
+        className="chip-link cursor-pointer has-checked:bg-blue1 has-checked:!text-white has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-blue1"
+      >
+        <input
+          type="radio"
+          name="startsAt"
+          value={s.startsAt}
+          defaultChecked={values?.startsAt === s.startsAt}
+          className="sr-only"
+        />
+        {s.time}
+      </label>
+    ))}
+  </div>
+  {state.errors?.startsAt && <p className="text-sm font-semibold text-red-700">{state.errors.startsAt}</p>}
+</fieldset>
 
       {offersOnline && offersInPerson ? (
         <fieldset className="flex flex-col gap-2">

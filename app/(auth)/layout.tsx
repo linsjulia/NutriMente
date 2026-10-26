@@ -1,3 +1,4 @@
+'use client'
 import Image from "next/image";
 import Link from "next/link";
 
@@ -29,7 +30,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           {/* "fill" exige um pai com position relative/absolute/fixed; o sticky
               acima mantém a foto parada na rolagem, este div serve de moldura */}
           <div className="relative h-full w-full">
-            <Image src="/doctor/profissionais.webp" alt="" fill sizes="50vw" loading="eager" className="rounded-2xl object-cover" />
+                <Image src="/patient/consulta-auth.jpg" alt="" fill sizes="(min-width: 1024px) 50vw, 100vw" loading="eager" className="rounded-2xl object-cover" />
           </div>
         </div>
       </div>

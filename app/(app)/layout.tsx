@@ -35,7 +35,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
-      <header className="bg-blue1 text-white">
+      <header className="bg-blue1 text-white sticky top-0 z-50">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
           <Link href="/" className="flex items-center gap-2" aria-label="NutriMente: página inicial">
             <Image src="/logo/nutrimente-v1.png" alt="" width={40} height={40} className="h-10 w-auto" />

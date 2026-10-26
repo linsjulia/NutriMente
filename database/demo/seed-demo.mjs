@@ -123,7 +123,7 @@ const PROFESSIONALS = [
     reviews: [[5, "Me senti acolhida desde a primeira sessão."]],
   },
   {
-    key: "Alice", name: "Alice Lima", type: "PSICOLOGO", gender: "FEMALE", photo: "/doctor/doctor-alice.jpg", price: 140, office: null, // sem consultório: só online
+    key: "alice", name: "Alice Lima", type: "PSICOLOGO", gender: "FEMALE", photo: "/doctor/doctor-alice.jpg", price: 140, office: null, // sem consultório: só online
     bio: "Atendimento à noite para quem trabalha durante o dia. Ansiedade, autoestima e relacionamento com o corpo.",
     specialties: ["Ansiedade", "Autoestima e Imagem Corporal", "Estresse e burnout"], minutes: 30, audiences: ["ADULTO"],
     windows: weekdays([1, 2, 3, 4], [["18:00", "22:00"]]),
@@ -135,7 +135,7 @@ const PROFESSIONALS = [
 ];
 
 /** Fica PENDENTE: aparece na fila de aprovação do admin */
-// Consultórios (consulta presencial). A Beatriz atende só online (office: null);
+// Consultórios (consulta presencial). A Alice atende só online (office: null);
 // o Lucas, só presencial (online: false)
 const OFFICES = {
   camila: { officeAddress: "Av. Paulista, 1000, sala 81 - Bela Vista", officeCity: "São Paulo", officeState: "SP" },

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -21,15 +22,14 @@ import br.com.nutrimente.api.appointment.AppointmentDtos.AppointmentResponse;
 import br.com.nutrimente.api.appointment.AppointmentDtos.BookRequest;
 import br.com.nutrimente.api.appointment.AppointmentDtos.Person;
 import br.com.nutrimente.api.appointment.AppointmentDtos.ProfessionalSummary;
-import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
+import br.com.nutrimente.api.common.event.AppointmentBookedEvent;
+import br.com.nutrimente.api.common.event.AppointmentCancelledEvent;
+import br.com.nutrimente.api.common.event.AppointmentCompletedEvent;
+import br.com.nutrimente.api.common.event.AppointmentConfirmedEvent;
+import br.com.nutrimente.api.common.event.AppointmentRescheduledEvent;
 import br.com.nutrimente.api.config.AppProperties;
-import br.com.nutrimente.api.logging.LogClient;
-import br.com.nutrimente.api.notification.EmailService;
-import br.com.nutrimente.api.notification.Notification;
-import br.com.nutrimente.api.notification.NotificationLinks;
-import br.com.nutrimente.api.notification.NotificationService;
 import br.com.nutrimente.api.review.ReviewRepository;
 import br.com.nutrimente.api.screening.ScreeningService;
 import br.com.nutrimente.api.user.Patient;
@@ -58,27 +58,23 @@ public class AppointmentService {
 	private final PatientRepository patients;
 	private final ProfessionalRepository professionals;
 	private final ScheduleService schedule;
-	private final EmailService emailService;
-	private final LogClient logClient;
 	private final ReviewRepository reviews;
 	private final ScreeningService screenings;
-	private final NotificationService notifications;
 	private final AppProperties.Appointments rules;
+	private final ApplicationEventPublisher publisher;
 
 	public AppointmentService(AppointmentRepository appointments, PatientRepository patients,
-			ProfessionalRepository professionals, ScheduleService schedule, EmailService emailService,
-			LogClient logClient, ReviewRepository reviews, NotificationService notifications, AppProperties properties,
-			ScreeningService screenings) {
+			ProfessionalRepository professionals, ScheduleService schedule,
+			ReviewRepository reviews, AppProperties properties,
+			ScreeningService screenings, ApplicationEventPublisher publisher) {
 		this.screenings = screenings;
 		this.appointments = appointments;
 		this.patients = patients;
 		this.professionals = professionals;
 		this.schedule = schedule;
-		this.emailService = emailService;
-		this.logClient = logClient;
 		this.reviews = reviews;
-		this.notifications = notifications;
 		this.rules = properties.appointments();
+		this.publisher = publisher;
 	}
 
 	// ---------------- Agendar ----------------
@@ -123,16 +119,11 @@ public class AppointmentService {
 			screenings.saveForNewAppointment(appointment.getId(), request.screening());
 		}
 
-		String when = describe(appointment);
-		inform(appointment, appointment.getProfessional().getUser(), "Nova consulta agendada",
-				"%s agendou uma consulta com você para %s (%s).".formatted(patient.getUser().getName(), when,
-						modalityLabel(modality)),
-				"Você pode confirmar a consulta na sua área do NutriMente.");
-		inform(appointment, patient.getUser(), "Consulta agendada",
-				"Sua consulta com %s está marcada para %s (%s).".formatted(professional.getUser().getName(), when,
-						modalityLabel(modality)),
-				cancelPolicy());
-		audit(patientId, "PATIENT", "CREATE", appointment);
+		publisher.publishEvent(new AppointmentBookedEvent(
+				appointment.getId(), patientId,
+				patient.getUser().getName(), patient.getUser().getEmail(),
+				professional.getId(), professional.getUser().getName(), professional.getUser().getEmail(),
+				describe(appointment), modalityLabel(modality), cancelPolicy()));
 		return toResponse(appointment, patientId);
 	}
 
@@ -175,16 +166,12 @@ public class AppointmentService {
 
 		appointment.cancel(userId, Digits.trimToNull(reason));
 
-		String when = describe(appointment);
-		String reasonText = appointment.getCancellationReason() == null ? ""
-				: " Motivo: " + appointment.getCancellationReason();
 		User canceller = byPatient ? appointment.getPatient().getUser() : appointment.getProfessional().getUser();
 		User other = byPatient ? appointment.getProfessional().getUser() : appointment.getPatient().getUser();
-		inform(appointment, other, "Consulta cancelada",
-				"%s cancelou a consulta de %s.%s".formatted(canceller.getName(), when, reasonText),
-				byPatient ? "O horário voltou a ficar livre na sua agenda."
-						: "Você pode agendar um novo horário pela busca de profissionais.");
-		audit(userId, byPatient ? "PATIENT" : "PROFESSIONAL", "UPDATE", appointment);
+		publisher.publishEvent(new AppointmentCancelledEvent(
+				appointment.getId(), appointment.getPatient().getId(), userId, byPatient,
+				other.getId(), other.getEmail(), other.getName(),
+				canceller.getName(), describe(appointment), appointment.getCancellationReason()));
 		return toResponse(appointment, userId);
 	}
 
@@ -219,16 +206,12 @@ public class AppointmentService {
 				original.getId()));
 		screenings.copy(original.getId(), created.getId());
 
-		inform(created, created.getProfessional().getUser(), "Consulta remarcada",
-				"%s remarcou a consulta de %s para %s.".formatted(created.getPatient().getUser().getName(),
-						describe(original), describe(created)),
-				"O horário antigo voltou a ficar livre na sua agenda.");
-		inform(created, created.getPatient().getUser(), "Consulta remarcada",
-				"Sua consulta com %s agora é %s.".formatted(created.getProfessional().getUser().getName(),
-						describe(created)),
-				cancelPolicy());
-		audit(userId, "PATIENT", "UPDATE", original);
-		audit(userId, "PATIENT", "CREATE", created);
+		publisher.publishEvent(new AppointmentRescheduledEvent(
+				original.getId(), created.getId(), created.getPatient().getId(),
+				created.getProfessional().getId(),
+				created.getPatient().getUser().getName(), created.getPatient().getUser().getEmail(),
+				created.getProfessional().getUser().getName(), created.getProfessional().getUser().getEmail(),
+				describe(original), describe(created), cancelPolicy()));
 		return toResponse(created, userId);
 	}
 
@@ -241,12 +224,11 @@ public class AppointmentService {
 			throw invalidStatus("Só dá para confirmar consultas agendadas que ainda não aconteceram.");
 		}
 		appointment.confirm();
-		inform(appointment, appointment.getPatient().getUser(), "Consulta confirmada",
-				"%s confirmou sua consulta de %s.".formatted(appointment.getProfessional().getUser().getName(),
-						describe(appointment)),
-				appointment.getVideoUrl() == null ? cancelPolicy()
-						: "No horário, entre pela videochamada: " + appointment.getVideoUrl());
-		audit(userId, "PROFESSIONAL", "UPDATE", appointment);
+		publisher.publishEvent(new AppointmentConfirmedEvent(
+				appointment.getId(), appointment.getPatient().getId(), userId,
+				appointment.getPatient().getUser().getEmail(), appointment.getPatient().getUser().getName(),
+				appointment.getProfessional().getUser().getName(), describe(appointment),
+				appointment.getVideoUrl(), cancelPolicy()));
 		return toResponse(appointment, userId);
 	}
 
@@ -257,7 +239,8 @@ public class AppointmentService {
 			throw invalidStatus("Só dá para concluir a consulta depois do horário de início.");
 		}
 		appointment.complete();
-		audit(userId, "PROFESSIONAL", "UPDATE", appointment);
+		publisher.publishEvent(new AppointmentCompletedEvent(
+				appointment.getId(), appointment.getPatient().getId(), userId));
 		return toResponse(appointment, userId);
 	}
 
@@ -370,24 +353,6 @@ public class AppointmentService {
 	private String cancelPolicy() {
 		return "Se precisar, você pode cancelar ou remarcar até %d horas antes pela sua área do NutriMente."
 				.formatted(rules.patientCancelLimit().toHours());
-	}
-
-	/**
-	 * Avisa alguém sobre a consulta de dois jeitos: notificação no site (gravada
-	 * agora, na mesma transação) e e-mail (enviado só depois do commit).
-	 */
-	private void inform(Appointment a, User to, String subject, String intro, String footer) {
-		notifications.notify(to.getId(), Notification.Type.APPOINTMENT, subject, intro,
-				NotificationLinks.appointment(a.getId()));
-		String email = to.getEmail();
-		String name = to.getName();
-		AfterCommit.run(() -> emailService.sendAppointmentNotice(email, name, subject, intro, footer));
-	}
-
-	private void audit(Long actorId, String role, String action, Appointment a) {
-		Long id = a.getId();
-		Long patientId = a.getPatient().getId();
-		AfterCommit.run(() -> logClient.audit(actorId, role, action, "appointments", id, patientId));
 	}
 
 	private AppointmentResponse toResponse(Appointment a, Long viewerId) {

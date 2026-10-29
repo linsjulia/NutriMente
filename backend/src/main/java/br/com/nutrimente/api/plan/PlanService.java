@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +30,7 @@ import br.com.nutrimente.api.appointment.AppointmentStatus;
 import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
+import br.com.nutrimente.api.common.event.PlanCreatedEvent;
 import br.com.nutrimente.api.config.AppProperties;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.notification.EmailService;
@@ -84,11 +86,12 @@ public class PlanService {
 	private final EmailService emailService;
 	private final LogClient logClient;
 	private final NotificationService notifications;
+	private final ApplicationEventPublisher publisher;
 	private final ZoneId zone;
 
 	public PlanService(ActionPlanRepository plans, PatientRepository patients, ProfessionalRepository professionals,
 			AppointmentRepository appointments, EmailService emailService, LogClient logClient,
-			NotificationService notifications, AppProperties properties) {
+			NotificationService notifications, ApplicationEventPublisher publisher, AppProperties properties) {
 		this.plans = plans;
 		this.patients = patients;
 		this.professionals = professionals;
@@ -96,6 +99,7 @@ public class PlanService {
 		this.emailService = emailService;
 		this.logClient = logClient;
 		this.notifications = notifications;
+		this.publisher = publisher;
 		this.zone = ZoneId.of(properties.appointments().timezone());
 	}
 
@@ -137,15 +141,9 @@ public class PlanService {
 		apply(plan, request);
 		plans.saveAndFlush(plan);
 
-		User to = patient.getUser();
-		String email = to.getEmail();
-		String name = to.getName();
-		String intro = "%s criou um plano de ação para você: \"%s\".".formatted(professional.getUser().getName(),
-				plan.getTitle());
-		notifications.notify(patient.getId(), Notification.Type.PLAN, "Novo plano de ação", intro,
-				NotificationLinks.plan(plan.getId()));
-		AfterCommit.run(() -> emailService.sendPlanNotice(email, name, "Novo plano de ação", intro));
-		audit(professionalId, "PROFESSIONAL", "CREATE", plan);
+		publisher.publishEvent(new PlanCreatedEvent(plan.getId(), professionalId,
+				professional.getUser().getName(), patient.getId(),
+				patient.getUser().getEmail(), patient.getUser().getName(), plan.getTitle()));
 		return detail(plan, professionalId);
 	}
 

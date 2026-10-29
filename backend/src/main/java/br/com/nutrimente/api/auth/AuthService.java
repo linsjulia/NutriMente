@@ -4,6 +4,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.common.validation.Names;
+import br.com.nutrimente.api.common.event.PasswordResetRequestedEvent;
+import br.com.nutrimente.api.common.event.UserRegisteredEvent;
 import br.com.nutrimente.api.config.JwtService;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.notification.EmailService;
@@ -58,10 +61,12 @@ public class AuthService {
 	private final EmailService emailService;
 	private final LogClient logClient;
 	private final RecordCipher cipher;
+	private final ApplicationEventPublisher publisher;
 
 	public AuthService(UserRepository users, PatientRepository patients, ProfessionalRepository professionals,
 			UserTokenRepository tokens, LgpdConsentRepository consents, PasswordEncoder passwordEncoder,
-			JwtService jwtService, EmailService emailService, LogClient logClient, RecordCipher cipher) {
+			JwtService jwtService, EmailService emailService, LogClient logClient, RecordCipher cipher,
+			ApplicationEventPublisher publisher) {
 		this.users = users;
 		this.cipher = cipher;
 		this.patients = patients;
@@ -72,6 +77,7 @@ public class AuthService {
 		this.jwtService = jwtService;
 		this.emailService = emailService;
 		this.logClient = logClient;
+		this.publisher = publisher;
 		this.dummyHash = passwordEncoder.encode("senha-que-nao-existe");
 	}
 
@@ -167,10 +173,8 @@ public class AuthService {
 
 	private String afterRegister(User user) {
 		String token = createToken(user, TokenPurpose.EMAIL_VERIFICATION);
-		AfterCommit.run(() -> {
-			emailService.sendEmailVerification(user.getEmail(), user.getName(), token);
-			logClient.audit(user.getId(), user.getRole().name(), "CREATE", "users", user.getId(), user.getId());
-		});
+		publisher.publishEvent(new UserRegisteredEvent(
+				user.getId(), user.getRole().name(), user.getEmail(), user.getName(), token));
 		return createToken(user, TokenPurpose.REGISTRATION);
 	}
 
@@ -288,10 +292,8 @@ public class AuthService {
 	public void requestPasswordReset(String email, String ip) {
 		users.findByEmail(normalizeEmail(email)).filter(u -> u.canLogin()).ifPresent(user -> {
 			String token = createToken(user, TokenPurpose.PASSWORD_RESET);
-			AfterCommit.run(() -> {
-				emailService.sendPasswordReset(user.getEmail(), user.getName(), token);
-				logClient.access("PASSWORD_RESET_REQUEST", true, user.getId(), user.getEmail(), ip, null);
-			});
+			publisher.publishEvent(new PasswordResetRequestedEvent(
+					user.getId(), user.getEmail(), user.getName(), token, ip));
 		});
 	}
 

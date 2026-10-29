@@ -55,9 +55,14 @@ public class EmailEventListener {
 
 	@TransactionalEventListener(fallbackExecution = true)
 	void on(AppointmentBookedEvent e) {
-		String intro = "%s agendou uma consulta %s para %s.".formatted(e.patientName(), e.modality(), e.when());
 		emailService.sendAppointmentNotice(e.professionalEmail(), e.professionalName(),
-				"Nova consulta agendada", intro, e.cancelPolicy());
+				"Nova consulta agendada",
+				"%s agendou uma consulta %s para %s.".formatted(e.patientName(), e.modality(), e.when()),
+				"Você pode confirmar a consulta na sua área do NutriMente.");
+		emailService.sendAppointmentNotice(e.patientEmail(), e.patientName(),
+				"Consulta agendada",
+				"Sua consulta com %s está marcada para %s (%s).".formatted(e.professionalName(), e.when(), e.modality()),
+				e.cancelPolicy());
 	}
 
 	@TransactionalEventListener(fallbackExecution = true)

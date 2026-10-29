@@ -4,9 +4,19 @@ import { useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import { CalendarDays } from "lucide-react";
 import Card from "./Card";
-import type { Dia, Horario } from "./Types";
+import type { Slot, SlotDay } from "@/app/lib/agenda";
 
-function Grupo({ titulo, horarios }: { titulo: string; horarios: Horario[] }) {
+function Grupo({
+  titulo,
+  horarios,
+  selecionado,
+  onSelecionar,
+}: {
+  titulo: string;
+  horarios: Slot[];
+  selecionado: string | null;
+  onSelecionar: (startsAt: string) => void;
+}) {
   return (
     <section>
       <h3 className="mb-3 flex items-center gap-3 text-xs font-bold text-gray-600">
@@ -14,16 +24,19 @@ function Grupo({ titulo, horarios }: { titulo: string; horarios: Horario[] }) {
         <span className="h-px flex-1 bg-gray-200" />
       </h3>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {horarios.map((h) => (
+        {horarios.map((slot) => (
           <button
-            key={h.hora}
+            key={slot.startsAt}
             type="button"
-            disabled={!h.livre}
+            aria-pressed={selecionado === slot.startsAt}
+            onClick={() => onSelecionar(slot.startsAt)}
             className={`rounded-lg border py-2 text-sm font-bold ${
-              h.livre ? "border-gray-200 hover:border-blue1" : "cursor-not-allowed text-gray-400 line-through"
+              selecionado === slot.startsAt
+                ? "border-blue1 bg-blue1 text-white"
+                : "border-gray-200 hover:border-blue1"
             }`}
           >
-            {h.hora}
+            {slot.time}
           </button>
         ))}
       </div>
@@ -31,16 +44,20 @@ function Grupo({ titulo, horarios }: { titulo: string; horarios: Horario[] }) {
   );
 }
 
-// Aba "Horários disponíveis": escolhe o dia e mostra os horários.
-export default function SchedulesTab({ dias }: { dias: Dia[] }) {
-  const [diaEscolhido, setDiaEscolhido] = useState<number | null>(null);
-  const dia = diaEscolhido === null ? null : dias[diaEscolhido];
+function dateValue(date: string): Date {
+  return new Date(`${date}T12:00:00Z`);
+}
 
-  const manha = dia?.horarios.filter((h) => Number(h.hora.split(":")[0]) < 12) ?? [];
-  const tarde = dia?.horarios.filter((h) => Number(h.hora.split(":")[0]) >= 12) ?? [];
+// Aba "Horários disponíveis": escolhe o dia e mostra os horários.
+export default function SchedulesTab({ dias }: { dias: SlotDay[] }) {
+  const [diaEscolhido, setDiaEscolhido] = useState<string | null>(null);
+  const [horarioEscolhido, setHorarioEscolhido] = useState<string | null>(null);
+  const dia = diaEscolhido === null ? null : dias.find((day) => day.date === diaEscolhido) ?? null;
+
+  const manha = dia?.slots.filter((slot) => Number(slot.time.slice(0, 2)) < 12) ?? [];
+  const tarde = dia?.slots.filter((slot) => Number(slot.time.slice(0, 2)) >= 12) ?? [];
 
   return (
-    // reducedMotion="user": quem pediu menos movimento no sistema não vê a animação
     <MotionConfig reducedMotion="user">
       <Card className="flex flex-col gap-6">
         <div>
@@ -48,24 +65,46 @@ export default function SchedulesTab({ dias }: { dias: Dia[] }) {
           <p className="mt-1 text-sm text-gray-700">Escolha um horário para a consulta</p>
         </div>
 
-        <p className="text-sm font-semibold">04 de outubro de 2026</p>
+        {dia && (
+          <p className="text-sm font-semibold">
+            {dateValue(dia.date).toLocaleDateString("pt-BR", {
+              timeZone: "UTC",
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
+        )}
 
-        <div className="grid grid-cols-5 gap-3">
-          {dias.map((d, i) => (
-            <button
-              key={d.numero}
-              type="button"
-              aria-pressed={diaEscolhido === i}
-              onClick={() => setDiaEscolhido(i)}
-              className={`flex flex-col items-center rounded-xl border py-3 ${
-                diaEscolhido === i ? "border-blue-600 bg-blue-600 text-white" : "border-gray-200 hover:border-blue1"
-              }`}
-            >
-              <span className="text-sm">{d.semana}</span>
-              <span className="text-xl font-bold">{d.numero}</span>
-            </button>
-          ))}
-        </div>
+        {dias.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+            {dias.map((day) => (
+              <button
+                key={day.date}
+                type="button"
+                aria-pressed={diaEscolhido === day.date}
+                onClick={() => {
+                  setDiaEscolhido(day.date);
+                  setHorarioEscolhido(null);
+                }}
+                className={`flex flex-col items-center rounded-xl border py-3 ${
+                  diaEscolhido === day.date
+                    ? "border-blue-600 bg-blue-600 text-white"
+                    : "border-gray-200 hover:border-blue1"
+                }`}
+              >
+                <span className="text-sm">{day.weekday}</span>
+                <span className="text-xl font-bold">
+                  {dateValue(day.date).toLocaleDateString("pt-BR", { timeZone: "UTC", day: "2-digit" })}
+                </span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="rounded-xl border border-blue-100 bg-blue3 py-8 text-center text-sm text-gray-600">
+            Não há horários livres nos próximos dias.
+          </p>
+        )}
 
         {/* Quando a "key" muda (outro dia), o conteúdo antigo sai e o novo entra */}
         <AnimatePresence mode="wait" initial={false}>
@@ -85,12 +124,22 @@ export default function SchedulesTab({ dias }: { dias: Dia[] }) {
               </div>
             ) : (
               <>
-                <Grupo titulo="MANHÃ" horarios={manha} />
-                <Grupo titulo="TARDE" horarios={tarde} />
-                <p className="flex gap-6 text-xs text-gray-600">
-                  <span>● Disponível</span>
-                  <span className="line-through">Indisponível</span>
-                </p>
+                {manha.length > 0 && (
+                  <Grupo
+                    titulo="MANHÃ"
+                    horarios={manha}
+                    selecionado={horarioEscolhido}
+                    onSelecionar={setHorarioEscolhido}
+                  />
+                )}
+                {tarde.length > 0 && (
+                  <Grupo
+                    titulo="TARDE"
+                    horarios={tarde}
+                    selecionado={horarioEscolhido}
+                    onSelecionar={setHorarioEscolhido}
+                  />
+                )}
               </>
             )}
           </motion.div>

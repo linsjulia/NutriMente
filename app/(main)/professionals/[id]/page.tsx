@@ -31,6 +31,8 @@ export default async function ProfessionalPage({ params }: PageProps<"/professio
     api<SlotDay[]>(`/api/professionals/${professionalId}/slots?days=14`),
     getSession(),
   ]);
+
+  
   if (!profile.ok) {
     if (profile.error.status === 404) notFound();
     return (
@@ -58,51 +60,58 @@ export default async function ProfessionalPage({ params }: PageProps<"/professio
             {p.name[0]}
           </div>
         )}
-        <div className="flex flex-col gap-3">
-          <h1 id="perfil" className="font-fraunces text-3xl font-medium">{p.name}</h1>
-          <p className="text-gray-700">
-            {PROFESSION_LABELS[p.type]} · {formatCouncilNumber(p.type, p.document)}
-          </p>
-          <p className="flex items-center gap-1.5">
-            <Star aria-hidden size={18} className="fill-amber-400 text-amber-500" />
-            {p.ratingCount > 0 ? (
-              <span>
-                <strong>{p.ratingAverage.toFixed(1).replace(".", ",")}</strong> ({p.ratingCount}{" "}
-                {p.ratingCount === 1 ? "avaliação" : "avaliações"})
-              </span>
-            ) : (
-              <span>Ainda sem avaliações</span>
-            )}
-          </p>
-          <ul aria-label="Como atende" className="flex flex-wrap gap-2">
-            {p.offersOnline && (
-              <li className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-900">
-                <Video aria-hidden size={16} /> Atende online
-              </li>
-            )}
-            {p.offersInPerson && (
-              <li className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-900">
-                <MapPin aria-hidden size={16} /> Presencial em {p.officeCity}/{p.officeState}
-              </li>
-            )}
-          </ul>
-          {p.specialties.length > 0 && (
-            <ul aria-label="Especialidades" className="flex flex-wrap gap-1.5">
-              {p.specialties.map((s) => (
-                <li key={s.id} className="specialty-tag">{s.name}</li>
-              ))}
-            </ul>
-          )}
-          <p>{p.bio ?? "Este profissional ainda não escreveu uma apresentação."}</p>
-          <p className="text-lg font-semibold">
-            {p.consultationPrice != null ? `R$ ${formatBRL(p.consultationPrice)} por consulta` : "Valor a combinar"}
-            <span className="font-normal text-gray-700"> · {p.consultationMinutes} minutos</span>
-          </p>
-          {p.audiences.length > 0 && (
+        <div className="flex flex-1 flex-row gap-3">
+          <div className="flex flex-col gap-3">
+            <h1 id="perfil" className="font-fraunces text-3xl font-medium">{p.name}</h1>
             <p className="text-gray-700">
-              Atende: {p.audiences.map((a) => AUDIENCE_LABELS[a].toLowerCase()).join(", ")}
+              {PROFESSION_LABELS[p.type]} · {formatCouncilNumber(p.type, p.document)}
             </p>
-          )}
+            <p className="flex items-center gap-1.5">
+              <Star aria-hidden size={18} className="fill-amber-400 text-amber-500" />
+              {p.ratingCount > 0 ? (
+                <span>
+                  <strong>{p.ratingAverage.toFixed(1).replace(".", ",")}</strong> ({p.ratingCount}{" "}
+                  {p.ratingCount === 1 ? "avaliação" : "avaliações"})
+                </span>
+              ) : (
+                <span>Ainda sem avaliações</span>
+              )}
+            </p>
+            <ul aria-label="Como atende" className="flex flex-wrap gap-2">
+              {p.offersOnline && (
+                <li className="flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-900">
+                  <Video aria-hidden size={16} /> Atende online
+                </li>
+              )}
+              {p.offersInPerson && (
+                <li className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-900">
+                  <MapPin aria-hidden size={16} /> Presencial em {p.officeCity}/{p.officeState}
+                </li>
+              )}
+            </ul>
+            {p.specialties.length > 0 && (
+              <ul aria-label="Especialidades" className="flex flex-wrap gap-1.5">
+                {p.specialties.map((s) => (
+                  <li key={s.id} className="specialty-tag">{s.name}</li>
+                ))}
+              </ul>
+            )}
+            <p>{p.bio ?? "Este profissional ainda não escreveu uma apresentação."}</p>
+            <p className="text-lg font-semibold">
+              {p.consultationPrice != null ? `R$ ${formatBRL(p.consultationPrice)} por consulta` : "Valor a combinar"}
+              <span className="font-normal text-gray-700"> · {p.consultationMinutes} minutos</span>
+            </p>
+            {p.audiences.length > 0 && (
+              <p className="text-gray-700">
+                Atende: {p.audiences.map((a) => AUDIENCE_LABELS[a].toLowerCase()).join(", ")}
+              </p>
+            )}
+          </div>
+          <div>
+            <Link href={`/professionals/${p.id}/details`} className="inline-flex underline">
+              Ver perfil
+            </Link>
+          </div>
         </div>
       </section>
 

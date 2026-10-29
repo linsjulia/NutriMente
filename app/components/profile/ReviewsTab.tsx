@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Card from "./Card";
 import Stars from "./Stars";
-import type { Profissional } from "./Types";
+import type { ProfessionalProfile, PublicReview } from "@/app/lib/agenda";
+import { formatDate } from "@/app/lib/agenda";
 
 // Aba "Avaliações": resumo com barras, filtro por nota e lista.
-export default function ReviewsTab({ p }: { p: Profissional }) {
+export default function ReviewsTab({ p, reviews }: { p: ProfessionalProfile; reviews: PublicReview[] }) {
   const [filtro, setFiltro] = useState<number | null>(null);
-  const lista = filtro === null ? p.avaliacoes : p.avaliacoes.filter((a) => a.nota === filtro);
+  const lista = filtro === null ? reviews : reviews.filter((review) => review.rating === filtro);
 
   return (
     <Card className="flex flex-col gap-6">
@@ -20,24 +21,23 @@ export default function ReviewsTab({ p }: { p: Profissional }) {
       {/* Resumo */}
       <div className="flex flex-wrap items-center gap-8 rounded-xl bg-blue3 p-6">
         <div className="flex flex-col items-center">
-          <span className="text-4xl font-bold text-blue1">{p.nota.toFixed(1).replace(".", ",")}</span>
-          <Stars value={p.nota} className="text-lg" />
-          <span className="text-xs text-gray-600">{p.totalAvaliacoes} avaliações</span>
-        </div>
-        <ul className="flex min-w-48 flex-1 flex-col gap-1.5">
-          {[5, 4, 3, 2, 1].map((n) => (
-            <li key={n} className="flex items-center gap-3 text-xs">
-              <span className="w-6">{n} ★</span>
-              <span className="h-1.5 flex-1 rounded-full bg-gray-200">
-                <span
-                  className="block h-full rounded-full bg-yellow-600"
-                  style={{ width: `${((p.distribuicao[n] ?? 0) / p.totalAvaliacoes) * 100}%` }}
-                />
+          {p.ratingCount > 0 ? (
+            <>
+              <span className="text-4xl font-bold text-blue1">{p.ratingAverage.toFixed(1).replace(".", ",")}</span>
+              <Stars value={p.ratingAverage} className="text-lg" />
+              <span className="text-xs text-gray-600">
+                {p.ratingCount} {p.ratingCount === 1 ? "avaliação" : "avaliações"}
               </span>
-              <span className="w-8 text-right text-gray-600">{p.distribuicao[n] ?? 0}</span>
-            </li>
-          ))}
-        </ul>
+            </>
+          ) : (
+            <span className="text-sm text-gray-600">Ainda sem avaliações</span>
+          )}
+        </div>
+        <p className="max-w-md text-sm text-gray-700">
+          {reviews.length > 0
+            ? `Exibindo ${reviews.length} avaliações recentes.`
+            : "As avaliações dos pacientes aparecerão aqui."}
+        </p>
       </div>
 
       {/* Filtro */}
@@ -67,12 +67,12 @@ export default function ReviewsTab({ p }: { p: Profissional }) {
               <span aria-hidden className="size-8 shrink-0 rounded-full bg-gray-300" />
               <div className="flex flex-col gap-1">
                 <p className="flex flex-wrap items-center gap-2 text-sm">
-                  <strong className="text-blue1">{a.nome}</strong>
-                  <span className="text-xs text-gray-500">{a.quando}</span>
+                  <strong className="text-blue1">{a.patientName}</strong>
+                  <span className="text-xs text-gray-500">{formatDate(a.createdAt)}</span>
                   <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">Consulta realizada</span>
                 </p>
-                <Stars value={a.nota} className="text-xs" />
-                <p className="text-sm">“{a.comentario}”</p>
+                <Stars value={a.rating} className="text-xs" />
+                {a.comment && <p className="text-sm">“{a.comment}”</p>}
               </div>
             </li>
           ))}

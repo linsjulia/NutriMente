@@ -1,8 +1,6 @@
 package br.com.nutrimente.api.professional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -13,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.com.nutrimente.api.appointment.ScheduleService;
 import br.com.nutrimente.api.appointment.ScheduleService.DayPeriod;
 import br.com.nutrimente.api.user.Audience;
 import br.com.nutrimente.api.user.Gender;
@@ -52,31 +49,36 @@ public class ProfessionalSearchService {
 	}
 
 	private final ProfessionalRepository professionals;
-	private final ScheduleService schedule;
+	private final List<SearchResultFilter> postFilters;
 
-	public ProfessionalSearchService(ProfessionalRepository professionals, ScheduleService schedule) {
+	public ProfessionalSearchService(ProfessionalRepository professionals, List<SearchResultFilter> postFilters) {
 		this.professionals = professionals;
-		this.schedule = schedule;
+		this.postFilters = postFilters;
 	}
 
+	/**
+	 * Strategy Pattern: filtros pós-consulta são aplicados por implementações
+	 * de {@link SearchResultFilter}, injetadas automaticamente pelo Spring.
+	 * Para adicionar um novo filtro, crie um {@code @Component} que implemente
+	 * a interface — o serviço de busca não precisa mudar.
+	 */
 	@Transactional(readOnly = true)
 	public Page<Professional> search(Filters f, Pageable pageable) {
-		boolean byAvailability = !f.days().isEmpty() || !f.periods().isEmpty();
-		Page<Professional> found = query(f, byAvailability ? Pageable.unpaged(pageable.getSort()) : pageable);
-		if (!byAvailability) {
+		boolean hasPostFilters = postFilters.stream().anyMatch(pf -> pf.supports(f));
+		Page<Professional> found = query(f, hasPostFilters ? Pageable.unpaged(pageable.getSort()) : pageable);
+		if (!hasPostFilters) {
 			return found;
 		}
-		LocalDate today = LocalDate.now(schedule.zone());
-		LocalDate from = f.days().contains(AvailableDay.TODAY) || f.days().isEmpty() ? today : today.plusDays(1);
-		int span = f.days().isEmpty() ? PERIOD_ONLY_DAYS
-				: f.days().containsAll(EnumSet.allOf(AvailableDay.class)) ? 2 : 1;
-		List<Professional> available = found.getContent().stream()
-				.filter(p -> schedule.hasFreeSlot(p, from, span, f.periods()))
-				.toList();
-		int start = (int) Math.min((long) pageable.getPageNumber() * pageable.getPageSize(), available.size());
-		int end = Math.min(start + pageable.getPageSize(), available.size());
-		return new PageImpl<>(available.subList(start, end), PageRequest.of(pageable.getPageNumber(),
-				pageable.getPageSize(), pageable.getSort()), available.size());
+		List<Professional> filtered = found.getContent();
+		for (SearchResultFilter pf : postFilters) {
+			if (pf.supports(f)) {
+				filtered = pf.apply(filtered, f);
+			}
+		}
+		int start = (int) Math.min((long) pageable.getPageNumber() * pageable.getPageSize(), filtered.size());
+		int end = Math.min(start + pageable.getPageSize(), filtered.size());
+		return new PageImpl<>(filtered.subList(start, end), PageRequest.of(pageable.getPageNumber(),
+				pageable.getPageSize(), pageable.getSort()), filtered.size());
 	}
 
 	private Page<Professional> query(Filters f, Pageable pageable) {

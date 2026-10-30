@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.nutrimente.api.admin.AdminProfessionalController.ProfessionalForReview;
+import org.springframework.context.ApplicationEventPublisher;
+
 import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
+import br.com.nutrimente.api.common.event.ProfessionalVerifiedEvent;
+import br.com.nutrimente.api.common.event.TelehealthRevokedEvent;
 import br.com.nutrimente.api.logging.LogClient;
-import br.com.nutrimente.api.notification.EmailService;
-import br.com.nutrimente.api.notification.Notification;
-import br.com.nutrimente.api.notification.NotificationLinks;
-import br.com.nutrimente.api.notification.NotificationService;
 import br.com.nutrimente.api.professional.ProfessionalController.PageResponse;
 import br.com.nutrimente.api.specialty.Specialty;
 import br.com.nutrimente.api.specialty.SpecialtyDto;
@@ -30,17 +30,15 @@ public class AdminService {
 
 	private final ProfessionalRepository professionals;
 	private final SpecialtyRepository specialties;
-	private final EmailService emailService;
 	private final LogClient logClient;
-	private final NotificationService notifications;
+	private final ApplicationEventPublisher publisher;
 
 	public AdminService(ProfessionalRepository professionals, SpecialtyRepository specialties,
-			EmailService emailService, LogClient logClient, NotificationService notifications) {
+			LogClient logClient, ApplicationEventPublisher publisher) {
 		this.professionals = professionals;
 		this.specialties = specialties;
-		this.emailService = emailService;
 		this.logClient = logClient;
-		this.notifications = notifications;
+		this.publisher = publisher;
 	}
 
 	@Transactional(readOnly = true)
@@ -63,21 +61,9 @@ public class AdminService {
 				.filter(p -> p.getUser().canLogin())
 				.orElseThrow(() -> ApiException.notFound("Profissional não encontrado."));
 		professional.review(decision);
-		boolean approved = decision == VerificationStatus.APPROVED;
-		notifications.notify(professional.getId(), Notification.Type.SYSTEM,
-				approved ? "Cadastro aprovado" : "Cadastro precisa de revisão",
-				approved ? "Seu registro foi verificado e seu perfil já aparece na busca."
-						: "Não conseguimos confirmar seu registro. Motivo: " + cleanReason,
-				NotificationLinks.dashboard());
-
 		User user = professional.getUser();
-		String email = user.getEmail();
-		String name = user.getName();
-		AfterCommit.run(() -> {
-			emailService.sendProfessionalReviewed(email, name, decision == VerificationStatus.APPROVED,
-					decision == VerificationStatus.REJECTED ? cleanReason : null);
-			logClient.audit(adminId, "ADMIN", "UPDATE", "professionals.verification", professionalId, professionalId);
-		});
+		publisher.publishEvent(new ProfessionalVerifiedEvent(adminId, professionalId,
+				user.getEmail(), user.getName(), decision == VerificationStatus.APPROVED, cleanReason));
 		return ProfessionalForReview.of(professional);
 	}
 
@@ -105,15 +91,8 @@ public class AdminService {
 		professional.declareTelehealth(false);
 		String intro = "Desativamos o seu atendimento online: não conseguimos confirmar seu cadastro no %s. Motivo: %s"
 				.formatted(professional.getType() == ProfessionalType.PSICOLOGO ? "e-Psi" : "e-Nutricionista", cleanReason);
-		notifications.notify(professionalId, Notification.Type.SYSTEM, "Atendimento online desativado", intro,
-				NotificationLinks.dashboard());
-		String email = professional.getUser().getEmail();
-		String name = professional.getUser().getName();
-		AfterCommit.run(() -> {
-			emailService.sendAccountNotice(email, name, "Atendimento online desativado", intro,
-					"As consultas online já marcadas continuam valendo. Depois de regularizar, marque de novo no seu perfil.");
-			logClient.audit(adminId, "ADMIN", "UPDATE", "professionals.telehealth", professionalId, professionalId);
-		});
+		publisher.publishEvent(new TelehealthRevokedEvent(adminId, professionalId,
+				professional.getUser().getEmail(), professional.getUser().getName(), intro));
 		return ProfessionalForReview.of(professional);
 	}
 

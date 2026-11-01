@@ -10,11 +10,11 @@ export default function ProfileHeader({ p, onAgendar }: { p: ProfessionalProfile
     <Card className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex items-center gap-5">
         <Image
-          src={p.photoUrl ?? "/doctor/placeholder.png"}
+          src={ p.photoUrl ?? "/icons/circle-user-solid-full-blue.svg"}
           alt={`Foto de ${p.name}`}
           width={80}
           height={80}
-          className="size-20 rounded-full border-2 border-blue-500 object-cover"
+          className="size-30 rounded-full object-cover"
         />
         <div className="flex flex-col gap-1">
           <h1 className="font-fraunces text-2xl font-medium">{p.name}</h1>

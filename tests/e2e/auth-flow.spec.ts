@@ -36,7 +36,7 @@ test.afterAll(async () => {
 });
 
 test("sem login, a área logada manda para o login", async ({ page }) => {
-  for (const path of ["/dashboard", "/account", "/admin/professionals"]) {
+  for (const path of ["/dashboard", "/account", "/admin/professionals", "/professionals"]) {
     await page.goto(path);
     // Guarda a página de origem para voltar depois do login
     await page.waitForURL(/\/login\?next=/);
@@ -236,13 +236,13 @@ test("profissional: 3 etapas -> confirmação -> em análise -> admin aprova -> 
   await expect(review.getByRole("button", { name: /Copiar número/ })).toBeVisible();
   await page.getByRole("button", { name: `Aprovar ${name}` }).click();
   await expect(page.getByRole("button", { name: `Aprovar ${name}` })).toHaveCount(0);
-  await logout(page);
 
-  // Agora aparece na busca, sem dados pessoais
+  // Agora aparece na busca logada, sem dados pessoais
   await page.goto("/professionals?type=NUTRICIONISTA");
   const card = page.getByRole("listitem").filter({ hasText: name });
   await expect(card).toContainText("R$ 180,00");
   await expect(card).not.toContainText(email);
+  await logout(page);
 });
 
 test("esqueci a senha -> link por e-mail -> nova senha -> login", async ({ page }) => {

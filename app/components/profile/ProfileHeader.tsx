@@ -10,7 +10,7 @@ export default function ProfileHeader({ p, onAgendar }: { p: ProfessionalProfile
     <Card className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex items-center gap-5">
         <Image
-          src={ p.photoUrl ?? "/icons/circle-user-solid-full-blue.svg"}
+          src={p.photoUrl ?? "/icons/circle-user-solid-full-blue.svg"}
           alt={`Foto de ${p.name}`}
           width={80}
           height={80}

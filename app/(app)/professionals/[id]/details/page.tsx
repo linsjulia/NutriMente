@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { api } from "@/app/lib/api";
+import { verifySession } from "@/app/lib/dal";
 import ProfileView from "@/app/components/profile/ProfileView";
 import type { ProfessionalProfile, PublicReview, SlotDay } from "@/app/lib/agenda";
 import type { Page } from "@/app/lib/types";
@@ -8,6 +9,7 @@ import { notFound } from "next/navigation";
 export const metadata: Metadata = { title: "Perfil do profissional | NutriMente" };
 
 export default async function DetailsProfessional({ params }: PageProps<"/professionals/[id]/details">) {
+    await verifySession();
     const { id } = await params;
     const professionalId = Number(id);
     if (!Number.isSafeInteger(professionalId) || professionalId <= 0) notFound();
@@ -33,8 +35,8 @@ export default async function DetailsProfessional({ params }: PageProps<"/profes
     const days = slotsResult.data.filter((day) => day.slots.length > 0);
 
   return (
-    <main id="conteudo" className="flex-1 bg-blue3">
+    <div className="flex-1 bg-blue3">
       <ProfileView p={p} days={days} reviews={reviewsResult.data.items} />
-    </main>
+    </div>
   );
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Star, Video } from "lucide-react";
 import { api } from "@/app/lib/api";
-import { getSession } from "@/app/lib/session";
+import { verifySession } from "@/app/lib/dal";
 import { formatBRL } from "@/app/lib/money";
 import { AUDIENCE_LABELS, PROFESSION_LABELS, type Page, formatCouncilNumber } from "@/app/lib/types";
 import { formatDate, type ProfessionalProfile, type PublicReview, type SlotDay } from "@/app/lib/agenda";
@@ -17,29 +17,29 @@ export async function generateMetadata({ params }: PageProps<"/professionals/[id
 }
 
 /**
- * Perfil público do profissional ("Ver perfil" na busca): apresentação,
- * avaliações e, para o paciente logado, os horários livres para agendar.
+ * Perfil do profissional: apresentação, avaliações e horários livres para
+ * pacientes logados agendarem.
  */
 export default async function ProfessionalPage({ params }: PageProps<"/professionals/[id]">) {
+  const session = await verifySession();
   const { id } = await params;
   const professionalId = Number(id);
   if (!Number.isInteger(professionalId)) notFound();
 
-  const [profile, reviews, slots, session] = await Promise.all([
+  const [profile, reviews, slots] = await Promise.all([
     api<ProfessionalProfile>(`/api/professionals/${professionalId}`),
     api<Page<PublicReview>>(`/api/professionals/${professionalId}/reviews?size=5`),
     api<SlotDay[]>(`/api/professionals/${professionalId}/slots?days=14`),
-    getSession(),
   ]);
 
   
   if (!profile.ok) {
     if (profile.error.status === 404) notFound();
     return (
-      <main id="conteudo" className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
+      <div className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6">
         <h1 className="font-fraunces text-3xl font-medium">Profissional</h1>
         <p role="alert" className="card mt-6 border-red-300 text-red-800">{profile.error.detail}</p>
-      </main>
+      </div>
     );
   }
   // "?? padrão": não quebra com uma API desatualizada (sem os campos da V011)
@@ -47,7 +47,7 @@ export default async function ProfessionalPage({ params }: PageProps<"/professio
   const days = slots.ok ? slots.data.filter((d) => d.slots.length > 0) : [];
 
   return (
-    <main id="conteudo" className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-10 sm:px-6">
+    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-8 px-4 py-10 sm:px-6">
       <Link href="/professionals" className="inline-block py-2.5 font-semibold text-blue1 underline-offset-4 hover:underline">
         ← Voltar para a busca
       </Link>
@@ -162,6 +162,6 @@ export default async function ProfessionalPage({ params }: PageProps<"/professio
           </ul>
         )}
       </section>
-    </main>
+    </div>
   );
 }

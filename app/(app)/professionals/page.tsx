@@ -20,7 +20,7 @@ const FILTERS: { value?: ProfessionalType; label: string }[] = [
 
 const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 
-// Lista pública: só profissionais APROVADOS pelo admin (a API já filtra).
+// Só profissionais APROVADOS pelo admin aparecem na lista (a API já filtra).
 export default async function ProfessionalsPage({ searchParams }: PageProps<"/professionals">) {
   const { type: typeParam, specialty: specialtyParam, page: pageParam } = await searchParams;
   const type = typeParam === "NUTRICIONISTA" || typeParam === "PSICOLOGO" ? typeParam : undefined;
@@ -44,7 +44,7 @@ export default async function ProfessionalsPage({ searchParams }: PageProps<"/pr
   const pageLink = (p: number) => `/professionals?${new URLSearchParams({ ...filters, page: String(p) })}`;
 
   return (
-    <main id="conteudo" className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
+    <div className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
       <h1 className="font-fraunces text-3xl font-medium sm:text-4xl">Profissionais</h1>
       <p className="mt-2 text-gray-700">Todos com registro no conselho verificado pela nossa equipe.</p>
 
@@ -154,6 +154,6 @@ export default async function ProfessionalsPage({ searchParams }: PageProps<"/pr
           )}
         </>
       )}
-    </main>
+    </div>
   );
 }

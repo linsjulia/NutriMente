@@ -49,6 +49,9 @@ public class ProgressRecord {
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private LocalDateTime createdAt;
 
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
+
 	protected ProgressRecord() {
 	}
 
@@ -89,5 +92,21 @@ public class ProgressRecord {
 
 	public String getNotes() {
 		return notes;
+	}
+
+	public void update(LocalDate recordDate, BigDecimal weightKg, Integer moodScore, String notes) {
+		this.recordDate = recordDate;
+		this.weightKg = weightKg;
+		this.moodScore = moodScore;
+		this.notes = notes;
+		this.updatedAt = Clock.now();
+	}
+
+	public boolean isAuthor(Long userId) {
+		return recordedBy.getId().equals(userId);
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
 	}
 }

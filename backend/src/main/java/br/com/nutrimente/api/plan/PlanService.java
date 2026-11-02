@@ -297,6 +297,41 @@ public class PlanService {
 		return detail(plan, userId);
 	}
 
+	@Transactional
+	public PlanDetail updateProgress(Long userId, Long planId, Long progressId, ProgressRequest request) {
+		ActionPlan plan = participantPlan(userId, planId);
+		ProgressRecord record = plan.getProgress().stream()
+				.filter(p -> p.getId().equals(progressId))
+				.findFirst()
+				.orElseThrow(() -> ApiException.notFound("Registro não encontrado."));
+		if (!record.isAuthor(userId)) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", "Você só pode editar seus próprios registros.");
+		}
+		if (request.weightKg() == null && request.moodScore() == null && Digits.trimToNull(request.notes()) == null) {
+			throw fieldError("notes", "Informe o peso, o humor ou uma observação");
+		}
+		LocalDate date = request.recordDate() == null ? today() : request.recordDate();
+		if (date.isAfter(today())) {
+			throw fieldError("recordDate", "A data não pode ser no futuro");
+		}
+		record.update(date, request.weightKg(), request.moodScore(), Digits.trimToNull(request.notes()));
+		return detail(plan, userId);
+	}
+
+	@Transactional
+	public PlanDetail deleteProgress(Long userId, Long planId, Long progressId) {
+		ActionPlan plan = participantPlan(userId, planId);
+		ProgressRecord record = plan.getProgress().stream()
+				.filter(p -> p.getId().equals(progressId))
+				.findFirst()
+				.orElseThrow(() -> ApiException.notFound("Registro não encontrado."));
+		if (!record.isAuthor(userId)) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", "Você só pode excluir seus próprios registros.");
+		}
+		plan.getProgress().remove(record);
+		return detail(plan, userId);
+	}
+
 	// ---------------- Regras compartilhadas ----------------
 
 	private ActionPlan participantPlan(Long userId, Long planId) {
@@ -406,7 +441,7 @@ public class PlanService {
 						.sorted(Comparator.comparing((ProgressRecord p) -> p.getRecordDate()).reversed()
 								.thenComparing(p -> p.getId(), Comparator.nullsFirst(Comparator.reverseOrder())))
 						.map(p -> new ProgressView(p.getId(), p.getRecordDate(), p.getWeightKg(), p.getMoodScore(),
-								p.getNotes(), p.getRecordedBy().getName()))
+								p.getNotes(), p.getRecordedBy().getName(), p.isAuthor(viewerId)))
 						.toList(),
 				!viewerIsPatient,
 				viewerIsPatient && plan.getStatus() == PlanStatus.ACTIVE);

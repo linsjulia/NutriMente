@@ -28,7 +28,7 @@ export type PlanDetail = {
     doneToday: boolean;
     history: { date: string; completed: boolean }[];
   }[];
-  progress: { id: number; recordDate: string; weightKg: number | null; moodScore: number | null; notes: string | null; recordedBy: string }[];
+  progress: { id: number; recordDate: string; weightKg: number | null; moodScore: number | null; notes: string | null; recordedBy: string; canEdit: boolean }[];
   canEdit: boolean;
   canCheck: boolean;
 };

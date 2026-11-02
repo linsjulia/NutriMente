@@ -79,7 +79,6 @@ export default function CarouselHeroSection() {
               src={slide.src}
               alt={slide.alt}
               fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
               preload={index === 0}
               loading={index === 0 ? undefined : "lazy"}
               className="object-cover object-center"

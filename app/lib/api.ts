@@ -18,7 +18,7 @@ import { headers } from "next/headers";
 const API_URL = process.env.API_URL ?? "http://localhost:8080";
 
 /** Se a API não responder neste tempo, desistimos (senão a página trava para sempre) */
-const TIMEOUT_MS = 10_000;
+const TIMEOUT_MS = 20_000;
 
 /** Formato de erro da API (Problem Details, RFC 9457) */
 export type ApiError = {

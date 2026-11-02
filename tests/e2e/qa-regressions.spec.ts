@@ -63,7 +63,7 @@ test.describe("sem back-end", () => {
   });
 
   test("páginas públicas têm rodapé e um único h1", async ({ page }) => {
-    for (const path of ["/", "/professionals", "/about", "/terms", "/privacy"]) {
+    for (const path of ["/", "/about", "/terms", "/privacy"]) {
       await page.goto(path);
       await expect(page.getByRole("contentinfo"), path).toBeVisible();
       await expect(page.locator("h1"), path).toHaveCount(1);

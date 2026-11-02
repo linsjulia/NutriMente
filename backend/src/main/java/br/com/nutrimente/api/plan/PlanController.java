@@ -37,7 +37,7 @@ import jakarta.validation.Valid;
  * PUT   /api/plans/{id}                                 editar (PROFESSIONAL dono)
  * PATCH /api/plans/{id}/status                          { "status": "PAUSED" } (PROFESSIONAL dono)
  * PUT   /api/plans/{id}/checklist/{itemId}/{date}       { "completed": true } (PATIENT)
- * PUT   /api/plans/{id}/goals/{goalId}                  { "completed": true } (os dois)
+ * PUT   /api/plans/{id}/goals/{goalId}                  { "completed": true } (PATIENT)
  * POST  /api/plans/{id}/progress                        peso, humor, observações (os dois)
  * </pre>
  */
@@ -97,7 +97,7 @@ public class PlanController {
 	}
 
 	@PutMapping("/api/plans/{id}/goals/{goalId}")
-	@PreAuthorize("hasAnyRole('PATIENT', 'PROFESSIONAL')")
+	@PreAuthorize("hasRole('PATIENT')")
 	public PlanDetail goal(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id, @PathVariable Long goalId,
 			@Valid @RequestBody CompletedRequest request) {
 		return service.setGoal(CurrentUser.id(jwt), id, goalId, request.completed());

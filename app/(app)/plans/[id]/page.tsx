@@ -87,15 +87,22 @@ export default async function PlanPage({ params }: PageProps<"/plans/[id]">) {
           <ul className="flex flex-col gap-2">
             {plan.goals.map((g) => (
               <li key={g.id}>
-                <form action={toggleGoal}>
-                  <input type="hidden" name="planId" value={s.id} />
-                  <input type="hidden" name="goalId" value={g.id} />
-                  <input type="hidden" name="completed" value={String(!g.completed)} />
-                  <button type="submit" aria-pressed={g.completed} className="flex min-h-11 items-center gap-3 text-left">
-                    {g.completed ? <CircleCheck aria-hidden className="shrink-0 text-green-700" size={26} /> : <Circle aria-hidden className="shrink-0 text-gray-500" size={26} />}
+                {isPatient ? (
+                  <form action={toggleGoal}>
+                    <input type="hidden" name="planId" value={s.id} />
+                    <input type="hidden" name="goalId" value={g.id} />
+                    <input type="hidden" name="completed" value={String(!g.completed)} />
+                    <button type="submit" aria-pressed={g.completed} className="flex min-h-11 items-center gap-3 text-left">
+                      {g.completed ? <CircleCheck aria-hidden className="shrink-0 text-green-700" size={26} /> : <Circle aria-hidden className="shrink-0 text-gray-500" size={26} />}
+                      <span>{g.description}{g.dueDate ? ` · até ${day(g.dueDate)}` : ""}</span>
+                    </button>
+                  </form>
+                ) : (
+                  <span className="flex items-center gap-3">
+                    {g.completed ? <CircleCheck aria-hidden className="text-green-700" size={26} /> : <Circle aria-hidden className="text-gray-500" size={26} />}
                     <span>{g.description}{g.dueDate ? ` · até ${day(g.dueDate)}` : ""}</span>
-                  </button>
-                </form>
+                  </span>
+                )}
               </li>
             ))}
           </ul>

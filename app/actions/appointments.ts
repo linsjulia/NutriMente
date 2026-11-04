@@ -78,7 +78,7 @@ export async function reviewAppointment(_state: FormState, formData: FormData): 
     body: { rating: optionalNumber(formData, "rating"), comment: text(formData, "comment") || null },
   });
   if (!result.ok) return fromApiError(result.error, values);
-  revalidatePath(`/appointments/${id}`);
+  revalidatePath("/appointments");
   return { ok: true, message: "Obrigado! Sua avaliação foi publicada." };
 }
 

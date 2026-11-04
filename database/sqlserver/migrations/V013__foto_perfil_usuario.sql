@@ -7,8 +7,10 @@
 -- estáticas já cadastradas.
 -- =============================================================
 
-ALTER TABLE users ADD photo_file         VARCHAR(100) NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('users') AND name = 'photo_file')
+    ALTER TABLE users ADD photo_file VARCHAR(100) NULL;
 GO
 
-ALTER TABLE users ADD photo_content_type VARCHAR(50)  NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('users') AND name = 'photo_content_type')
+    ALTER TABLE users ADD photo_content_type VARCHAR(50) NULL;
 GO

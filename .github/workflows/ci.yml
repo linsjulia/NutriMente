@@ -79,9 +79,28 @@ jobs:
       - name: Criar o .env a partir do exemplo
         run: cp .env.example .env
 
-      # --wait: só continua quando todos os serviços ficarem "healthy"
       - name: Subir o back-end (docker compose)
-        run: docker compose up -d --build --wait --wait-timeout 600
+        run: docker compose up -d --build
+
+      - name: Aguardar todos os serviços ficarem healthy
+        run: |
+          echo "Aguardando serviços…"
+          for i in $(seq 1 60); do
+            if docker compose ps --format json | jq -e 'select(.Health == "healthy" or .Health == "" or .Health == null)' > /dev/null 2>&1; then
+              UNHEALTHY=$(docker compose ps --format json | jq -r 'select(.Health == "unhealthy" or .Health == "starting") | .Name' 2>/dev/null)
+              if [ -z "$UNHEALTHY" ]; then
+                echo "Todos os serviços estão healthy!"
+                docker compose ps
+                exit 0
+              fi
+            fi
+            echo "Tentativa $i/60 — aguardando: $(docker compose ps --format json | jq -r 'select(.Health != "healthy" and .Health != "" and .Health != null) | "\(.Name)=\(.Health)"' 2>/dev/null | tr '\n' ' ')"
+            sleep 10
+          done
+          echo "Timeout! Serviços não ficaram healthy em 10 minutos."
+          docker compose ps
+          docker compose logs --tail=50
+          exit 1
 
       - name: Testes do banco (SQL Server + MongoDB)
         working-directory: database/tests

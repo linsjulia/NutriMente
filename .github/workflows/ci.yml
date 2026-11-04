@@ -79,27 +79,49 @@ jobs:
       - name: Criar o .env a partir do exemplo
         run: cp .env.example .env
 
-      - name: Subir o back-end (docker compose)
-        run: docker compose up -d --build
+      - name: Subir infraestrutura (banco, MongoDB, mail, logs)
+        run: docker compose up -d --build sqlserver mongodb mailpit logs-service
 
-      - name: Aguardar todos os serviços ficarem healthy
+      - name: Aguardar SQL Server e MongoDB ficarem healthy
         run: |
-          echo "Aguardando serviços…"
+          echo "Aguardando banco de dados…"
           for i in $(seq 1 60); do
-            if docker compose ps --format json | jq -e 'select(.Health == "healthy" or .Health == "" or .Health == null)' > /dev/null 2>&1; then
-              UNHEALTHY=$(docker compose ps --format json | jq -r 'select(.Health == "unhealthy" or .Health == "starting") | .Name' 2>/dev/null)
-              if [ -z "$UNHEALTHY" ]; then
-                echo "Todos os serviços estão healthy!"
-                docker compose ps
-                exit 0
-              fi
+            SQL_HEALTH=$(docker inspect --format='{{.State.Health.Status}}' nutrimente-sqlserver 2>/dev/null || echo "not_found")
+            MONGO_HEALTH=$(docker inspect --format='{{.State.Health.Status}}' nutrimente-mongodb 2>/dev/null || echo "not_found")
+            LOGS_HEALTH=$(docker inspect --format='{{.State.Health.Status}}' nutrimente-logs-service 2>/dev/null || echo "not_found")
+            echo "Tentativa $i/60 — sqlserver=$SQL_HEALTH mongodb=$MONGO_HEALTH logs=$LOGS_HEALTH"
+            if [ "$SQL_HEALTH" = "healthy" ] && [ "$MONGO_HEALTH" = "healthy" ] && [ "$LOGS_HEALTH" = "healthy" ]; then
+              echo "Todos os serviços de infra estão healthy!"
+              break
             fi
-            echo "Tentativa $i/60 — aguardando: $(docker compose ps --format json | jq -r 'select(.Health != "healthy" and .Health != "" and .Health != null) | "\(.Name)=\(.Health)"' 2>/dev/null | tr '\n' ' ')"
+            if [ "$i" = "60" ]; then
+              echo "Timeout! Serviços não ficaram healthy em 10 minutos."
+              docker compose ps
+              docker compose logs --tail=100
+              exit 1
+            fi
             sleep 10
           done
-          echo "Timeout! Serviços não ficaram healthy em 10 minutos."
-          docker compose ps
-          docker compose logs --tail=50
+
+      - name: Subir a API Java
+        run: docker compose up -d api
+
+      - name: Aguardar API ficar healthy
+        run: |
+          for i in $(seq 1 30); do
+            API_HEALTH=$(docker inspect --format='{{if .State.Health}}{{.State.Health.Status}}{{else}}no_healthcheck{{end}}' nutrimente-api 2>/dev/null || echo "not_found")
+            API_RUNNING=$(docker inspect --format='{{.State.Running}}' nutrimente-api 2>/dev/null || echo "false")
+            echo "Tentativa $i/30 — api running=$API_RUNNING health=$API_HEALTH"
+            if [ "$API_RUNNING" = "true" ] && [ "$API_HEALTH" = "no_healthcheck" -o "$API_HEALTH" = "healthy" ]; then
+              sleep 5
+              echo "API está rodando."
+              docker compose ps
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "API não subiu!"
+          docker compose logs api --tail=50
           exit 1
 
       - name: Testes do banco (SQL Server + MongoDB)

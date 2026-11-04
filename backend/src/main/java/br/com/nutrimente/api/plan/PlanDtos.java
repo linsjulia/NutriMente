@@ -141,7 +141,7 @@ public final class PlanDtos {
 	}
 
 	public record ProgressView(Long id, LocalDate recordDate, BigDecimal weightKg, Integer moodScore, String notes,
-			String recordedBy) {
+			String recordedBy, boolean canEdit) {
 	}
 
 	/**

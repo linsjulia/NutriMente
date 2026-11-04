@@ -81,7 +81,7 @@ test("todas as 30 tabelas foram criadas (29 + professional_audiences da V011)", 
 test("migrações foram aplicadas e registradas em schema_migrations", async () => {
   const { recordset } = await pool.query("SELECT version FROM schema_migrations ORDER BY version");
   const versions = recordset.map((r) => r.version);
-  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar", "V009__documentos_e_endereco", "V010__ticket_de_cadastro", "V011__filtros_da_busca", "V013__foto_perfil_usuario"]) assert.ok(versions.includes(v), `falta ${v}`);
+  for (const v of ["V002__registro_da_consulta", "V003__cadastro_telessaude", "V004__versao_da_sessao", "V005__questionario_e_triagem", "V006__lembrete_da_consulta", "V007__criptografia_dados_pessoais", "V008__diario_alimentar", "V009__documentos_e_endereco", "V010__ticket_de_cadastro", "V011__filtros_da_busca", "V012__updated_at_progresso", "V013__foto_perfil_usuario"]) assert.ok(versions.includes(v), `falta ${v}`);
 });
 
 // O admin pode cadastrar especialidades novas (/admin/specialties), então

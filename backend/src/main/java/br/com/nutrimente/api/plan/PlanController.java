@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -39,6 +40,8 @@ import jakarta.validation.Valid;
  * PUT   /api/plans/{id}/checklist/{itemId}/{date}       { "completed": true } (PATIENT)
  * PUT   /api/plans/{id}/goals/{goalId}                  { "completed": true } (PATIENT)
  * POST  /api/plans/{id}/progress                        peso, humor, observações (os dois)
+ * PUT   /api/plans/{id}/progress/{progressId}        editar progresso (autor)
+ * DELETE /api/plans/{id}/progress/{progressId}       excluir progresso (autor)
  * </pre>
  */
 @RestController
@@ -109,5 +112,19 @@ public class PlanController {
 	public PlanDetail progress(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id,
 			@Valid @RequestBody ProgressRequest request) {
 		return service.addProgress(CurrentUser.id(jwt), id, request);
+	}
+
+	@PutMapping("/api/plans/{id}/progress/{progressId}")
+	@PreAuthorize("hasAnyRole('PATIENT', 'PROFESSIONAL')")
+	public PlanDetail updateProgress(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id,
+			@PathVariable Long progressId, @Valid @RequestBody ProgressRequest request) {
+		return service.updateProgress(CurrentUser.id(jwt), id, progressId, request);
+	}
+
+	@DeleteMapping("/api/plans/{id}/progress/{progressId}")
+	@PreAuthorize("hasAnyRole('PATIENT', 'PROFESSIONAL')")
+	public PlanDetail deleteProgress(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id,
+			@PathVariable Long progressId) {
+		return service.deleteProgress(CurrentUser.id(jwt), id, progressId);
 	}
 }

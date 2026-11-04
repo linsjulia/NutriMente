@@ -48,6 +48,16 @@ export async function toggleGoal(formData: FormData) {
   revalidatePath(`/plans/${plan}`);
 }
 
+export async function deleteProgress(formData: FormData) {
+  const session = await verifySession();
+  const plan = text(formData, "planId");
+  await api(`/api/plans/${plan}/progress/${text(formData, "progressId")}`, {
+    method: "DELETE",
+    token: session.token,
+  });
+  revalidatePath(`/plans/${plan}`);
+}
+
 export async function addProgress(_state: FormState, formData: FormData): Promise<FormState> {
   const session = await verifySession();
   const plan = text(formData, "planId");

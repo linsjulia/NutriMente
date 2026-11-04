@@ -414,6 +414,7 @@ CREATE TABLE progress_records (
     mood_score    TINYINT        NULL,          -- 1 (muito mal) a 5 (muito bem)
     notes         NVARCHAR(2000) NULL,
     created_at    DATETIME2(0)   NOT NULL CONSTRAINT df_progress_created_at DEFAULT SYSUTCDATETIME(),
+    updated_at    DATETIME2(0)   NULL,
 
     CONSTRAINT fk_progress_plan        FOREIGN KEY (plan_id)     REFERENCES action_plans (id) ON DELETE CASCADE,
     CONSTRAINT fk_progress_recorded_by FOREIGN KEY (recorded_by) REFERENCES users (id),

@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { CircleCheck, Circle } from "lucide-react";
 import { api } from "@/app/lib/api";
 import { verifySession } from "@/app/lib/dal";
-import { toggleChecklist, toggleGoal } from "@/app/actions/followup";
+import { deleteProgress, toggleChecklist, toggleGoal } from "@/app/actions/followup";
 import { FREQUENCY_TEXT, type PlanDetail } from "@/app/lib/plans";
 import { MOOD_TEXT } from "@/app/lib/agenda";
 import ProgressForm from "./ProgressForm";
@@ -130,11 +130,22 @@ export default async function PlanPage({ params }: PageProps<"/plans/[id]">) {
           <ul className="flex flex-col gap-2">
             {plan.progress.map((p) => (
               <li key={p.id} className="border-t border-gray-100 pt-2">
-                <strong>{day(p.recordDate)}</strong>
-                {p.weightKg != null && ` · ${String(p.weightKg).replace(".", ",")} kg`}
-                {p.moodScore != null && ` · ${MOOD_TEXT[p.moodScore]}`}
-                {p.notes && <span className="block">{p.notes}</span>}
-                <span className="block text-sm text-gray-700">por {p.recordedBy}</span>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <strong>{day(p.recordDate)}</strong>
+                    {p.weightKg != null && ` · ${String(p.weightKg).replace(".", ",")} kg`}
+                    {p.moodScore != null && ` · ${MOOD_TEXT[p.moodScore]}`}
+                    {p.notes && <span className="block">{p.notes}</span>}
+                    <span className="block text-sm text-gray-700">por {p.recordedBy}</span>
+                  </div>
+                  {p.canEdit && (
+                    <form action={deleteProgress}>
+                      <input type="hidden" name="planId" value={s.id} />
+                      <input type="hidden" name="progressId" value={p.id} />
+                      <button type="submit" className="shrink-0 text-sm text-red-600 hover:underline">Excluir</button>
+                    </form>
+                  )}
+                </div>
               </li>
             ))}
           </ul>

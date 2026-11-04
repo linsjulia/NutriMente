@@ -20,10 +20,11 @@ import br.com.nutrimente.api.config.AppProperties;
 
 /**
  * Apaga arquivos "órfãos": arquivos da pasta (EncryptedFileStorage) que
- * nenhuma linha usa mais, nem foto de refeição (meal_logs.photo_file) nem
- * documento de profissional (professional_documents.file_url). Acontece
- * quando a linha some direto no banco (ex.: o seed da demonstração apaga os
- * usuários) ou quando a transação falha depois de o arquivo ser gravado.
+ * nenhuma linha usa mais — nem foto de refeição (meal_logs.photo_file),
+ * nem documento de profissional (professional_documents.file_url), nem
+ * foto de perfil (users.photo_file). Acontece quando a linha some direto
+ * no banco (ex.: o seed da demonstração apaga os usuários) ou quando a
+ * transação falha depois de o arquivo ser gravado.
  *
  * Só apaga arquivos com mais de 1 hora: um arquivo acabou de ser gravado e
  * a transação ainda não terminou? Ele fica.
@@ -57,7 +58,8 @@ public class OrphanFileCleaner {
 	public int clean(Instant olderThan) {
 		Set<String> used = new HashSet<>(jdbc.queryForList("""
 				SELECT photo_file FROM meal_logs WHERE photo_file IS NOT NULL
-				UNION SELECT file_url FROM professional_documents""", String.class));
+				UNION SELECT file_url FROM professional_documents
+				UNION SELECT photo_file FROM users WHERE photo_file IS NOT NULL""", String.class));
 		List<Path> candidates;
 		try (Stream<Path> listing = Files.list(dir)) {
 			candidates = listing.filter(f -> f.getFileName().toString().endsWith(".bin")).toList();

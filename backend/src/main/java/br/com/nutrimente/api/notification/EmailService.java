@@ -69,7 +69,7 @@ public class EmailService {
 	/** Avisos de consulta (agendada, confirmada, cancelada, remarcada), com link para a área logada */
 	@Async
 	public void sendAppointmentNotice(String to, String name, String subject, String intro, String footer) {
-		String link = properties.frontendUrl() + "/dashboard";
+		String link = properties.frontendUrl() + "/appointments";
 		send(to, subject + " | NutriMente", name, intro, "Ver minhas consultas", link, footer);
 	}
 

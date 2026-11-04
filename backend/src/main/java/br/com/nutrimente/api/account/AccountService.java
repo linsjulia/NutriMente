@@ -1,14 +1,19 @@
 package br.com.nutrimente.api.account;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.nutrimente.api.account.AccountDtos.MeResponse;
 import br.com.nutrimente.api.account.AccountDtos.UpdateProfessionalProfileRequest;
@@ -18,6 +23,8 @@ import br.com.nutrimente.api.auth.AuthDtos.SessionUser;
 import br.com.nutrimente.api.common.AfterCommit;
 import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
+import br.com.nutrimente.api.common.EncryptedFileStorage;
+import br.com.nutrimente.api.common.FileType;
 import br.com.nutrimente.api.common.validation.Names;
 import br.com.nutrimente.api.config.JwtService;
 import br.com.nutrimente.api.document.DocumentService;
@@ -45,11 +52,12 @@ public class AccountService {
 	private final PatientIntakeRepository intakes;
 	private final MealLogService mealLogs;
 	private final DocumentService documents;
+	private final EncryptedFileStorage photos;
 
 	public AccountService(UserRepository users, ProfessionalRepository professionals,
 			SpecialtyRepository specialties, PasswordEncoder passwordEncoder, LogClient logClient,
 			JwtService jwtService, PatientIntakeRepository intakes, MealLogService mealLogs,
-			DocumentService documents) {
+			DocumentService documents, EncryptedFileStorage photos) {
 		this.documents = documents;
 		this.jwtService = jwtService;
 		this.mealLogs = mealLogs;
@@ -59,6 +67,7 @@ public class AccountService {
 		this.specialties = specialties;
 		this.passwordEncoder = passwordEncoder;
 		this.logClient = logClient;
+		this.photos = photos;
 	}
 
 	/** readOnly: só leitura, o banco pode otimizar */
@@ -74,6 +83,54 @@ public class AccountService {
 		user.updateProfile(Names.normalize(request.name()), Digits.only(request.telephone()), request.gender());
 		audit(user, "UPDATE", "users");
 		return meResponse(user, professionalOf(user));
+	}
+
+	@Transactional
+	public MeResponse uploadPhoto(Long userId, MultipartFile file) {
+		User user = activeUser(userId);
+		if (file == null || file.isEmpty()) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Escolha uma foto.",
+					Map.of("photo", "Escolha uma foto"));
+		}
+		byte[] bytes;
+		try {
+			bytes = file.getBytes();
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+		String contentType = FileType.image(bytes)
+				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
+						"Envie uma foto em JPG, PNG ou WebP.", Map.of("photo", "Envie uma foto em JPG, PNG ou WebP")));
+		String old = user.getPhotoFile();
+		String saved = photos.save(bytes);
+		user.attachPhoto(saved, contentType);
+		users.flush();
+		AfterCommit.run(() -> photos.delete(old));
+		audit(user, "UPDATE", "users.photo");
+		return meResponse(user, professionalOf(user));
+	}
+
+	@Transactional
+	public MeResponse removePhoto(Long userId) {
+		User user = activeUser(userId);
+		String old = user.getPhotoFile();
+		user.removePhoto();
+		users.flush();
+		AfterCommit.run(() -> photos.delete(old));
+		audit(user, "UPDATE", "users.photo");
+		return meResponse(user, professionalOf(user));
+	}
+
+	@Transactional(readOnly = true)
+	public ResponseEntity<byte[]> userPhoto(Long userId) {
+		User user = users.findById(userId)
+				.filter(u -> u.getPhotoFile() != null)
+				.orElseThrow(() -> ApiException.notFound("Foto não encontrada."));
+		byte[] data = photos.read(user.getPhotoFile());
+		return ResponseEntity.ok()
+				.contentType(MediaType.parseMediaType(user.getPhotoContentType()))
+				.header("Cache-Control", "public, max-age=3600")
+				.body(data);
 	}
 
 	@Transactional
@@ -129,6 +186,7 @@ public class AccountService {
 			throw new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", "Contas de administrador não podem ser excluídas por aqui.");
 		}
 		checkPassword(user, password, "password");
+		String photoFile = user.getPhotoFile();
 		professionals.findById(userId).ifPresent(professional -> professional.anonymize());
 		// Dados de saúde que são só do paciente (sem obrigação de guarda) são APAGADOS.
 		// Prontuário e triagem ficam: fazem parte do histórico clínico (CFP/CFN).
@@ -142,6 +200,7 @@ public class AccountService {
 		}
 		user.anonymize();
 		audit(user, "ANONYMIZE", "users");
+		AfterCommit.run(() -> photos.delete(photoFile));
 	}
 
 	private User activeUser(Long userId) {

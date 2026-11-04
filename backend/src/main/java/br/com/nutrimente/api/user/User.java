@@ -49,12 +49,15 @@ public class User {
 	@Convert(converter = EncryptedStringConverter.class)
 	private String telephone;
 
-	/**
-	 * Endereço da foto de perfil. Por enquanto, um caminho de arquivo do site
-	 * (ex.: "/doctor/pfp.png", em public/); o envio de foto pela tela vem depois.
-	 */
+	/** URL da foto de perfil (caminho estático ou endpoint /api/users/{id}/photo) */
 	@Column(name = "photo_url")
 	private String photoUrl;
+
+	@Column(name = "photo_file")
+	private String photoFile;
+
+	@Column(name = "photo_content_type")
+	private String photoContentType;
 
 	/** Somente os 11 dígitos. Cifrado no banco (V007) */
 	@Convert(converter = EncryptedStringConverter.class)
@@ -185,6 +188,8 @@ public class User {
 		this.passwordHash = null;
 		this.telephone = null;
 		this.photoUrl = null;
+		this.photoFile = null;
+		this.photoContentType = null;
 		this.cpf = null;
 		this.cpfHash = null;
 		this.birthDate = null;
@@ -197,6 +202,26 @@ public class User {
 		this.name = name;
 		this.telephone = telephone;
 		this.gender = gender;
+	}
+
+	public void attachPhoto(String file, String contentType) {
+		this.photoFile = file;
+		this.photoContentType = contentType;
+		this.photoUrl = "/api/users/" + id + "/photo";
+	}
+
+	public void removePhoto() {
+		this.photoFile = null;
+		this.photoContentType = null;
+		this.photoUrl = null;
+	}
+
+	public String getPhotoFile() {
+		return photoFile;
+	}
+
+	public String getPhotoContentType() {
+		return photoContentType;
 	}
 
 	void setPersonalData(String cpf, String cpfHash, LocalDate birthDate, String telephone, Gender gender) {

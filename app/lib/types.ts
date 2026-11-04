@@ -13,6 +13,7 @@ export type Me = {
   name: string;
   email: string;
   role: Role;
+  photoUrl: string | null;
   cpfMasked: string | null;
   birthDate: string | null;
   telephone: string | null;

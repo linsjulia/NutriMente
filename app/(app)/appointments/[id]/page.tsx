@@ -75,7 +75,7 @@ export default async function AppointmentPage({ params, searchParams }: PageProp
             </>
           )}
         </dl>
-        {a.videoUrl && (a.status === "SCHEDULED" || a.status === "CONFIRMED") && (
+        {a.videoUrl && a.status === "CONFIRMED" && (
           <div className="flex flex-col gap-1">
             <a href={a.videoUrl} target="_blank" rel="noopener noreferrer" className="btn-primary inline-flex items-center gap-2 self-start">
               <Video aria-hidden size={20} /> Entrar na videochamada

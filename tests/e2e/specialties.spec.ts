@@ -119,9 +119,8 @@ test("profissional escolhe especialidades (limite de 5) e o paciente filtra a bu
   await login(page, adminEmail!, adminPassword!);
   await page.getByRole("button", { name: `Aprovar ${name}` }).click();
   await expect(page.getByRole("button", { name: `Aprovar ${name}` })).toHaveCount(0);
-  await logout(page);
 
-  // Paciente (visitante) filtra por especialidade
+  // Admin logado filtra por especialidade
   await page.goto("/professionals?type=NUTRICIONISTA");
   await page.getByLabel("Especialidade", { exact: true }).selectOption({ label: "Nutrição Esportiva" });
   await page.getByRole("button", { name: "Filtrar" }).click();

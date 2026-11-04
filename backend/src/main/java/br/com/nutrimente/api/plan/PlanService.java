@@ -269,6 +269,9 @@ public class PlanService {
 	@Transactional
 	public PlanDetail setGoal(Long userId, Long planId, Long goalId, boolean completed) {
 		ActionPlan plan = participantPlan(userId, planId);
+		if (!plan.isPatient(userId)) {
+			throw new ApiException(HttpStatus.FORBIDDEN, "FORBIDDEN", "Só o paciente marca as metas.");
+		}
 		PlanGoal goal = plan.getGoals().stream().filter(g -> g.getId().equals(goalId)).findFirst()
 				.orElseThrow(() -> ApiException.notFound("Meta não encontrada."));
 		goal.setCompleted(completed);

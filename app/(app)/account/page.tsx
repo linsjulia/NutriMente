@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getMe } from "@/app/lib/dal";
 import { ChangePasswordForm, DeleteAccountForm, ProfileForm } from "./AccountForms";
+import PhotoUpload from "./PhotoUpload";
 
 export const metadata: Metadata = { title: "Minha conta | NutriMente" };
 
@@ -11,6 +12,13 @@ export default async function AccountPage() {
   return (
     <div className="flex flex-col gap-8">
       <h1 className="font-fraunces text-3xl font-medium sm:text-4xl">Minha conta</h1>
+
+      <section aria-labelledby="foto" className="card">
+        <h2 id="foto" className="mb-5 text-xl font-bold">
+          Foto de perfil
+        </h2>
+        <PhotoUpload photoUrl={me.photoUrl} />
+      </section>
 
       <section aria-labelledby="dados" className="card">
         <h2 id="dados" className="text-xl font-bold">

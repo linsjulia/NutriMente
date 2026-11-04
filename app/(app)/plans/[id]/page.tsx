@@ -125,7 +125,7 @@ export default async function PlanPage({ params }: PageProps<"/plans/[id]">) {
 
       <section aria-labelledby="progresso" className="card flex flex-col gap-3">
         <h2 id="progresso" className="text-xl font-bold">Progresso</h2>
-        <ProgressForm planId={s.id} />
+        {isPatient && <ProgressForm planId={s.id} />}
         {plan.progress.length > 0 && (
           <ul className="flex flex-col gap-2">
             {plan.progress.map((p) => (

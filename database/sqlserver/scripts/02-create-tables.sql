@@ -70,6 +70,8 @@ CREATE TABLE users (
     birth_date      DATE           NULL,
     gender          VARCHAR(12)    NULL,          -- opcional (LGPD: só coletamos se a pessoa quiser)
     photo_url       NVARCHAR(500)  NULL,
+    photo_file         VARCHAR(100)  NULL,         -- referência ao arquivo no EncryptedFileStorage
+    photo_content_type VARCHAR(50)   NULL,         -- image/jpeg, image/png ou image/webp
     role            VARCHAR(20)    NOT NULL,      -- tipo de conta: define o que a pessoa pode acessar
     is_active       BIT            NOT NULL CONSTRAINT df_users_is_active DEFAULT 1,
     email_verified  BIT            NOT NULL CONSTRAINT df_users_email_verified DEFAULT 0,

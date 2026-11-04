@@ -49,7 +49,7 @@ EXPOSE 1433
 # criando as tabelas, e a cada ligada as migrações podem estar rodando.
 # Por isso exigimos o arquivo que o entrypoint.sh cria no FIM (banco criado
 # e migrações aplicadas) e ainda entramos com o usuário da APLICAÇÃO.
-HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=12 \
+HEALTHCHECK --interval=10s --timeout=5s --start-period=120s --retries=18 \
     CMD test -f /tmp/nutrimente-ready && /opt/mssql-tools18/bin/sqlcmd -S localhost -U "$NUTRIMENTE_DB_USER" -P "$NUTRIMENTE_DB_PASSWORD" -C -d NutriMente -Q "SELECT TOP 1 1 FROM specialties" -b -o /dev/null || exit 1
 
 ENTRYPOINT ["/usr/src/nutrimente/entrypoint.sh"]

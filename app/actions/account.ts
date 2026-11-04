@@ -98,6 +98,39 @@ export async function deleteAccount(_state: FormState, formData: FormData): Prom
   redirect("/?account-deleted=1");
 }
 
+export async function uploadPhoto(_state: FormState, formData: FormData): Promise<FormState> {
+  const session = await verifySession();
+  const file = formData.get("photo");
+  if (!file || !(file instanceof File) || file.size === 0) {
+    return { ok: false, message: "Escolha uma foto.", errors: { photo: "Escolha uma foto" } };
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    return { ok: false, message: "A foto pode ter até 5 MB.", errors: { photo: "A foto pode ter até 5 MB" } };
+  }
+  const body = new FormData();
+  body.append("photo", file);
+  const apiUrl = process.env.API_URL ?? "http://localhost:8080";
+  const res = await fetch(`${apiUrl}/api/me/photo`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${session.token}` },
+    body,
+  });
+  if (!res.ok) {
+    const json = await res.json().catch(() => null);
+    return { ok: false, message: json?.detail ?? "Não foi possível enviar a foto." };
+  }
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Foto atualizada!" };
+}
+
+export async function removePhoto(): Promise<FormState> {
+  const session = await verifySession();
+  const result = await api("/api/me/photo", { method: "DELETE", token: session.token });
+  if (!result.ok) return fromApiError(result.error);
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Foto removida." };
+}
+
 /** Admin aprova ou recusa um profissional */
 export async function reviewProfessional(formData: FormData) {
   const session = await requireRole("ADMIN");

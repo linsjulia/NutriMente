@@ -6,17 +6,21 @@ import java.util.Map;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.nutrimente.api.account.AccountDtos.ChangePasswordRequest;
 import br.com.nutrimente.api.account.AccountDtos.DeleteAccountRequest;
@@ -33,6 +37,8 @@ import jakarta.validation.Valid;
  * <pre>
  * GET    /api/me                       meus dados
  * PUT    /api/me                       editar nome, celular e gênero
+ * PUT    /api/me/photo                 enviar foto de perfil (multipart, campo "photo"; JPG/PNG/WebP até 5 MB)
+ * DELETE /api/me/photo                 remover foto de perfil
  * PUT    /api/me/professional-profile  editar bio e valor (só PROFESSIONAL)
  * PUT    /api/me/password              trocar a senha (encerra as outras sessões; devolve token novo)
  * GET    /api/me/export                baixar todos os meus dados em JSON (LGPD)
@@ -73,6 +79,17 @@ public class AccountController {
 	@PutMapping
 	public MeResponse update(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody UpdateProfileRequest request) {
 		return accountService.updateProfile(CurrentUser.id(jwt), request);
+	}
+
+	@PutMapping(path = "/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public MeResponse uploadPhoto(@AuthenticationPrincipal Jwt jwt,
+			@RequestPart(name = "photo", required = false) MultipartFile photo) {
+		return accountService.uploadPhoto(CurrentUser.id(jwt), photo);
+	}
+
+	@DeleteMapping("/photo")
+	public MeResponse removePhoto(@AuthenticationPrincipal Jwt jwt) {
+		return accountService.removePhoto(CurrentUser.id(jwt));
 	}
 
 	/** Exemplo de permissão por papel: paciente recebe 403 aqui */

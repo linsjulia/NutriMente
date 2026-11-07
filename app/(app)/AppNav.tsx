@@ -17,7 +17,7 @@ export default function AppNav({ links }: { links: { href: string; label: string
               <Link
                 href={link.href}
                 aria-current={current ? "page" : undefined}
-                className={`font-semibold underline-offset-8 hover:underline hover:decoration-green1 hover:decoration-2 ${current ? "underline decoration-green1 decoration-2" : ""}`}
+                className={`font-semibold underline-offset-8 decoration-transparent ease-in duration-300  hover:underline hover:decoration-green1 hover:decoration-2 ${current ? "underline decoration-green1 decoration-2" : ""}`}
               >
                 {link.label}
               </Link>

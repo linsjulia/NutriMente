@@ -50,7 +50,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
               >
                 <Bell aria-hidden size={22} />
                 {count > 0 && (
-                  <span aria-hidden className="absolute -top-0.5 -right-0.5 min-w-5 rounded-full bg-red-600 px-1 text-center text-xs font-bold leading-5">
+                  <span aria-hidden className="absolute -top-0.5 -right-0.5 min-w-5 rounded-full bg-green1 px-1 text-center text-xs font-bold leading-5">
                     {count > 9 ? "9+" : count}
                   </span>
                 )}
@@ -58,7 +58,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             )}
             <span className="hidden sm:inline">Olá, {session.name}</span>
             <form action={logout}>
-              <button type="submit" className="flex items-center gap-2 rounded-full border border-white/60 px-4 py-2 font-semibold hover:bg-white/10">
+              <button type="submit" className="flex items-center gap-2 rounded-full border border-blue1 px-4 py-2 font-semibold hover:bg-blue1/10">
                 <LogOut aria-hidden size={18} /> Sair
               </button>
             </form>

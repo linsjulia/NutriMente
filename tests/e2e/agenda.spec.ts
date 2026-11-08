@@ -156,7 +156,7 @@ test("paciente agenda com triagem pelo perfil; profissional vê a triagem, confi
 
   await ana.goto("/appointments/history");
   await settle(ana);
-  await expect(ana.getByText("Confirmada")).toBeVisible();
+  await expect(ana.getByText("Confirmada", { exact: true })).toBeVisible();
   await expectAccessible(ana);
 
   // Profissional cancela (com confirmação na própria tela)
@@ -196,7 +196,7 @@ test("acompanhamento: questionário e diário com foto; profissional cria plano 
   // Paciente: diário com foto (a foto passa pela rota do site, que põe o token)
   await bruna.goto("/diary");
   await settle(bruna);
-  await bruna.getByLabel("Refeição", { exact: true }).selectOption("ALMOCO");
+  await bruna.getByRole("group", { name: "Refeição" }).getByLabel("Almoço").check();
   await bruna.getByLabel("O que você comeu?").fill("Arroz, feijão e salada");
   await bruna.getByLabel(/^Foto/).setInputFiles("public/icons/apple.png");
   await bruna.getByRole("button", { name: "Registrar refeição" }).click();

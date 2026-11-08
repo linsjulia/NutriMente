@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { logout } from "@/app/actions/auth";
 import { getMe } from "@/app/lib/dal";
 import { ChangePasswordForm, DeleteAccountForm, ProfileForm } from "./AccountForms";
 import PhotoUpload from "./PhotoUpload";
@@ -66,17 +65,6 @@ export default async function AccountPage() {
           <DeleteAccountForm />
         </section>
       )}
-
-      <section aria-labelledby="sessao" className="card">
-        <h2 id="sessao" className="mb-5 text-xl font-bold">
-          Sessão
-        </h2>
-        <form action={logout}>
-          <button type="submit" className="btn-secondary">
-            Sair da conta
-          </button>
-        </form>
-      </section>
     </div>
   );
 }

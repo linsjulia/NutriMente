@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight, faClose } from "@fortawesome/free-solid-svg-icons";
 import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard";
 import SearchProfessionalFilter from "../../components/filter/SearchProfessionalFilter";
+import SpecialtySearchFilter from "@/app/components/filter/SpecialtySearchFilter";
 
 export const metadata: Metadata = { title: "Buscar profissionais | NutriMente" };
 
@@ -57,7 +58,7 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
 
   const [result, specialties] = await Promise.all([
     api<Page<PublicProfessional>>(`/api/professionals?${query}`),
-    specialtyId ? api<Specialty[]>("/api/specialties") : Promise.resolve(null),
+    api<Specialty[]>("/api/specialties"),
   ]);
   const specialtyName = specialties?.ok ? specialties.data.find((specialty) => specialty.id === specialtyId)?.name : undefined;
 
@@ -108,6 +109,16 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
           <h1 id="resultado" className="mb-1 font-fraunces text-2xl font-medium text-blue2">
             {q ? `Resultados para “${q}”` : "Encontre seu profissional"}
           </h1>
+          {specialties.ok && (
+            <SpecialtySearchFilter
+              action="/professionals"
+              specialties={specialties.data}
+              query={q}
+              type={type}
+              sort={sort}
+              specialtyId={specialtyId}
+            />
+          )}
           {result.ok && (
             <p className="mb-4 text-sm text-slate-700" aria-live="polite">
               {totalItems === 1 ? "1 profissional encontrado" : `${totalItems} profissionais encontrados`}

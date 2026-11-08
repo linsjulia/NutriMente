@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Bell } from "lucide-react";
+import { logout } from "@/app/actions/auth";
 import { api } from "@/app/lib/api";
 import { getMe, verifySession } from "@/app/lib/dal";
 import AppNav from "./AppNav";
@@ -56,6 +57,11 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
               </Link>
             )}
             <span className="hidden sm:inline">Olá, {session.name}</span>
+            <form action={logout}>
+              <button type="submit" className="min-h-11 rounded-full px-3 font-semibold hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-blue1">
+                Sair
+              </button>
+            </form>
             <Link href="/account" aria-label="Minha conta" title="Minha conta" className="rounded-full ring-offset-2 focus-visible:outline-2 focus-visible:outline-blue1">
               <Image
                 src={me.photoUrl ?? "/icons/circle-user-solid-full-blue.svg"}

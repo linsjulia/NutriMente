@@ -9,7 +9,7 @@ type Props = {
 };
 
 // Cabeçalho da busca de profissionais. A busca é um formulário GET para
-// /patient?q=... (funciona até sem JavaScript).
+// /professionals?q=... (funciona até sem JavaScript).
 export default function HeaderSearchBar({ user, query = "" }: Props) {
   return (
     <header className="sticky top-0 z-50 bg-blue1">
@@ -17,7 +17,7 @@ export default function HeaderSearchBar({ user, query = "" }: Props) {
         <Link href="/" aria-label="NutriMente: página inicial" className="shrink-0">
           <Image src="/logo/nutrimente-v1.png" width={60} height={60} alt="" className="h-12 w-12 sm:h-14 sm:w-14" />
         </Link>
-        <form action="/patient" method="get" role="search" className="min-w-0 flex-1">
+        <form action="/professionals" method="get" role="search" className="min-w-0 flex-1">
           <div className="flex items-center gap-2 rounded-lg bg-white p-2 shadow-md sm:gap-4 sm:px-4">
             <div className="flex min-w-0 flex-1 flex-col">
               <label htmlFor="busca" className="text-xs font-semibold text-slate-700 sm:text-sm">

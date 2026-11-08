@@ -122,7 +122,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       <ul className="grid gap-4 sm:grid-cols-2">
         {shortcuts.map(({ href, icon: Icon, title, text }) => (
           <li key={href}>
-            <Link href={href} className="card flex h-full items-start gap-4 transition hover:border-blue1">
+            <Link href={href} className="card flex h-full items-start gap-4 shadow-lg shadow-blue1/10 transition hover:-translate-y-0.5 hover:border-blue1 hover:shadow-lg">
               <Icon aria-hidden className="shrink-0 text-blue1" size={32} />
               <span>
                 <span className="block text-lg font-bold">{title}</span>

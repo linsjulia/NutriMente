@@ -17,7 +17,6 @@ const OPTIONAL = "font-normal text-slate-600";
 const ERROR = "text-sm font-semibold text-red-700";
 const RING = "peer-focus-visible:ring-2 peer-focus-visible:ring-blue1 peer-focus-visible:ring-offset-2";
 
-/** Hoje e agora no horário de Brasília (valores iniciais dos campos) */
 function nowInBrasilia() {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false,
@@ -26,7 +25,6 @@ function nowInBrasilia() {
   return { date: `${get("year")}-${get("month")}-${get("day")}`, time: `${get("hour")}:${get("minute")}` };
 }
 
-/** Escala 1–5: quadradinhos arredondados, o selecionado fica verde; "Pouca" sob o 1 e "Muita" sob o 5 */
 function Scale({ name, legend, selected }: { name: string; legend: string; selected?: string }) {
   return (
     <fieldset className="min-w-0">
@@ -38,7 +36,7 @@ function Scale({ name, legend, selected }: { name: string; legend: string; selec
         {[1, 2, 3, 4, 5].map((n) => (
           <label key={n} className="cursor-pointer">
             <input type="radio" name={name} value={n} defaultChecked={selected === String(n)} className="peer sr-only" />
-            <span className={`flex h-[3.25rem] w-[3.25rem] items-center justify-center rounded-2xl border ${BORDER} bg-white text-lg font-bold transition hover:border-blue1/60 peer-checked:border-[#00dc5a] peer-checked:bg-[#00dc5a] ${RING}`}>
+            <span className={`flex h-13 w-13 items-center justify-center rounded-2xl border ${BORDER} bg-white text-lg font-bold transition hover:border-blue1/60 peer-checked:border-[#00dc5a] peer-checked:bg-[#00dc5a] ${RING}`}>
               {n}
             </span>
           </label>
@@ -134,7 +132,7 @@ export default function MealForm() {
       <div className="flex flex-col gap-2.5">
         <label htmlFor="description" className={LABEL}>O que você comeu?</label>
         <textarea id="description" name="description" maxLength={2000} defaultValue={v?.description}
-          placeholder="Ex.: arroz, feijão, frango grelhado e salada" className={`${TEXTAREA} min-h-[5.5rem]`}
+          placeholder="Ex.: arroz, feijão, frango grelhado e salada" className={`${TEXTAREA} min-h-22`}
           aria-invalid={state.errors?.description ? true : undefined} />
         {state.errors?.description && <p className={ERROR}>{state.errors.description}</p>}
       </div>
@@ -142,7 +140,7 @@ export default function MealForm() {
       <div className="flex flex-col gap-2.5">
         <label htmlFor="notes" className={LABEL}>Como você se sentiu? <span className={OPTIONAL}>(opcional)</span></label>
         <textarea id="notes" name="notes" maxLength={2000} defaultValue={v?.notes}
-          placeholder="Fale sobre emoções, pensamentos ou o ambiente" className={`${TEXTAREA} min-h-[4.25rem]`} />
+          placeholder="Fale sobre emoções, pensamentos ou o ambiente" className={`${TEXTAREA} min-h-17`} />
       </div>
 
       <div className="flex flex-wrap gap-x-10 gap-y-7">
@@ -163,7 +161,6 @@ export default function MealForm() {
         >
           {pending ? "Salvando…" : "Registrar refeição"}
         </button>
-        <span className="text-slate-700">Leva menos de um minuto.</span>
       </div>
     </form>
   );

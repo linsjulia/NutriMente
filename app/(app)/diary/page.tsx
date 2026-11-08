@@ -39,7 +39,7 @@ export default async function DiaryPage() {
 
         <aside className="flex flex-col gap-6 lg:mt-24 lg:sticky lg:top-32 lg:self-start">
           <TodayMeals meals={meals} />
-          <section className="rounded-[2rem] bg-blue1 p-8 text-white">
+          <section className="rounded-[1rem] bg-blue1 p-8 text-white">
             <h2 className="text-lg font-extrabold">Sem julgamentos</h2>
             <p className="mt-3 text-md leading-relaxed">
               Não existe resposta certa. Anotar como você se sentiu é tão importante quanto anotar o que comeu.

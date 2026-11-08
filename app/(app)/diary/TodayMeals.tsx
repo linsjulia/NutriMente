@@ -13,7 +13,7 @@ export default function TodayMeals({ meals }: { meals: Meal[] }) {
     .sort((a, b) => +new Date(a.eatenAt) - +new Date(b.eatenAt));
 
   return (
-    <section aria-labelledby="hoje" className="relative rounded-[2rem] bg-white p-8 shadow-[0_20px_60px_-24px_rgba(0,80,176,0.25)]">
+    <section aria-labelledby="hoje" className="relative rounded-[1rem] bg-white p-8 shadow-[0_20px_60px_-24px_rgba(0,80,176,0.25)]">
       <h2 id="hoje" className="mb-5 text-lg font-extrabold">Hoje</h2>
       {items.length === 0 ? (
         <p className="text-gray-600">Nenhuma refeição registrada hoje.</p>

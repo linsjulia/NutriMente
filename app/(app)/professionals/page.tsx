@@ -17,7 +17,7 @@ const SORTS = [
   { value: "PRICE_DESC", label: "Maior preço" },
 ];
 
-/** Compara sem acento e sem maiúsculas ("psico" acha "Psicólogo(a)") */
+
 const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 export default async function BuscaProfissionais({ searchParams }: PageProps<"/professionals">) {
@@ -101,7 +101,7 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
   ].filter(Boolean) as { label: string; remove: string }[];
 
   return (
-    <div className="min-h-screen bg-sky-50 text-slate-800">
+    <div className="min-h-screen text-slate-800">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:flex-row md:px-8">
         <SearchProfessionalFilter />
         <section aria-labelledby="resultado" className="min-w-0 flex-1">

@@ -1,15 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Bell, LogOut } from "lucide-react";
+import { Bell } from "lucide-react";
 import { api } from "@/app/lib/api";
-import { logout } from "@/app/actions/auth";
-import { verifySession } from "@/app/lib/dal";
+import { getMe, verifySession } from "@/app/lib/dal";
 import AppNav from "./AppNav";
 
 // Layout da área LOGADA (/dashboard, /account, /admin).
 // verifySession() manda para o login quem não estiver logado.
 export default async function AppLayout({ children }: LayoutProps<"/">) {
-  const session = await verifySession();
+  const [session, me] = await Promise.all([verifySession(), getMe()]);
   // Contador do sino (o admin não recebe notificações de consulta)
   const unread =
     session.role === "ADMIN"
@@ -57,11 +56,15 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
               </Link>
             )}
             <span className="hidden sm:inline">Olá, {session.name}</span>
-            <form action={logout}>
-              <button type="submit" className="flex items-center gap-2 rounded-full border border-blue1 px-4 py-2 font-semibold hover:bg-blue1/10">
-                <LogOut aria-hidden size={18} /> Sair
-              </button>
-            </form>
+            <Link href="/account" aria-label="Minha conta" title="Minha conta" className="rounded-full ring-offset-2 focus-visible:outline-2 focus-visible:outline-blue1">
+              <Image
+                src={me.photoUrl ?? "/icons/circle-user-solid-full-blue.svg"}
+                alt=""
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-full object-cover"
+              />
+            </Link>
           </div>
         </div>
       </header>

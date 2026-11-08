@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         ]
       : [
           { href: "/dashboard", label: "Início" },
-          { href: "/appointments", label: session.role === "PATIENT" ? "Consultas" : "Agenda" },
+          { href: "/appointments/history", label: session.role === "PATIENT" ? "Consultas" : "Agenda" },
           ...(session.role === "PROFESSIONAL" ? [{ href: "/patients", label: "Pacientes" }] : []),
           { href: "/plans", label: "Planos" },
           ...(session.role === "PATIENT" ? [{ href: "/professionals", label: "Profissionais" },{ href: "/diary", label: "Diário" }] : []),

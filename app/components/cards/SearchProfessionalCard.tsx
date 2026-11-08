@@ -66,7 +66,7 @@ export default function CardProfissional({ p }: { p: Profissional }) {
           {p.horarios.map((h) => (
             <Link
               key={h.startsAt}
-              href={`/appointment?professional=${p.id}&startsAt=${encodeURIComponent(h.startsAt)}`}
+              href={`/appointments?professional=${p.id}&startsAt=${encodeURIComponent(h.startsAt)}`}
               aria-label={`Agendar hoje às ${h.time} com ${p.nome}`}
               className="flex min-h-8 items-center justify-center rounded bg-sky-100 px-3 py-1 text-xs font-medium text-slate-700 hover:bg-sky-200"
             >
@@ -79,7 +79,7 @@ export default function CardProfissional({ p }: { p: Profissional }) {
         </p>
         <p className="text-[11px] text-slate-600">por consulta</p>
         <Link
-          href={`/appointment?professional=${p.id}`}
+          href={`/appointments?professional=${p.id}`}
           aria-label={`Agendar consulta com ${p.nome}`}
           className="mt-2 flex min-h-11 w-full items-center justify-center rounded-full bg-green1 px-4 py-2 text-xs font-semibold text-blue2 transition duration-200 hover:bg-green3"
         >

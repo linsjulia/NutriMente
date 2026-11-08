@@ -99,7 +99,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   // PATIENT
   const shortcuts = [
     { href: "/professionals", icon: Search, title: "Encontrar profissionais", text: "Nutricionistas e psicólogos verificados." },
-    { href: "/appointments", icon: CalendarDays, title: "Minhas consultas", text: "Próximas consultas, videochamada e histórico." },
+    { href: "/appointments/history", icon: CalendarDays, title: "Minhas consultas", text: "Próximas consultas, videochamada e histórico." },
     { href: "/plans", icon: ClipboardList, title: "Plano de ação", text: "Checklist de hoje, metas, rotina alimentar e progresso." },
     { href: "/diary", icon: Utensils, title: "Diário alimentar", text: "Registre o que comeu, com foto, para o profissional acompanhar." },
     { href: "/account", icon: UserRound, title: "Meus dados", text: "Edite seu perfil e sua senha." },

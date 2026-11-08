@@ -67,10 +67,24 @@ export default function AppointmentFlow({
   const loginHref = `/login?next=${encodeURIComponent(
     `/appointment?professional=${p.id}${startsAt ? `&startsAt=${startsAt}` : ""}`,
   )}`;
+  const backButton =
+    step === 1 ? (
+      <Link href="/professionals" className="inline-block min-h-11 shrink-0 font-semibold text-blue-800 underline-offset-4 hover:underline">
+        ← Voltar
+      </Link>
+    ) : (
+      <button
+        type="button"
+        onClick={() => setStep(step === 3 ? 2 : 1)}
+        className="min-h-11 shrink-0 font-semibold text-blue-800 underline-offset-4 hover:underline"
+      >
+        ← Voltar
+      </button>
+    );
 
   return (
     <div className="space-y-6">
-      <StepProgress currentStep={step} />
+      <StepProgress currentStep={step} backButton={backButton} />
 
       {step === 1 && <DoctorProfile profile={p} price={price} nextSlot={nextSlot} onStartBooking={() => setStep(2)} />}
 
@@ -101,9 +115,6 @@ export default function AppointmentFlow({
                 </div>
               </fieldset>
             )}
-            <button type="button" onClick={() => setStep(1)} className="min-h-11 font-semibold text-blue-800 underline-offset-4 hover:underline">
-              ← Voltar ao perfil
-            </button>
           </div>
           <div className="lg:col-span-1">
             {summary(
@@ -164,9 +175,6 @@ export default function AppointmentFlow({
               </p>
             )}
 
-            <button type="button" onClick={() => setStep(2)} className="min-h-11 font-semibold text-blue-800 underline-offset-4 hover:underline">
-              ← Trocar data ou horário
-            </button>
           </div>
           <div className="lg:col-span-1">
             {summary(

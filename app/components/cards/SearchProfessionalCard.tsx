@@ -81,7 +81,7 @@ export default function CardProfissional({ p }: { p: Profissional }) {
         <Link
           href={`/appointments?professional=${p.id}`}
           aria-label={`Agendar consulta com ${p.nome}`}
-          className="mt-2 flex min-h-11 w-full items-center justify-center rounded-full bg-green1 px-4 py-2 text-xs font-semibold text-blue2 transition duration-200 hover:bg-green3"
+          className="mt-2 flex min-h-11 w-full items-center justify-center rounded-full bg-green1/70 px-4 py-2 text-xs font-bold text-blue2 transition duration-200 hover:bg-green3"
         >
           Agendar Consulta
         </Link>

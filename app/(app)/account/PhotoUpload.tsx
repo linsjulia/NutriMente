@@ -71,8 +71,8 @@ export default function PhotoUpload({ name, photoUrl }: { name: string; photoUrl
           alt="Sua foto de perfil"
           width={128}
           height={128}
+          quality={75}
           className="size-32 rounded-full border border-gray-200 object-cover ring-4 ring-blue-50"
-          unoptimized
         />
       ) : (
         <div

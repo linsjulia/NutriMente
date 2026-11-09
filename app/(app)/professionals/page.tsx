@@ -86,6 +86,7 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
         id: professional.id,
         titulo: PROFESSION_LABELS[professional.type],
         nome: professional.name,
+        foto: professional.photoUrl,
         nota: professional.ratingAverage,
         avaliacoes: professional.ratingCount,
         areas: professional.specialties.map((specialty) => specialty.name),
@@ -104,7 +105,7 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
   return (
     <div className="min-h-screen text-slate-800">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:flex-row md:px-8">
-        <SearchProfessionalFilter />
+        {/* <SearchProfessionalFilter /> */}
         <section aria-labelledby="resultado" className="min-w-0 flex-1">
           <h1 id="resultado" className="mb-1 font-fraunces text-2xl font-medium text-blue2">
             {q ? `Resultados para “${q}”` : "Encontre seu profissional"}
@@ -130,7 +131,7 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
               {active.map((filter) => (
                 <span
                   key={filter.label}
-                  className="flex items-center gap-2 rounded-full border border-green-700 bg-emerald-50 px-3 py-1 text-xs text-slate-800"
+                  className="flex items-center gap-2 rounded-full border border-green-700 bg-emerald-50 px-3 py-1 text-md text-slate-800"
                 >
                   {filter.label}
                   <Link href={filter.remove} aria-label={`Remover filtro ${filter.label}`} className="flex h-8 w-8 shrink-0 items-center justify-center">
@@ -139,20 +140,20 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
                 </span>
               ))}
               {active.length > 0 && (
-                <Link href="/professionals" className="py-2 text-xs font-semibold text-green-800 underline-offset-2 hover:underline">
+                <Link href="/professionals" className="py-2 text-md font-semibold text-green-800 underline-offset-2 hover:underline">
                   Limpar tudo
                 </Link>
               )}
             </div>
 
-            <nav aria-label="Ordenar" className="flex flex-wrap items-center gap-1 text-xs text-slate-700">
+            <nav aria-label="Ordenar" className="flex flex-wrap items-center gap-1 text-md text-slate-700">
               <span>Ordenar:</span>
               {SORTS.map((option) => (
                 <Link
                   key={option.value}
                   href={link({ sort: option.value === "RELEVANCE" ? undefined : option.value, page: undefined })}
                   aria-current={option.value === sort ? "true" : undefined}
-                  className={`rounded-full px-3 py-1.5 ${option.value === sort ? "bg-blue1 font-semibold text-white" : "hover:bg-white"}`}
+                  className={`rounded-full px-3 py-1.5 ${option.value === sort ? "bg-blue1 font-semibold text-white" : "transition ease-in-out duration-300 hover:bg-blue-200/60"}`}
                 >
                   {option.label}
                 </Link>

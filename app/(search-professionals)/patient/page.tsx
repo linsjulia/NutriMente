@@ -84,6 +84,7 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
         id: p.id,
         titulo: PROFESSION_LABELS[p.type],
         nome: p.name,
+        foto: p.photoUrl,
         nota: p.ratingAverage,
         avaliacoes: p.ratingCount,
         areas: p.specialties.map((s) => s.name),

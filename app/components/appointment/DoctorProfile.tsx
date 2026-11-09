@@ -49,7 +49,7 @@ export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile, price, ne
                 <p className="text-sm text-gray-600">
                   {PROFESSION_LABELS[p.type]} · {formatCouncilNumber(p.type, p.document)}
                 </p>
-                <Link href={`/professionals/${p.id}`} className="inline-block text-sm font-semibold text-blue-800 underline-offset-4 hover:underline">
+                <Link href={`/professionals/${p.id}/details`} className="inline-block text-sm font-semibold text-blue-800 underline-offset-4 hover:underline">
                   Ver o perfil completo e as avaliações
                 </Link>
                 <ul aria-label="Especialidades e atendimento" className="flex flex-wrap gap-2 pt-1">

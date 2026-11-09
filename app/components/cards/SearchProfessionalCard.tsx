@@ -23,7 +23,7 @@ export default function CardProfissional({ p }: { p: Profissional }) {
       {/* esquerda: foto, nome e áreas */}
       <div className="flex justify-center gap-6">
         <Link
-          href={`/professionals/${p.id}`}
+          href={`/professionals/${p.id}/details`}
           aria-label={`Ver perfil de ${p.nome}`}
           className="relative h-19 w-19 shrink-0 overflow-hidden rounded-full ring-2 ring-blue-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-900"
         >
@@ -39,7 +39,7 @@ export default function CardProfissional({ p }: { p: Profissional }) {
         <div>
           <p className="text-lg font-semibold text-sky-700">{p.titulo}</p>
           <h3 className="font-bold text-slate-900">
-            <Link href={`/professionals/${p.id}`} className="text-lg underline-offset-4 hover:underline">{p.nome}</Link>
+            <Link href={`/professionals/${p.id}/details`} className="text-lg underline-offset-4 hover:underline">{p.nome}</Link>
           </h3>
           <p className="text-md text-slate-500">
             <span className="text-yellow-400">★</span> {p.nota.toFixed(1)} ({p.avaliacoes})

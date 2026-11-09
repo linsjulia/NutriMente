@@ -140,7 +140,7 @@ export default async function NotificationsPage({ searchParams }: { searchParams
         <p className="card text-gray-700">Nenhuma notificação por aqui.</p>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[260px_1fr] lg:items-start lg:gap-9">
-          <nav aria-label="Filtrar notificações" className="card flex gap-1 overflow-x-auto p-3 lg:sticky lg:top-6 lg:flex-col lg:overflow-visible">
+          <nav aria-label="Filtrar notificações" className="card flex gap-1 overflow-x-auto p-3 lg:sticky lg:top-32 lg:flex-col lg:overflow-visible">
             <FilterLink
               href="?filtro=todas"
               active={filtro !== "nao-lidas" && !Object.values(TYPES).some((t) => t.filter === filtro)}

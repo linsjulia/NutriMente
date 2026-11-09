@@ -25,7 +25,7 @@ export default function ProfileSidebar({
             <>
               <span className="text-3xl font-bold text-blue1">{p.ratingAverage.toFixed(1).replace(".", ",")}</span>
               <Stars value={p.ratingAverage} className="text-base" />
-              <span className="text-xs text-gray-600">
+              <span className="text-md text-gray-600">
                 {p.ratingCount} {p.ratingCount === 1 ? "avaliação" : "avaliações"}
               </span>
             </>
@@ -36,15 +36,15 @@ export default function ProfileSidebar({
         <ul>
           {reviews.slice(0, 2).map((review) => (
             <li key={review.id} className="border-t border-gray-200 py-3">
-              <p className="text-xs font-bold text-blue1">{review.patientName}</p>
+              <p className="text-md font-bold text-blue1">{review.patientName}</p>
               <Stars value={review.rating} className="text-xs" />
-              <p className="text-xs">{review.comment ?? "Avaliação sem comentário."}</p>
+              <p className="text-md">{review.comment ?? "Avaliação sem comentário."}</p>
               <p className="mt-1 text-xs text-gray-500">{formatDate(review.createdAt)}</p>
             </li>
           ))}
         </ul>
         {reviews.length === 0 && <p className="text-center text-xs text-gray-600">Ainda não há avaliações.</p>}
-        <button type="button" onClick={onVerMais} className="text-xs font-bold text-blue1 hover:underline">
+        <button type="button" onClick={onVerMais} className="text-md font-bold text-blue1 hover:underline">
           Ver mais
         </button>
       </Card>
@@ -55,7 +55,7 @@ export default function ProfileSidebar({
     <Card className="flex flex-col gap-5 self-start">
       <section>
         <h2 className="mb-2 text-sm font-bold">Sobre</h2>
-        <p className="text-xs text-gray-700">{p.bio ?? "Este profissional ainda não escreveu uma apresentação."}</p>
+        <p className="text-md text-gray-700">{p.bio ?? "Este profissional ainda não escreveu uma apresentação."}</p>
       </section>
       <section>
         <h2 className="mb-2 text-sm font-bold">Especialidades</h2>

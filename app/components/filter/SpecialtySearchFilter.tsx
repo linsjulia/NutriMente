@@ -17,7 +17,7 @@ export default function SpecialtySearchFilter({ action, specialties, query, type
       {sort !== "RELEVANCE" && <input type="hidden" name="sort" value={sort} />}
       <div className="flex flex-col gap-1">
         <label htmlFor="specialty" className="font-semibold">Especialidade</label>
-        <select id="specialty" name="specialty" defaultValue={specialtyId ? String(specialtyId) : ""} className="form-input">
+        <select id="specialty" name="specialty" defaultValue={specialtyId ? String(specialtyId) : ""} className="form-input shadow-md shadow-blue1/10">
           <option value="">Todas</option>
           {specialties
             .filter((specialty) => !type || specialty.type === type)

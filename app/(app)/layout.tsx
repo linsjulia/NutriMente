@@ -58,7 +58,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             )}
             <span className="hidden sm:inline">Olá, {session.name}</span>
             <form action={logout}>
-              <button type="submit" className="min-h-11 rounded-full px-3 font-semibold hover:bg-blue1 focus-visible:outline-2 focus-visible:outline-blue1">
+              <button type="submit" className="min-h-11 rounded-full px-3 font-semibold transition ease-in-out hover:bg-blue-200 focus-visible:outline-2 focus-visible:outline-blue1">
                 Sair
               </button>
             </form>

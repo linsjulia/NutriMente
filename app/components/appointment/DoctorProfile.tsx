@@ -25,7 +25,7 @@ export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile, price, ne
 
   return (
     <div className="space-y-6">
-      <nav aria-label="Você está em" className="text-xs text-gray-600 flex items-center space-x-1">
+      <nav aria-label="Você está em" className="text-sm text-gray-600 flex items-center space-x-1">
         <Link href="/professionals" className="hover:underline">Profissionais</Link>
         <span aria-hidden>›</span>
         <Link href={`/professionals?type=${p.type}`} className="hover:underline">{PROFESSION_LABELS[p.type]}</Link>

@@ -69,7 +69,7 @@ export default function AppointmentFlow({
   )}`;
   const backButton =
     step === 1 ? (
-      <Link href="/professionals" className="inline-block min-h-11 shrink-0 font-semibold text-blue-800 underline-offset-4 hover:underline">
+      <Link href="/professionals" className="inline-flex min-h-11 shrink-0 items-center font-semibold text-blue-800 underline-offset-4 hover:underline">
         ← Voltar
       </Link>
     ) : (

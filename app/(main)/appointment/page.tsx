@@ -3,13 +3,13 @@ import { notFound } from "next/navigation";
 import { api } from "@/app/lib/api";
 import { getSession } from "@/app/lib/session";
 import type { ProfessionalProfile, SlotDay } from "@/app/lib/agenda";
-import AppointmentFlow from "./AppointmentFlow";
+import AppointmentFlow from "@/app/components/appointment/AppointmentFlow";
 
 export const metadata: Metadata = { title: "Agendar consulta | NutriMente" };
 
 /**
- * Agendamento em etapas: /appointment?professional=ID (&startsAt=... para
- * já chegar com um horário escolhido, ex.: vindo do card da busca).
+ * Compatibilidade para visitantes: /appointment?professional=ID.
+ * Pacientes autenticados usam /appointments?professional=ID.
  * Perfil e horários vêm da API; quem grava é a mesma ação do perfil
  * (bookAppointment -> POST /api/appointments).
  */

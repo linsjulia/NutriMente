@@ -8,8 +8,8 @@ import CategoryBadge from "../badge/SpecialityBadge";
 function Info({ titulo, valor }: { titulo: string; valor: string }) {
   return (
     <div>
-      <p className="text-xs font-semibold">{titulo}</p>
-      <p className="text-xs text-gray-600">{valor}</p>
+      <p className="text-md font-semibold">{titulo}</p>
+      <p className="text-md text-gray-600">{valor}</p>
     </div>
   );
 }

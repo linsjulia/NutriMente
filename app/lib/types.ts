@@ -55,6 +55,7 @@ export const CONSULTATION_MINUTES = [30, 40, 45, 50, 60, 75, 90, 120];
 export type PublicProfessional = {
   id: number;
   name: string;
+  photoUrl: string | null;
   type: ProfessionalType;
   document: string;
   bio: string | null;

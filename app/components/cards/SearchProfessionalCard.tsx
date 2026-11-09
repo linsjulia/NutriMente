@@ -19,7 +19,7 @@ export default function CardProfissional({ p }: { p: Profissional }) {
   const iniciais = p.nome.split(" ").map((parte) => parte[0]).slice(0, 2).join("");
 
   return (
-    <article className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:justify-between">
+    <article className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-6 shadow-lg shadow-blue1/10 sm:flex-row sm:justify-between">
       {/* esquerda: foto, nome e áreas */}
       <div className="flex justify-center gap-6">
         <Link

@@ -46,16 +46,16 @@ export default function CardProfissional({ p }: { p: Profissional }) {
           </p>
 
           <p className="mt-3 text-[14px] text-slate-500">Principais áreas de atuação:</p>
-          <div className="mt-1 flex flex-wrap gap-1.5">
+          <ul aria-label="Especialidades" className="mt-1 flex flex-wrap gap-1.5">
             {p.areas.map((area) => (
-              <span
+              <li
                 key={area}
                 className="rounded-2xl bg-emerald-100 px-2 py-0.5 text-[14px] text-green-900"
               >
                 {area}
-              </span>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </div>
 

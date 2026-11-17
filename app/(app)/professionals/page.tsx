@@ -6,12 +6,17 @@ import type { SlotDay } from "@/app/lib/agenda";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft, faArrowRight, faClose } from "@fortawesome/free-solid-svg-icons";
 import SearchProfessionalCard from "../../components/cards/SearchProfessionalCard";
-import SearchProfessionalFilter from "../../components/filter/SearchProfessionalFilter";
 import SpecialtySearchFilter from "@/app/components/filter/SpecialtySearchFilter";
 
 export const metadata: Metadata = { title: "Buscar profissionais | NutriMente" };
 
 const PAGE_SIZE = 10;
+const PROFESSIONS: { value?: "NUTRICIONISTA" | "PSICOLOGO"; label: string }[] = [
+  { label: "Todos" },
+  { value: "NUTRICIONISTA", label: "Nutricionistas" },
+  { value: "PSICOLOGO", label: "Psicólogos" },
+];
+
 const SORTS = [
   { value: "RELEVANCE", label: "Mais relevantes" },
   { value: "PRICE_ASC", label: "Menor preço" },
@@ -105,11 +110,26 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
   return (
     <div className="min-h-screen text-slate-800">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:flex-row md:px-8">
-        {/* <SearchProfessionalFilter /> */}
         <section aria-labelledby="resultado" className="min-w-0 flex-1">
           <h1 id="resultado" className="mb-1 font-fraunces text-2xl font-medium text-blue2">
             {q ? `Resultados para “${q}”` : "Encontre seu profissional"}
           </h1>
+          {/* Trocar de profissão limpa a especialidade (cada uma é de uma profissão) */}
+          <nav aria-label="Filtrar por profissão" className="mt-4">
+            <ul className="flex flex-wrap gap-2">
+              {PROFESSIONS.map((profession) => (
+                <li key={profession.label}>
+                  <Link
+                    href={link({ type: profession.value, specialty: undefined, page: undefined })}
+                    aria-current={profession.value === type ? "page" : undefined}
+                    className={`chip-link ${profession.value === type ? "chip-link-active" : ""}`}
+                  >
+                    {profession.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
           {specialties.ok && (
             <SpecialtySearchFilter
               action="/professionals"
@@ -175,11 +195,13 @@ export default async function BuscaProfissionais({ searchParams }: PageProps<"/p
               )}
             </div>
           ) : (
-            <div className="space-y-4">
+            <ul aria-label="Profissionais encontrados" className="space-y-4">
               {professionals.map((professional) => (
-                <SearchProfessionalCard key={professional.id} p={professional} />
+                <li key={professional.id}>
+                  <SearchProfessionalCard p={professional} />
+                </li>
               ))}
-            </div>
+            </ul>
           )}
 
           {totalPages > 1 && (

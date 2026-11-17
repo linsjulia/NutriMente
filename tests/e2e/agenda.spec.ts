@@ -196,7 +196,10 @@ test("acompanhamento: questionário e diário com foto; profissional cria plano 
   // Paciente: diário com foto (a foto passa pela rota do site, que põe o token)
   await bruna.goto("/diary");
   await settle(bruna);
-  await bruna.getByRole("group", { name: "Refeição" }).getByLabel("Almoço").check();
+  // O rádio fica escondido (sr-only) dentro do botão estilizado: clica no rótulo, como a pessoa faria
+  const almoco = bruna.getByRole("group", { name: "Refeição" }).getByLabel("Almoço");
+  await bruna.getByRole("group", { name: "Refeição" }).getByText("Almoço", { exact: true }).click();
+  await expect(almoco).toBeChecked();
   await bruna.getByLabel("O que você comeu?").fill("Arroz, feijão e salada");
   await bruna.getByLabel(/^Foto/).setInputFiles("public/icons/apple.png");
   await bruna.getByRole("button", { name: "Registrar refeição" }).click();
@@ -230,9 +233,9 @@ test("acompanhamento: questionário e diário com foto; profissional cria plano 
   await bruna.goto(planUrl);
   await settle(bruna);
   const checklist = bruna.getByRole("heading", { name: /Checklist de hoje/ });
-  await expect(checklist).toContainText("(0/1)");
+  await expect(checklist).toContainText("0 de 1");
   await bruna.getByRole("button", { name: /Jantar até as 20h/ }).click();
-  await expect(checklist).toContainText("(1/1)");
+  await expect(checklist).toContainText("1 de 1");
 });
 
 test("paciente com consulta em menos de 24 h vê por que não pode mais cancelar", async ({ browser }) => {

@@ -242,6 +242,11 @@ public class User {
 
 	// ---------------- Getters ----------------
 
+	/** Conta ativa (o admin pode desativar) */
+	public boolean isActive() {
+		return active;
+	}
+
 	public Long getId() {
 		return id;
 	}

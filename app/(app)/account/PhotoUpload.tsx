@@ -2,6 +2,7 @@
 
 import { useActionState, useRef, useState, type ChangeEvent } from "react";
 import Image from "next/image";
+import { isUploadedPhoto } from "@/app/lib/photo";
 import { Camera, Trash2 } from "lucide-react";
 import { uploadPhoto, removePhoto } from "@/app/actions/account";
 import { FormAlert, SubmitButton } from "@/app/components/form/FormParts";
@@ -68,6 +69,7 @@ export default function PhotoUpload({ name, photoUrl }: { name: string; photoUrl
       {photoUrl ? (
         <Image
           src={photoUrl}
+          unoptimized={isUploadedPhoto(photoUrl)}
           alt="Sua foto de perfil"
           width={128}
           height={128}

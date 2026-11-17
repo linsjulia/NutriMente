@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { isUploadedPhoto } from "@/app/lib/photo";
 import Link from "next/link";
 import { CalendarDays, ChevronRight, MapPin, Video } from "lucide-react";
 import { api } from "@/app/lib/api";
@@ -64,7 +65,7 @@ function Avatar({ name, photoUrl }: Person) {
       className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#dcfbe8] text-xs font-extrabold text-green-900"
     >
       {photoUrl ? (
-        <Image src={photoUrl} alt="" fill sizes="32px" className="object-cover" />
+        <Image src={photoUrl} unoptimized={isUploadedPhoto(photoUrl)} alt="" fill sizes="32px" className="object-cover" />
       ) : (
         initials(name)
       )}

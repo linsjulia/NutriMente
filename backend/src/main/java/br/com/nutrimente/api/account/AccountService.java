@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -119,18 +117,6 @@ public class AccountService {
 		AfterCommit.run(() -> photos.delete(old));
 		audit(user, "UPDATE", "users.photo");
 		return meResponse(user, professionalOf(user));
-	}
-
-	@Transactional(readOnly = true)
-	public ResponseEntity<byte[]> userPhoto(Long userId) {
-		User user = users.findById(userId)
-				.filter(u -> u.getPhotoFile() != null)
-				.orElseThrow(() -> ApiException.notFound("Foto não encontrada."));
-		byte[] data = photos.read(user.getPhotoFile());
-		return ResponseEntity.ok()
-				.contentType(MediaType.parseMediaType(user.getPhotoContentType()))
-				.header("Cache-Control", "public, max-age=3600")
-				.body(data);
 	}
 
 	@Transactional

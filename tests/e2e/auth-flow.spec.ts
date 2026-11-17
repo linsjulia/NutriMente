@@ -290,3 +290,34 @@ test("excluir conta pela tela apaga o acesso", async ({ page }) => {
   await login(page, email);
   await expect(page.getByRole("main").getByRole("alert")).toContainText("E-mail ou senha incorretos");
 });
+
+test("foto de perfil do paciente: aparece para ele e não abre sem login", async ({ page }) => {
+  const email = uniqueEmail("foto");
+  created.push(email);
+  await registerPatient(page, email);
+  await confirmEmail(page, email);
+  await login(page, email);
+  await expect(page).toHaveURL(/\/dashboard$/);
+
+  await page.goto("/account");
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Escolher foto" }).click();
+  await (await chooser).setFiles("public/patient/paciente.jpg");
+  await page.getByRole("button", { name: "Enviar foto" }).click();
+  await expect(page.getByText("Foto atualizada!")).toBeVisible();
+
+  // A foto é privada: vai direto do navegador (com o cookie), sem o otimizador do Next
+  await page.reload();
+  const photo = page.getByRole("img", { name: "Sua foto de perfil" });
+  await expect(photo).toHaveAttribute("src", /^\/api\/users\/\d+\/photo$/);
+  await expect.poll(() => photo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  const src = (await photo.getAttribute("src"))!;
+  const own = await page.request.get(src);
+  expect(own.status()).toBe(200);
+  expect(own.headers()["cache-control"]).toBe("private, no-store");
+
+  // Sem login: 404, e o otimizador de imagens também não consegue buscar
+  await logout(page);
+  expect((await page.request.get(src)).status()).toBe(404);
+  expect((await page.request.get(`/_next/image?url=${encodeURIComponent(src)}&w=128&q=75`)).ok()).toBe(false);
+});

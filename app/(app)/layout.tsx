@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { isUploadedPhoto } from "@/app/lib/photo";
 import Link from "next/link";
 import { Bell } from "lucide-react";
 import { logout } from "@/app/actions/auth";
@@ -65,6 +66,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             <Link href="/account" aria-label="Minha conta" title="Minha conta" className="rounded-full ring-offset-2 focus-visible:outline-2 focus-visible:outline-blue1">
               <Image
                 src={me.photoUrl ?? "/icons/circle-user-solid-full-blue.svg"}
+                unoptimized={isUploadedPhoto(me.photoUrl)}
                 alt=""
                 width={40}
                 height={40}

@@ -76,8 +76,13 @@ jobs:
             services/logs-service/package-lock.json
 
       # No CI as senhas de exemplo bastam: a máquina é apagada no final
+      # O limite de 30 chamadas/min em /api/auth/** por IP vale para a produção.
+      # Aqui todos os testes e2e vêm do mesmo IP e passam disso; o limitador em si
+      # é testado no RateLimitIntegrationTest (igual ao application-test.properties).
       - name: Criar o .env a partir do exemplo
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          sed -i 's/^AUTH_RATE_LIMIT_PER_MINUTE=.*/AUTH_RATE_LIMIT_PER_MINUTE=100000/' .env
 
       - name: Subir infraestrutura (banco, MongoDB, mail, logs)
         run: docker compose up -d --build sqlserver mongodb mailpit logs-service

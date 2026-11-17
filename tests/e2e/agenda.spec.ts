@@ -102,7 +102,8 @@ const letters = () => Array.from({ length: 6 }, () => String.fromCharCode(97 + M
 
 test("paciente agenda com triagem pelo perfil; profissional vê a triagem, confirma e cancela", async ({ browser }) => {
   const suffix = letters();
-  const pro = await readyProfessional(`Camila ${suffix[0].toUpperCase()}${suffix.slice(1)}`);
+  const professionalName = `Camila ${suffix[0].toUpperCase()}${suffix.slice(1)}`;
+  const pro = await readyProfessional(professionalName);
   const patient = await createVerified("patient", "Ana Paciente");
 
   // Paciente: busca → perfil → agendar presencial com triagem
@@ -137,9 +138,25 @@ test("paciente agenda com triagem pelo perfil; profissional vê a triagem, confi
   await expect(camila.getByRole("status")).toContainText("Consulta confirmada.");
 
   // Paciente vê "Confirmada" na lista
-  await ana.goto("/appointments");
+  await ana.goto(`/appointments?professional=${pro.id}`);
+  await expect(ana.getByRole("link", { name: "← Voltar" })).toBeVisible();
+  await ana.getByRole("link", { name: "← Voltar" }).click();
+  await expect(ana).toHaveURL(/\/professionals$/);
+  await ana.goto(`/appointments?professional=${pro.id}`);
+  await expect(ana.getByRole("heading", { name: professionalName })).toBeVisible();
+  await ana.getByRole("button", { name: "Escolher data e horário" }).click();
+  await ana.getByRole("button", { name: "← Voltar" }).click();
+  await expect(ana.getByRole("button", { name: "Escolher data e horário" })).toBeVisible();
+  await ana.getByRole("button", { name: "Escolher data e horário" }).click();
+  await ana.locator("fieldset").nth(1).getByRole("button").first().click();
+  await ana.getByRole("button", { name: "Continuar" }).click();
+  await expect(ana.getByRole("heading", { name: "Confirmação" })).toBeVisible();
+  await ana.getByRole("button", { name: "← Voltar" }).click();
+  await expect(ana.getByRole("heading", { name: "Data e horário" })).toBeVisible();
+
+  await ana.goto("/appointments/history");
   await settle(ana);
-  await expect(ana.getByText("Confirmada")).toBeVisible();
+  await expect(ana.getByText("Confirmada", { exact: true })).toBeVisible();
   await expectAccessible(ana);
 
   // Profissional cancela (com confirmação na própria tela)
@@ -179,7 +196,10 @@ test("acompanhamento: questionário e diário com foto; profissional cria plano 
   // Paciente: diário com foto (a foto passa pela rota do site, que põe o token)
   await bruna.goto("/diary");
   await settle(bruna);
-  await bruna.getByLabel("Refeição", { exact: true }).selectOption("ALMOCO");
+  // O rádio fica escondido (sr-only) dentro do botão estilizado: clica no rótulo, como a pessoa faria
+  const almoco = bruna.getByRole("group", { name: "Refeição" }).getByLabel("Almoço");
+  await bruna.getByRole("group", { name: "Refeição" }).getByText("Almoço", { exact: true }).click();
+  await expect(almoco).toBeChecked();
   await bruna.getByLabel("O que você comeu?").fill("Arroz, feijão e salada");
   await bruna.getByLabel(/^Foto/).setInputFiles("public/icons/apple.png");
   await bruna.getByRole("button", { name: "Registrar refeição" }).click();
@@ -213,9 +233,9 @@ test("acompanhamento: questionário e diário com foto; profissional cria plano 
   await bruna.goto(planUrl);
   await settle(bruna);
   const checklist = bruna.getByRole("heading", { name: /Checklist de hoje/ });
-  await expect(checklist).toContainText("(0/1)");
+  await expect(checklist).toContainText("0 de 1");
   await bruna.getByRole("button", { name: /Jantar até as 20h/ }).click();
-  await expect(checklist).toContainText("(1/1)");
+  await expect(checklist).toContainText("1 de 1");
 });
 
 test("paciente com consulta em menos de 24 h vê por que não pode mais cancelar", async ({ browser }) => {

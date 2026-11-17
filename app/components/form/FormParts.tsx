@@ -9,7 +9,7 @@ import { GENDER_LABELS, type Gender } from "@/app/lib/types";
 /** Botão de enviar que mostra "Enviando..." e trava enquanto espera a resposta */
 export function SubmitButton({ pending, children, className = "" }: { pending: boolean; children: ReactNode; className?: string }) {
   return (
-    <button type="submit" disabled={pending} aria-disabled={pending} className={`btn-primary ${className}`}>
+    <button type="submit" disabled={pending} aria-disabled={pending} className={`btn-secondary ${className}`}>
       {pending && <LoaderCircle aria-hidden size={20} className="animate-spin" />}
       {pending ? "Enviando..." : children}
     </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
 import AboutTab from "./AboutTab";
 import ProfileHeader from "./ProfileHeader";
@@ -39,6 +40,10 @@ export default function ProfileView({
   return (
     <MotionConfig reducedMotion="user">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-8">
+        <Link href="/professionals" className="inline-block self-start py-2.5 font-semibold text-blue1 underline-offset-4 hover:underline">
+          ← Voltar
+        </Link>
+        <p className="mt-2 text-4xl font-extrabold tracking-tight text-[#14304a] sm:text-[2.75rem] sm:leading-tight">Perfil do profissional</p>
         <ProfileHeader p={p} onAgendar={() => setAba("horarios")} />
 
         <div role="tablist" aria-label="Seções do perfil" className="flex gap-8 border-b border-gray-200">

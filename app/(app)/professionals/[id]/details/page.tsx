@@ -35,7 +35,7 @@ export default async function DetailsProfessional({ params }: PageProps<"/profes
     const days = slotsResult.data.filter((day) => day.slots.length > 0);
 
   return (
-    <div className="flex-1 bg-blue3">
+    <div className="flex-1">
       <ProfileView p={p} days={days} reviews={reviewsResult.data.items} />
     </div>
   );

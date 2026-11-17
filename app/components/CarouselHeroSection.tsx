@@ -47,7 +47,7 @@ export default function CarouselHeroSection() {
   }, [paused]);
 
   return (
-    <div className="relative aspect-4/3 w-full overflow-hidden sm:aspect-16/10 lg:aspect-auto lg:h-full lg:min-h-[32rem]">
+    <div className="relative aspect-4/3 w-full overflow-hidden sm:aspect-16/10 lg:aspect-auto lg:h-full lg:min-h-128">
       <Swiper
         className="h-full w-full"
         modules={[Autoplay, Pagination, A11y, Keyboard]}

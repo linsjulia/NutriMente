@@ -12,7 +12,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { decodeSession, homeFor, SESSION_COOKIE } from "@/app/lib/session";
 
-const PRIVATE_ROUTES = ["/dashboard", "/account", "/admin", "/professionals"];
+const PRIVATE_ROUTES = ["/dashboard", "/account", "/admin", "/professionals", "/appointments"];
 const ADMIN_ROUTES = ["/admin"];
 const GUEST_ONLY_ROUTES = ["/login", "/register"];
 

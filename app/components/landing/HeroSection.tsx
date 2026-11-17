@@ -58,7 +58,7 @@ export default function Hero() {
             </div>
           </div>
           <div className="h-80 w-full sm:h-96 lg:h-auto lg:w-1/2 lg:flex">
-            <CarouselHeroSection />
+            <CarouselHeroSection/>
           </div>
         </div>
       </section>

@@ -1,15 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Bell, LogOut } from "lucide-react";
-import { api } from "@/app/lib/api";
+import { Bell } from "lucide-react";
 import { logout } from "@/app/actions/auth";
-import { verifySession } from "@/app/lib/dal";
+import { api } from "@/app/lib/api";
+import { getMe, verifySession } from "@/app/lib/dal";
 import AppNav from "./AppNav";
 
 // Layout da área LOGADA (/dashboard, /account, /admin).
 // verifySession() manda para o login quem não estiver logado.
 export default async function AppLayout({ children }: LayoutProps<"/">) {
-  const session = await verifySession();
+  const [session, me] = await Promise.all([verifySession(), getMe()]);
   // Contador do sino (o admin não recebe notificações de consulta)
   const unread =
     session.role === "ADMIN"
@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         ]
       : [
           { href: "/dashboard", label: "Início" },
-          { href: "/appointments", label: session.role === "PATIENT" ? "Consultas" : "Agenda" },
+          { href: "/appointments/history", label: session.role === "PATIENT" ? "Consultas" : "Agenda" },
           ...(session.role === "PROFESSIONAL" ? [{ href: "/patients", label: "Pacientes" }] : []),
           { href: "/plans", label: "Planos" },
           ...(session.role === "PATIENT" ? [{ href: "/professionals", label: "Profissionais" },{ href: "/diary", label: "Diário" }] : []),
@@ -50,7 +50,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
               >
                 <Bell aria-hidden size={22} />
                 {count > 0 && (
-                  <span aria-hidden className="absolute -top-0.5 -right-0.5 min-w-5 rounded-full bg-red-600 px-1 text-center text-xs font-bold leading-5">
+                  <span aria-hidden className="absolute -top-0.5 -right-0.5 min-w-5 rounded-full bg-green1 px-1 text-center text-xs font-bold leading-5">
                     {count > 9 ? "9+" : count}
                   </span>
                 )}
@@ -58,10 +58,19 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
             )}
             <span className="hidden sm:inline">Olá, {session.name}</span>
             <form action={logout}>
-              <button type="submit" className="flex items-center gap-2 rounded-full border border-white/60 px-4 py-2 font-semibold hover:bg-white/10">
-                <LogOut aria-hidden size={18} /> Sair
+              <button type="submit" className="min-h-11 rounded-full px-3 font-semibold transition ease-in-out hover:bg-blue-200 focus-visible:outline-2 focus-visible:outline-blue1">
+                Sair
               </button>
             </form>
+            <Link href="/account" aria-label="Minha conta" title="Minha conta" className="rounded-full ring-offset-2 focus-visible:outline-2 focus-visible:outline-blue1">
+              <Image
+                src={me.photoUrl ?? "/icons/circle-user-solid-full-blue.svg"}
+                alt=""
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-full object-cover"
+              />
+            </Link>
           </div>
         </div>
       </header>

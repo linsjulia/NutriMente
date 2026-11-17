@@ -578,10 +578,14 @@ body {
   background: #003a88;
 }
 .btn-secondary {
-  border: 2px solid var(--color-blue1);
-  color: var(--color-blue1);
-  background: #fff;
+  background: var(--color-blue1);
+  color: #fff;
 }
+
+.btn-secondary:hover {
+  background: #005fdc;
+}
+
 .btn-danger {
   background: #b91c1c;
   color: #fff;

@@ -79,7 +79,7 @@ test("paciente: cadastro -> e-mail -> confirmação -> login -> editar conta -> 
   await expect(page).toHaveURL(/\/dashboard$/);
 
   // Minha conta: CPF mascarado e edição
-  await page.getByRole("link", { name: "Minha conta" }).click();
+  await page.getByRole("navigation", { name: "Área logada" }).getByRole("link", { name: "Minha conta" }).click();
   await expect(page.getByText(/\*\*\*\.\d{3}\.\d{3}-\*\*/)).toBeVisible();
   await page.getByLabel("Nome completo").fill("Ana Maria Paciente");
   await page.getByRole("button", { name: "Salvar dados" }).click();

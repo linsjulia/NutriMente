@@ -25,7 +25,7 @@ export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile, price, ne
 
   return (
     <div className="space-y-6">
-      <nav aria-label="Você está em" className="text-xs text-gray-600 flex items-center space-x-1">
+      <nav aria-label="Você está em" className="text-sm text-gray-600 flex items-center space-x-1">
         <Link href="/professionals" className="hover:underline">Profissionais</Link>
         <span aria-hidden>›</span>
         <Link href={`/professionals?type=${p.type}`} className="hover:underline">{PROFESSION_LABELS[p.type]}</Link>
@@ -49,6 +49,9 @@ export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile, price, ne
                 <p className="text-sm text-gray-600">
                   {PROFESSION_LABELS[p.type]} · {formatCouncilNumber(p.type, p.document)}
                 </p>
+                <Link href={`/professionals/${p.id}/details`} className="inline-block text-sm font-semibold text-blue-800 underline-offset-4 hover:underline">
+                  Ver o perfil completo e as avaliações
+                </Link>
                 <ul aria-label="Especialidades e atendimento" className="flex flex-wrap gap-2 pt-1">
                   {p.specialties.map((s) => (
                     <li key={s.id} className="bg-sky-50 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">{s.name}</li>
@@ -101,11 +104,6 @@ export const DoctorProfile: React.FC<DoctorProfileProps> = ({ profile, price, ne
             </div>
           </section>
 
-          <p className="text-sm">
-            <Link href={`/professionals/${p.id}`} className="font-semibold text-blue-800 underline-offset-4 hover:underline">
-              Ver o perfil completo e as avaliações
-            </Link>
-          </p>
         </div>
 
         <div className="lg:col-span-1">

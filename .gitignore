@@ -45,6 +45,6 @@ yarn-error.log*
 next-env.d.ts
 
 # playwright
-/test-results/
+test-results/
 /playwright-report/
 /playwright/.cache/

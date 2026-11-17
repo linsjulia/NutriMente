@@ -44,7 +44,7 @@ export default async function AppointmentPage({ params, searchParams }: PageProp
 
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/appointments" className="inline-block self-start py-2.5 font-semibold text-blue1 underline-offset-4 hover:underline">
+      <Link href="/appointments/history" className="inline-block self-start py-2.5 font-semibold text-blue1 underline-offset-4 hover:underline">
         ← {isPatient ? "Minhas consultas" : "Agenda"}
       </Link>
 

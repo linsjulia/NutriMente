@@ -1,5 +1,6 @@
 package br.com.nutrimente.api.account;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -15,11 +16,12 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.ResultActions;
 
 import br.com.nutrimente.api.IntegrationTest;
+import br.com.nutrimente.api.common.TestImages;
 
 /** Foto de perfil: pública só para profissional aprovado; a de paciente é dado pessoal */
 class UserPhotoIntegrationTest extends IntegrationTest {
 
-	private static final byte[] PNG = { (byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3, 4, 5, 6, 7, 8 };
+	private static final byte[] PNG = TestImages.png(1200, 900);
 
 	private ResultActions upload(String token) throws Exception {
 		return mvc.perform(multipart(HttpMethod.PUT, "/api/me/photo")
@@ -50,13 +52,17 @@ class UserPhotoIntegrationTest extends IntegrationTest {
 		getAs(url, registerVerifiedPatient(uniqueEmail())).andExpect(status().isNotFound());
 
 		getAs(url, patient).andExpect(status().isOk())
-				.andExpect(content().bytes(PNG))
+				.andExpect(content().contentType("image/jpeg"))
 				.andExpect(header().string("Cache-Control", "no-store, private"));
+		// Guardada já reduzida: 1200x900 -> 512x384
+		byte[] stored = getAs(url, patient).andReturn().getResponse().getContentAsByteArray();
+		assertThat(TestImages.decode(stored).getWidth()).isEqualTo(512);
+		assertThat(TestImages.decode(stored).getHeight()).isEqualTo(384);
 		getAs(url, admin).andExpect(status().isOk());
 
 		// Com consulta marcada, o profissional passa a ver; o outro continua sem ver
 		book(patient, pro.id(), slotAfter(pro.id(), Duration.ofHours(30)));
-		getAs(url, pro.token()).andExpect(status().isOk()).andExpect(content().bytes(PNG));
+		getAs(url, pro.token()).andExpect(status().isOk()).andExpect(content().contentType("image/jpeg"));
 		getAs(url, other.token()).andExpect(status().isNotFound());
 	}
 
@@ -76,7 +82,7 @@ class UserPhotoIntegrationTest extends IntegrationTest {
 		patchAs("/api/admin/professionals/" + id + "/verification", admin, "{\"status\": \"APPROVED\"}")
 				.andExpect(status().isOk());
 		getAs(url, null).andExpect(status().isOk())
-				.andExpect(content().bytes(PNG))
+				.andExpect(content().contentType("image/jpeg"))
 				.andExpect(header().string("Cache-Control", "max-age=3600, public"));
 
 		// Recusado depois: volta a ser privada

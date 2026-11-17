@@ -23,6 +23,7 @@ import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.common.EncryptedFileStorage;
 import br.com.nutrimente.api.common.FileType;
+import br.com.nutrimente.api.common.ImageResizer;
 import br.com.nutrimente.api.common.validation.Names;
 import br.com.nutrimente.api.config.JwtService;
 import br.com.nutrimente.api.document.DocumentService;
@@ -96,12 +97,14 @@ public class AccountService {
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
-		String contentType = FileType.image(bytes)
+		FileType.image(bytes)
 				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
 						"Envie uma foto em JPG, PNG ou WebP.", Map.of("photo", "Envie uma foto em JPG, PNG ou WebP")));
+		// Foto de celular (3000+ px, vários MB) vira JPEG de até 512 px, girado e sem EXIF
+		byte[] resized = ImageResizer.fit(bytes, ImageResizer.PROFILE_SIDE);
 		String old = user.getPhotoFile();
-		String saved = photos.save(bytes);
-		user.attachPhoto(saved, contentType);
+		String saved = photos.save(resized);
+		user.attachPhoto(saved, ImageResizer.CONTENT_TYPE);
 		users.flush();
 		AfterCommit.run(() -> photos.delete(old));
 		audit(user, "UPDATE", "users.photo");

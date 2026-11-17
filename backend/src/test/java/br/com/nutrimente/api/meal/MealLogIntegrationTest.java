@@ -25,14 +25,15 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.jayway.jsonpath.JsonPath;
 
 import br.com.nutrimente.api.IntegrationTest;
+import br.com.nutrimente.api.common.TestImages;
 import br.com.nutrimente.api.common.OrphanFileCleaner;
 import br.com.nutrimente.api.config.AppProperties;
 
 /** Diário alimentar: o paciente registra (com foto cifrada); só o profissional que o atende lê */
 class MealLogIntegrationTest extends IntegrationTest {
 
-	/** Começo de um PNG de verdade (a "assinatura"), seguido de bytes quaisquer */
-	private static final byte[] PNG = { (byte) 0x89, 'P', 'N', 'G', 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3, 4, 5, 6, 7, 8 };
+	/** PNG de verdade: a API abre a foto e regrava como JPEG (ImageResizer) */
+	private static final byte[] PNG = TestImages.png(1200, 900);
 	private static final byte[] GIF = { 'G', 'I', 'F', '8', '9', 'a', 1, 2, 3 };
 
 	@Autowired
@@ -89,9 +90,8 @@ class MealLogIntegrationTest extends IntegrationTest {
 
 		getAs("/api/meals/" + id + "/photo", patient)
 				.andExpect(status().isOk())
-				.andExpect(header().string("Content-Type", "image/png"))
-				.andExpect(header().string("X-Content-Type-Options", "nosniff"))
-				.andExpect(content().bytes(PNG));
+				.andExpect(header().string("Content-Type", "image/jpeg")) // regravada pelo ImageResizer
+				.andExpect(header().string("X-Content-Type-Options", "nosniff"));
 
 		// Lista: mais recente primeiro
 		postAs("/api/me/meals", patient, meal(Instant.now().minus(1, ChronoUnit.HOURS)).replace("ALMOCO", "LANCHE_DA_TARDE"))
@@ -129,7 +129,7 @@ class MealLogIntegrationTest extends IntegrationTest {
 		getAs("/api/patients/" + patientId + "/meals", pro.token())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.items[0].description").value("Arroz, feijão, frango e salada"));
-		getAs("/api/meals/" + id + "/photo", pro.token()).andExpect(status().isOk()).andExpect(content().bytes(PNG));
+		getAs("/api/meals/" + id + "/photo", pro.token()).andExpect(status().isOk()).andExpect(content().contentType("image/jpeg"));
 		getAs("/api/patients/" + patientId + "/meals", other.token()).andExpect(status().isNotFound());
 		postAs("/api/me/meals", pro.token(), meal(Instant.now())).andExpect(status().isForbidden());
 

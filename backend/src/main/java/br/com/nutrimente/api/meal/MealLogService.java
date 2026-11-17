@@ -22,6 +22,7 @@ import br.com.nutrimente.api.common.ApiException;
 import br.com.nutrimente.api.common.Digits;
 import br.com.nutrimente.api.common.EncryptedFileStorage;
 import br.com.nutrimente.api.common.FileType;
+import br.com.nutrimente.api.common.ImageResizer;
 import br.com.nutrimente.api.logging.LogClient;
 import br.com.nutrimente.api.meal.MealLog.MealType;
 import br.com.nutrimente.api.professional.ProfessionalController.PageResponse;
@@ -114,11 +115,11 @@ public class MealLogService {
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
-		String contentType = FileType.image(bytes)
-				.orElseThrow(() -> photoError("Envie uma foto em JPG, PNG ou WebP"));
+		FileType.image(bytes).orElseThrow(() -> photoError("Envie uma foto em JPG, PNG ou WebP"));
+		byte[] resized = ImageResizer.fit(bytes, ImageResizer.MEAL_SIDE);
 		String old = meal.getPhotoFile();
-		String saved = photos.save(bytes);
-		meal.attachPhoto(saved, contentType);
+		String saved = photos.save(resized);
+		meal.attachPhoto(saved, ImageResizer.CONTENT_TYPE);
 		meals.flush();
 		// Se a transação falhar, o arquivo novo é que sobra (e o antigo continua valendo)
 		AfterCommit.run(() -> photos.delete(old));
